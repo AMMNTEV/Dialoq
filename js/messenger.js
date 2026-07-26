@@ -11,10 +11,6 @@ let selectedMessageId = null;
 let unreadCounts = {};
 let isCreatingGroup = false;
 let isNewChatPending = false;
-let currentUser = null;
-let currentUserData = null;
-let userCache = new Map();
-let isMessagesLoading = false;
 
 // ========== ЗАГРУЗКА ПОЛЬЗОВАТЕЛЕЙ ==========
 async function loadAllUsers() {
@@ -104,14 +100,13 @@ function listenForChats() {
           const lastMsgQuery = await db.collection('chats').doc(doc.id)
             .collection('messages')
             .orderBy('timestamp', 'desc')
-            .limit(10)
+            .limit(5)
             .get();
 
           let lastMessage = null;
           let lastMessageTime = chat.lastMessageTime ? chat.lastMessageTime.toDate?.() || new Date(chat.lastMessageTime) : null;
           let hasAnyMessage = false;
 
-          // Ищем последнее НЕУДАЛЕННОЕ сообщение
           for (const msgDoc of lastMsgQuery.docs) {
             const msg = msgDoc.data();
             hasAnyMessage = true;
@@ -452,11 +447,9 @@ async function markMessagesAsRead(chatId) {
   }
 }
 
-// ========== ЗАГРУЗКА СООБЩЕНИЙ ==========
+// ========== ЗАГРУЗКА СООБЩЕНИЙ (БЕЗ МИГАНИЯ) ==========
 async function loadMessages(showLoading = false) {
-  if (!currentChatId || !selectedChat || isMessagesLoading) return;
-  isMessagesLoading = true;
-  
+  if (!currentChatId || !selectedChat) return;
   const messagesContainer = document.getElementById('messagesContainer');
   if (unsubscribeMessages) {
     unsubscribeMessages();
@@ -476,17 +469,16 @@ async function loadMessages(showLoading = false) {
     const visibleMessages = [];
     snapshot.forEach(doc => {
       const msg = doc.data();
-      // Проверяем, не удалено ли сообщение для текущего пользователя
       if (msg.deletedFor && (msg.deletedFor.includes('everyone') || msg.deletedFor.includes(currentUser.uid))) {
         return;
       }
       visibleMessages.push({ id: doc.id, ...msg });
     });
 
+    const scrollTop = messagesContainer.scrollTop;
+
     if (visibleMessages.length === 0) {
       messagesContainer.innerHTML = '<div class="no-messages">Нет сообщений. Напишите что-нибудь!</div>';
-      isMessagesLoading = false;
-      listenForMessages();
       return;
     }
 
@@ -511,7 +503,6 @@ async function loadMessages(showLoading = false) {
       }
     }
 
-    // Отмечаем сообщения как прочитанные
     const batch = db.batch();
     let hasUnread = false;
     visibleMessages.forEach(msg => {
@@ -545,7 +536,6 @@ async function loadMessages(showLoading = false) {
       }
     }
 
-    // Рендерим сообщения
     let html = '';
     let lastDate = '';
     const nonSystemMessages = visibleMessages.filter(msg => !msg.isSystem);
@@ -593,87 +583,52 @@ async function loadMessages(showLoading = false) {
     }
 
     messagesContainer.innerHTML = html;
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    if (scrollTop > 0) {
+      messagesContainer.scrollTop = scrollTop;
+    } else {
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
 
-    // Запускаем слушатель для реального времени
-    listenForMessages();
-    
+    listenForNewMessages();
   } catch (error) {
     console.error('Ошибка загрузки сообщений:', error);
     if (showLoading) {
       messagesContainer.innerHTML = '<div class="error">Ошибка загрузки сообщений</div>';
     }
   }
-  
-  isMessagesLoading = false;
 }
 
-// ========== СЛУШАТЕЛЬ СООБЩЕНИЙ В РЕАЛЬНОМ ВРЕМЕНИ (ОБНОВЛЕННЫЙ) ==========
-function listenForMessages() {
+// ========== СЛУШАТЕЛЬ НОВЫХ СООБЩЕНИЙ ==========
+function listenForNewMessages() {
   if (!currentChatId) return;
   if (unsubscribeMessages) {
     unsubscribeMessages();
   }
+  const lastTimestamp = firebase.firestore.Timestamp.now();
 
   unsubscribeMessages = db.collection('chats').doc(currentChatId)
     .collection('messages')
+    .where('timestamp', '>', lastTimestamp)
     .orderBy('timestamp', 'asc')
     .onSnapshot(async snapshot => {
-      const messagesContainer = document.getElementById('messagesContainer');
-      if (!messagesContainer) return;
-
       snapshot.docChanges().forEach(async change => {
-        const msg = change.doc.data();
-        const msgId = change.doc.id;
-        const msgElement = document.getElementById(`msg-${msgId}`);
-        
-        // Проверяем, удалено ли сообщение
-        const isDeleted = msg.deletedFor && 
-          (msg.deletedFor.includes('everyone') || msg.deletedFor.includes(currentUser.uid));
-
-        if (change.type === 'modified') {
-          // Сообщение было изменено (добавлено deletedFor)
-          if (isDeleted) {
-            // Удаляем сообщение из DOM
-            if (msgElement) {
-              msgElement.remove();
-            }
-            // Обновляем превью чата
-            await updateChatPreviewAfterDelete(currentChatId);
-          }
-          return;
-        }
-
         if (change.type === 'added') {
-          // Пропускаем, если уже есть или удалено
-          if (msgElement) return;
-          if (isDeleted) return;
-          if (msg.isSystem) {
-            // Добавляем системное сообщение
-            const systemHTML = `<div class="message system"><div class="message-content">${msg.text}</div></div>`;
-            messagesContainer.insertAdjacentHTML('beforeend', systemHTML);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            return;
-          }
+          const msg = change.doc.data();
+          const msgId = change.doc.id;
+          if (document.getElementById(`msg-${msgId}`)) return;
 
-          // Отмечаем как прочитанное
-          try {
-            if (selectedChat.isGroup) {
-              if (msg.senderId !== currentUser.uid && !msg.isSystem) {
-                if (!msg.readBy || !msg.readBy.includes(currentUser.uid)) {
-                  await change.doc.ref.update({ readBy: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) });
-                }
-              }
-            } else {
-              if (msg.receiverId === currentUser.uid && !msg.read) {
-                await change.doc.ref.update({ read: true });
+          if (selectedChat.isGroup) {
+            if (msg.senderId !== currentUser.uid && !msg.isSystem) {
+              if (!msg.readBy || !msg.readBy.includes(currentUser.uid)) {
+                await change.doc.ref.update({ readBy: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) });
               }
             }
-          } catch (error) {
-            console.error('Ошибка отметки прочитанного:', error);
+          } else {
+            if (msg.receiverId === currentUser.uid && !msg.read) {
+              await change.doc.ref.update({ read: true });
+            }
           }
 
-          // Получаем информацию об отправителе для групп
           let senderInfo = '';
           if (selectedChat.isGroup && msg.senderId !== currentUser.uid && msg.senderId) {
             const sender = await getUserById(msg.senderId);
@@ -681,14 +636,12 @@ function listenForMessages() {
               senderInfo = `<div class="message-sender">${sender.nickname || '?'} ${sender.tag || ''}</div>`;
             }
           }
-
           const isMyMessage = msg.senderId === currentUser.uid;
           let time = '';
           if (msg.timestamp) {
             const date = msg.timestamp.toDate();
             time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
           }
-
           const deleteOption = isMyMessage ? `<button class="message-delete-btn" onclick="showMessageOptions('${msgId}', event)">⋯</button>` : '';
           const messageHTML = `
             <div class="message ${isMyMessage ? 'my-message' : 'other-message'}" id="msg-${msgId}">
@@ -698,42 +651,12 @@ function listenForMessages() {
               <div class="message-time">${time}</div>
             </div>
           `;
-
-          // Вставляем в правильное место (по времени)
-          const existingMessages = messagesContainer.querySelectorAll('.message:not(.system)');
-          let inserted = false;
-          
-          if (existingMessages.length > 0) {
-            // Ищем сообщение с меньшим ID (более старое)
-            for (let i = existingMessages.length - 1; i >= 0; i--) {
-              const existingMsg = existingMessages[i];
-              const existingId = existingMsg.id.replace('msg-', '');
-              if (existingId < msgId) {
-                existingMsg.insertAdjacentHTML('afterend', messageHTML);
-                inserted = true;
-                break;
-              }
-            }
-          }
-          
-          if (!inserted) {
-            messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
-          }
-          
+          const messagesContainer = document.getElementById('messagesContainer');
+          messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
           messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
-
-        if (change.type === 'removed') {
-          // Сообщение было полностью удалено из базы
-          if (msgElement) {
-            msgElement.remove();
-          }
-          await updateChatPreviewAfterDelete(currentChatId);
-        }
       });
-    }, error => {
-      console.error('Ошибка слушателя сообщений:', error);
-    });
+    }, error => console.error('Ошибка слушателя новых сообщений:', error));
 }
 
 // ========== ОТПРАВКА СООБЩЕНИЯ ==========
@@ -764,8 +687,7 @@ async function sendMessage() {
         senderId: currentUser.uid,
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         receiverId: otherUserId,
-        read: false,
-        deletedFor: []
+        read: false
       };
       await db.collection('chats').doc(chatId).collection('messages').add(messageData);
       await db.collection('chats').doc(chatId).update({
@@ -781,8 +703,7 @@ async function sendMessage() {
     const messageData = {
       text: text,
       senderId: currentUser.uid,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-      deletedFor: []
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
     if (selectedChat.isGroup) {
       messageData.readBy = [currentUser.uid];
@@ -798,109 +719,12 @@ async function sendMessage() {
       lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
     });
 
+    await loadMessages(false);
+
   } catch (error) {
     console.error('Ошибка отправки:', error);
     alert('Ошибка при отправке сообщения');
     input.value = text;
-  }
-}
-
-// ========== УДАЛЕНИЕ СООБЩЕНИЙ (ОБНОВЛЕННЫЙ) ==========
-function showMessageOptions(messageId, event) {
-  if (event) event.stopPropagation();
-  selectedMessageId = messageId;
-  const msgElement = document.getElementById(`msg-${messageId}`);
-  if (!msgElement) return;
-  const isMyMessage = msgElement.classList.contains('my-message');
-  const deleteForEveryoneBtn = document.getElementById('deleteForEveryoneBtn');
-  deleteForEveryoneBtn.style.display = isMyMessage ? 'block' : 'none';
-  document.getElementById('messageOptionsModal').style.display = 'flex';
-}
-
-function hideMessageOptions() {
-  document.getElementById('messageOptionsModal').style.display = 'none';
-  selectedMessageId = null;
-}
-
-async function deleteMessageForMe() {
-  if (!selectedMessageId || !currentChatId) return;
-  try {
-    await db.collection('chats').doc(currentChatId)
-      .collection('messages')
-      .doc(selectedMessageId)
-      .update({
-        deletedFor: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
-      });
-    hideMessageOptions();
-    // Обновление произойдет через слушатель
-  } catch (error) {
-    console.error('Ошибка удаления сообщения:', error);
-    alert('Ошибка при удалении сообщения');
-  }
-}
-
-async function deleteMessageForEveryone() {
-  if (!selectedMessageId || !currentChatId) return;
-  if (!confirm('Удалить это сообщение у всех участников?')) return;
-  try {
-    await db.collection('chats').doc(currentChatId)
-      .collection('messages')
-      .doc(selectedMessageId)
-      .update({
-        deletedFor: firebase.firestore.FieldValue.arrayUnion('everyone')
-      });
-    hideMessageOptions();
-    // Обновление произойдет через слушатель
-  } catch (error) {
-    console.error('Ошибка удаления сообщения:', error);
-    alert('Ошибка при удалении сообщения');
-  }
-}
-
-// ========== ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ ОБНОВЛЕНИЯ ПРЕВЬЮ ЧАТА ==========
-async function updateChatPreviewAfterDelete(chatId) {
-  try {
-    const snapshot = await db.collection('chats').doc(chatId)
-      .collection('messages')
-      .orderBy('timestamp', 'desc')
-      .limit(20)
-      .get();
-
-    let newLastMessage = null;
-    let newLastMessageTime = null;
-
-    // Ищем последнее НЕУДАЛЕННОЕ сообщение
-    for (const doc of snapshot.docs) {
-      const msg = doc.data();
-      if (!msg.deletedFor || (!msg.deletedFor.includes('everyone') && !msg.deletedFor.includes(currentUser.uid))) {
-        newLastMessage = msg.text;
-        newLastMessageTime = msg.timestamp ? msg.timestamp.toDate() : null;
-        break;
-      }
-    }
-
-    // Обновляем в allChats
-    const chatIndex = allChats.findIndex(c => c.id === chatId);
-    if (chatIndex !== -1) {
-      allChats[chatIndex].lastMessage = newLastMessage;
-      allChats[chatIndex].lastMessageTime = newLastMessageTime;
-    }
-
-    // Обновляем в selectedChat
-    if (selectedChat && selectedChat.id === chatId) {
-      selectedChat.lastMessage = newLastMessage;
-      selectedChat.lastMessageTime = newLastMessageTime;
-    }
-
-    // Обновляем в базе данных
-    await db.collection('chats').doc(chatId).update({
-      lastMessage: newLastMessage,
-      lastMessageTime: newLastMessageTime ? firebase.firestore.Timestamp.fromDate(newLastMessageTime) : null
-    });
-
-    displayChats(allChats);
-  } catch (error) {
-    console.error('Ошибка обновления превью чата:', error);
   }
 }
 
@@ -912,11 +736,9 @@ function showCreateGroupModal() {
   usersList.innerHTML = '<div class="no-users">Начните вводить имя для поиска</div>';
   document.getElementById('createGroupModal').style.display = 'flex';
 }
-
 function hideCreateGroupModal() {
   document.getElementById('createGroupModal').style.display = 'none';
 }
-
 async function createGroupChat() {
   if (isCreatingGroup) return;
   const groupName = document.getElementById('groupName').value.trim();
@@ -993,7 +815,6 @@ async function openChatInfo(chatId) {
     console.error('Ошибка загрузки информации о беседе:', error);
   }
 }
-
 function hideGroupInfoModal() {
   document.getElementById('groupInfoModal').style.display = 'none';
 }
@@ -1015,8 +836,7 @@ async function removeParticipant(userId) {
           senderId: 'system',
           timestamp: firebase.firestore.FieldValue.serverTimestamp(),
           read: false,
-          isSystem: true,
-          deletedFor: []
+          isSystem: true
         });
     }
     const updatedChatDoc = await db.collection('chats').doc(selectedChat.id).get();
@@ -1056,8 +876,7 @@ async function addSelectedParticipants() {
         senderId: 'system',
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         read: false,
-        isSystem: true,
-        deletedFor: []
+        isSystem: true
       });
     const updatedChatDoc = await db.collection('chats').doc(selectedChat.id).get();
     const updatedChat = updatedChatDoc.data();
@@ -1083,8 +902,7 @@ async function leaveCurrentGroup() {
         senderId: 'system',
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         read: false,
-        isSystem: true,
-        deletedFor: []
+        isSystem: true
       });
     await db.collection('chats').doc(selectedChat.id).update({
       participants: firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
@@ -1126,6 +944,99 @@ function updateChatHeaderParticipantCount() {
   }
 }
 
+// ========== УДАЛЕНИЕ СООБЩЕНИЙ ==========
+function showMessageOptions(messageId, event) {
+  if (event) event.stopPropagation();
+  selectedMessageId = messageId;
+  const msgElement = document.getElementById(`msg-${messageId}`);
+  if (!msgElement) return;
+  const isMyMessage = msgElement.classList.contains('my-message');
+  const deleteForEveryoneBtn = document.getElementById('deleteForEveryoneBtn');
+  deleteForEveryoneBtn.style.display = isMyMessage ? 'block' : 'none';
+  document.getElementById('messageOptionsModal').style.display = 'flex';
+}
+function hideMessageOptions() {
+  document.getElementById('messageOptionsModal').style.display = 'none';
+  selectedMessageId = null;
+}
+
+// ========== ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ ОБНОВЛЕНИЯ ПРЕВЬЮ ЧАТА ==========
+async function updateChatPreviewAfterDelete(chatId, isForEveryone = false) {
+  const snapshot = await db.collection('chats').doc(chatId)
+    .collection('messages')
+    .orderBy('timestamp', 'desc')
+    .limit(20)
+    .get();
+
+  let newLastMessage = null;
+  let newLastMessageTime = null;
+
+  for (const doc of snapshot.docs) {
+    const msg = doc.data();
+    if (!msg.deletedFor || (!msg.deletedFor.includes('everyone') && !msg.deletedFor.includes(currentUser.uid))) {
+      newLastMessage = msg.text;
+      newLastMessageTime = msg.timestamp ? msg.timestamp.toDate() : null;
+      break;
+    }
+  }
+
+  if (isForEveryone) {
+    await db.collection('chats').doc(chatId).update({
+      lastMessage: newLastMessage,
+      lastMessageTime: newLastMessageTime ? firebase.firestore.Timestamp.fromDate(newLastMessageTime) : null
+    });
+  } else {
+    const chatIndex = allChats.findIndex(c => c.id === chatId);
+    if (chatIndex !== -1) {
+      allChats[chatIndex].lastMessage = newLastMessage;
+      allChats[chatIndex].lastMessageTime = newLastMessageTime;
+    }
+    if (selectedChat && selectedChat.id === chatId) {
+      selectedChat.lastMessage = newLastMessage;
+      selectedChat.lastMessageTime = newLastMessageTime;
+    }
+    displayChats(allChats);
+  }
+}
+
+// ========== ОБНОВЛЁННЫЕ ФУНКЦИИ УДАЛЕНИЯ (без мигания) ==========
+async function deleteMessageForMe() {
+  if (!selectedMessageId || !currentChatId) return;
+  try {
+    await db.collection('chats').doc(currentChatId)
+      .collection('messages')
+      .doc(selectedMessageId)
+      .update({
+        deletedFor: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+      });
+    await loadMessages(false);
+    await updateChatPreviewAfterDelete(currentChatId, false);
+    hideMessageOptions();
+  } catch (error) {
+    console.error('Ошибка удаления сообщения:', error);
+    alert('Ошибка при удалении сообщения');
+  }
+}
+
+async function deleteMessageForEveryone() {
+  if (!selectedMessageId || !currentChatId) return;
+  if (!confirm('Удалить это сообщение у всех участников?')) return;
+  try {
+    await db.collection('chats').doc(currentChatId)
+      .collection('messages')
+      .doc(selectedMessageId)
+      .update({
+        deletedFor: ['everyone']
+      });
+    await loadMessages(false);
+    await updateChatPreviewAfterDelete(currentChatId, true);
+    hideMessageOptions();
+  } catch (error) {
+    console.error('Ошибка удаления сообщения:', error);
+    alert('Ошибка при удалении сообщения');
+  }
+}
+
 // ========== ПЕРЕКЛЮЧЕНИЕ РЕЖИМОВ (МОБИЛЬНЫЕ) ==========
 function enterChatMode() {
   isChatMode = true;
@@ -1135,7 +1046,6 @@ function enterChatMode() {
   if (chatsSidebar) chatsSidebar.style.display = 'none';
   history.pushState({ chatMode: true }, '', window.location.href);
 }
-
 function exitChatMode() {
   isChatMode = false;
   document.body.classList.remove('chat-mode');
@@ -1176,7 +1086,6 @@ window.addEventListener('load', function() {
     if (chatsSidebar) chatsSidebar.style.display = 'flex';
   }
 });
-
 window.addEventListener('resize', function() {
   if (window.innerWidth > 768) {
     document.body.classList.remove('chat-mode');
@@ -1190,24 +1099,13 @@ window.addEventListener('resize', function() {
   }
 });
 
-// ========== AUTH STATE CHANGED ==========
+// Запускаем прослушивание чатов после загрузки данных
 onAuthStateChanged(async (user) => {
   if (!user || !user.emailVerified) {
     window.location.href = 'index.html';
     return;
   }
   currentUser = user;
-  
-  // Загружаем данные текущего пользователя
-  try {
-    const userDoc = await db.collection('users').doc(user.uid).get();
-    if (userDoc.exists) {
-      currentUserData = userDoc.data();
-    }
-  } catch (error) {
-    console.error('Ошибка загрузки данных пользователя:', error);
-  }
-  
   await loadAllUsers();
   await loadAllUsersForModal();
   listenForChats();
