@@ -355,17 +355,15 @@ async function selectChat(chat) {
   const messagesContainer = document.getElementById('messagesContainer');
   const chatHeader = document.getElementById('chatHeader');
 
-  // Для мобилок сначала переключаем интерфейс (чтобы DOM успел выделить место под чат)
-  if (window.innerWidth <= 768) {
-    enterChatMode();
-  }
-
   if (chat.isNew) {
     selectedChat = chat;
     currentChatId = chat.id;
     updateChatHeader(chat);
     messagesContainer.innerHTML = '<div class="no-messages">Нет сообщений. Напишите что-нибудь!</div>';
     document.getElementById('messageInputArea').style.display = 'flex';
+    if (window.innerWidth <= 768) {
+      enterChatMode();
+    }
     return;
   }
 
@@ -376,6 +374,10 @@ async function selectChat(chat) {
   document.getElementById('messageInputArea').style.display = 'flex';
 
   await loadMessages(true);
+
+  if (window.innerWidth <= 768) {
+    enterChatMode();
+  }
 
   if (unreadCounts[chat.id] > 0) {
     markMessagesAsRead(chat.id);
@@ -475,6 +477,7 @@ async function loadMessages(showLoading = false) {
 
     if (visibleMessages.length === 0) {
       messagesContainer.innerHTML = '<div class="no-messages">Нет сообщений. Напишите что-нибудь!</div>';
+      // Мы все равно запускаем слушатель, чтобы перехватывать новые сообщения!
       listenForNewMessages();
       return;
     }
@@ -580,11 +583,7 @@ async function loadMessages(showLoading = false) {
     }
 
     messagesContainer.innerHTML = html;
-    
-    // Микро-задержка для мобильных браузеров, чтобы DOM успел пересчитать высоту перед скроллом
-    setTimeout(() => {
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }, 50);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
     listenForNewMessages();
   } catch (error) {
@@ -602,6 +601,8 @@ function listenForNewMessages() {
     unsubscribeMessages();
   }
 
+  // Убрана фильтрация по времени. Теперь слушаем всю коллекцию, 
+  // чтобы отлавливать изменения (modified) старых сообщений.
   unsubscribeMessages = db.collection('chats').doc(currentChatId)
     .collection('messages')
     .orderBy('timestamp', 'asc')
@@ -611,7 +612,10 @@ function listenForNewMessages() {
         const msgId = change.doc.id;
 
         if (change.type === 'added') {
+          // Если сообщение уже отрендерено функцией loadMessages, пропускаем
           if (document.getElementById(`msg-${msgId}`)) return;
+
+          // Если сообщение было удалено до того, как мы его загрузили
           if (msg.deletedFor && (msg.deletedFor.includes('everyone') || msg.deletedFor.includes(currentUser.uid))) return;
 
           if (selectedChat.isGroup) {
@@ -627,6 +631,8 @@ function listenForNewMessages() {
           }
 
           const messagesContainer = document.getElementById('messagesContainer');
+          
+          // Удаляем плейсхолдер "Нет сообщений", если он есть
           const noMessages = messagesContainer.querySelector('.no-messages');
           if (noMessages) {
             noMessages.remove();
@@ -669,6 +675,7 @@ function listenForNewMessages() {
           messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
+        // Если документ обновился (например, кто-то его удалил)
         if (change.type === 'modified') {
           if (msg.deletedFor && (msg.deletedFor.includes('everyone') || msg.deletedFor.includes(currentUser.uid))) {
             const msgElement = document.getElementById(`msg-${msgId}`);
@@ -678,6 +685,7 @@ function listenForNewMessages() {
           }
         }
 
+        // Если документ полностью физически удалили из базы
         if (change.type === 'removed') {
           const msgElement = document.getElementById(`msg-${msgId}`);
           if (msgElement) {
@@ -1026,13 +1034,9 @@ async function updateChatPreviewAfterDelete(chatId, isForEveryone = false) {
   }
 }
 
-// ========== УДАЛЕНИЕ (с мгновенным закрытием меню) ==========
+// ========== ОБНОВЛЁННЫЕ ФУНКЦИИ УДАЛЕНИЯ (без мигания) ==========
 async function deleteMessageForMe() {
   if (!selectedMessageId || !currentChatId) return;
-  
-  // Мгновенно закрываем модальное окно без задержек
-  hideMessageOptions();
-
   try {
     await db.collection('chats').doc(currentChatId)
       .collection('messages')
@@ -1040,7 +1044,9 @@ async function deleteMessageForMe() {
       .update({
         deletedFor: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
       });
+    // loadMessages(false) убран, так как onSnapshot в listenForNewMessages сам скроет сообщение
     await updateChatPreviewAfterDelete(currentChatId, false);
+    hideMessageOptions();
   } catch (error) {
     console.error('Ошибка удаления сообщения:', error);
     alert('Ошибка при удалении сообщения');
@@ -1050,10 +1056,6 @@ async function deleteMessageForMe() {
 async function deleteMessageForEveryone() {
   if (!selectedMessageId || !currentChatId) return;
   if (!confirm('Удалить это сообщение у всех участников?')) return;
-  
-  // Мгновенно закрываем модальное окно без задержек
-  hideMessageOptions();
-
   try {
     await db.collection('chats').doc(currentChatId)
       .collection('messages')
@@ -1061,7 +1063,9 @@ async function deleteMessageForEveryone() {
       .update({
         deletedFor: ['everyone']
       });
+    // loadMessages(false) убран, так как onSnapshot в listenForNewMessages сам скроет сообщение
     await updateChatPreviewAfterDelete(currentChatId, true);
+    hideMessageOptions();
   } catch (error) {
     console.error('Ошибка удаления сообщения:', error);
     alert('Ошибка при удалении сообщения');
@@ -1130,6 +1134,7 @@ window.addEventListener('resize', function() {
   }
 });
 
+// Запускаем прослушивание чатов после загрузки данных
 onAuthStateChanged(async (user) => {
   if (!user || !user.emailVerified) {
     window.location.href = 'index.html';
