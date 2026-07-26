@@ -475,8 +475,6 @@ async function loadMessages(showLoading = false) {
       visibleMessages.push({ id: doc.id, ...msg });
     });
 
-    const scrollTop = messagesContainer.scrollTop;
-
     if (visibleMessages.length === 0) {
       messagesContainer.innerHTML = '<div class="no-messages">Нет сообщений. Напишите что-нибудь!</div>';
       // Мы все равно запускаем слушатель, чтобы перехватывать новые сообщения!
@@ -585,11 +583,7 @@ async function loadMessages(showLoading = false) {
     }
 
     messagesContainer.innerHTML = html;
-    if (scrollTop > 0) {
-      messagesContainer.scrollTop = scrollTop;
-    } else {
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
     listenForNewMessages();
   } catch (error) {
@@ -659,11 +653,15 @@ function listenForNewMessages() {
             }
           }
           const isMyMessage = msg.senderId === currentUser.uid;
+          
           let time = '';
           if (msg.timestamp) {
             const date = msg.timestamp.toDate();
             time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          } else {
+            time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
           }
+
           const deleteOption = isMyMessage ? `<button class="message-delete-btn" onclick="showMessageOptions('${msgId}', event)">⋯</button>` : '';
           const messageHTML = `
             <div class="message ${isMyMessage ? 'my-message' : 'other-message'}" id="msg-${msgId}">
@@ -757,8 +755,6 @@ async function sendMessage() {
       lastMessage: text,
       lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
     });
-
-    await loadMessages(false);
 
   } catch (error) {
     console.error('Ошибка отправки:', error);
