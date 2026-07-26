@@ -15,7 +15,8 @@ let currentUser = null;
 let currentUserData = null;
 let userCache = new Map();
 let isMessagesLoading = false;
-let isScrolling = false;
+let scrollTimeout = null;
+let isUserScrolling = false;
 
 // ========== ЗАГРУЗКА ПОЛЬЗОВАТЕЛЕЙ ==========
 async function loadAllUsers() {
@@ -61,35 +62,81 @@ async function getUserById(userId) {
   }
 }
 
-// ========== ФУНКЦИЯ ПРОКРУТКИ ВНИЗ (УЛУЧШЕННАЯ) ==========
+// ========== ПЛАВНАЯ ПРОКРУТКА ВНИЗ ==========
 function scrollToBottom(container, smooth = true) {
   if (!container) return;
   
-  // Небольшая задержка для завершения рендеринга
-  setTimeout(() => {
+  // Очищаем предыдущий таймаут
+  if (scrollTimeout) {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = null;
+  }
+  
+  // Если пользователь скроллит вручную - не мешаем
+  if (isUserScrolling) {
+    return;
+  }
+  
+  const scrollHeight = container.scrollHeight;
+  const currentScroll = container.scrollTop + container.clientHeight;
+  const distance = scrollHeight - currentScroll;
+  
+  // Если уже внизу или близко к низу
+  if (distance < 100) {
     if (smooth) {
       container.scrollTo({
-        top: container.scrollHeight,
+        top: scrollHeight,
         behavior: 'smooth'
       });
     } else {
-      container.scrollTop = container.scrollHeight;
+      container.scrollTop = scrollHeight;
     }
-  }, 50);
+    return;
+  }
   
-  // Дополнительная попытка через 100ms для мобильных устройств
-  setTimeout(() => {
-    if (container.scrollTop < container.scrollHeight - 100) {
-      container.scrollTop = container.scrollHeight;
+  // Плавная прокрутка с анимацией
+  if (smooth) {
+    const startTime = performance.now();
+    const startPosition = container.scrollTop;
+    const targetPosition = scrollHeight;
+    const duration = Math.min(300, distance * 0.5); // Максимум 300ms
+    
+    function animateScroll(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Easing function для плавности
+      const ease = 1 - Math.pow(1 - progress, 3);
+      container.scrollTop = startPosition + (targetPosition - startPosition) * ease;
+      
+      if (progress < 1) {
+        scrollTimeout = requestAnimationFrame(animateScroll);
+      } else {
+        container.scrollTop = targetPosition;
+        scrollTimeout = null;
+      }
     }
-  }, 150);
+    
+    scrollTimeout = requestAnimationFrame(animateScroll);
+  } else {
+    container.scrollTop = scrollHeight;
+  }
+}
+
+// Отслеживаем скролл пользователя
+function setupScrollListener() {
+  const container = document.getElementById('messagesContainer');
+  if (!container) return;
   
-  // Третья попытка через 300ms
-  setTimeout(() => {
-    if (container.scrollTop < container.scrollHeight - 100) {
-      container.scrollTop = container.scrollHeight;
-    }
-  }, 350);
+  container.addEventListener('scroll', () => {
+    isUserScrolling = true;
+    clearTimeout(scrollTimeout);
+    
+    // Через 2 секунды бездействия снова включаем автоскролл
+    setTimeout(() => {
+      isUserScrolling = false;
+    }, 2000);
+  });
 }
 
 // ========== ПРОСЛУШИВАНИЕ ЧАТОВ ==========
@@ -377,7 +424,7 @@ async function createPrivateChat(userId, nickname, tag) {
     }
   } catch (error) {
     console.error('Ошибка создания чата:', error);
-    alert('Ошибка при создании чата');
+    showToast('Ошибка при создании чата', 'error');
   }
 }
 
@@ -483,7 +530,7 @@ async function markMessagesAsRead(chatId) {
   }
 }
 
-// ========== ЗАГРУЗКА СООБЩЕНИЙ (БЕЗ МИГАНИЯ) ==========
+// ========== ЗАГРУЗКА СООБЩЕНИЙ ==========
 async function loadMessages(showLoading = false) {
   if (!currentChatId || !selectedChat) return;
   const messagesContainer = document.getElementById('messagesContainer');
@@ -618,7 +665,11 @@ async function loadMessages(showLoading = false) {
     }
 
     messagesContainer.innerHTML = html;
-    scrollToBottom(messagesContainer, false);
+    
+    // Прокрутка вниз после загрузки
+    setTimeout(() => {
+      scrollToBottom(messagesContainer, false);
+    }, 100);
 
     listenForNewMessages();
   } catch (error) {
@@ -662,7 +713,6 @@ function listenForNewMessages() {
             }
           }
           
-          // Удаляем плейсхолдер "Нет сообщений", если он есть
           const noMessages = messagesContainer.querySelector('.no-messages');
           if (noMessages) {
             noMessages.remove();
@@ -788,7 +838,7 @@ async function sendMessage() {
 
   } catch (error) {
     console.error('Ошибка отправки:', error);
-    alert('Ошибка при отправке сообщения');
+    showToast('Ошибка при отправке сообщения', 'error');
     input.value = text;
   }
 }
@@ -810,7 +860,6 @@ function hideMessageOptions() {
   selectedMessageId = null;
 }
 
-// ========== ФУНКЦИИ УДАЛЕНИЯ (С МГНОВЕННЫМ ЗАКРЫТИЕМ ОКНА) ==========
 async function deleteMessageForMe() {
   if (!selectedMessageId || !currentChatId) return;
   
@@ -825,9 +874,10 @@ async function deleteMessageForMe() {
         deletedFor: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
       });
     await updateChatPreviewAfterDelete(currentChatId, false);
+    showToast('Сообщение удалено', 'success');
   } catch (error) {
     console.error('Ошибка удаления сообщения:', error);
-    alert('Ошибка при удалении сообщения');
+    showToast('Ошибка при удалении сообщения', 'error');
   }
 }
 
@@ -846,48 +896,110 @@ async function deleteMessageForEveryone() {
         deletedFor: ['everyone']
       });
     await updateChatPreviewAfterDelete(currentChatId, true);
+    showToast('Сообщение удалено у всех', 'success');
   } catch (error) {
     console.error('Ошибка удаления сообщения:', error);
-    alert('Ошибка при удалении сообщения');
+    showToast('Ошибка при удалении сообщения', 'error');
   }
+}
+
+// ========== TOAST УВЕДОМЛЕНИЯ (ВМЕСТО ALERT) ==========
+function showToast(message, type = 'info') {
+  // Удаляем старые тосты
+  const oldToast = document.querySelector('.custom-toast');
+  if (oldToast) {
+    oldToast.remove();
+  }
+  
+  const toast = document.createElement('div');
+  toast.className = `custom-toast ${type}`;
+  toast.textContent = message;
+  
+  // Стили для тоста
+  toast.style.cssText = `
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    z-index: 10000;
+    max-width: 90%;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    pointer-events: none;
+  `;
+  
+  if (type === 'success') {
+    toast.style.background = 'rgba(76, 175, 80, 0.95)';
+  } else if (type === 'error') {
+    toast.style.background = 'rgba(244, 67, 54, 0.95)';
+  } else {
+    toast.style.background = 'rgba(33, 150, 243, 0.95)';
+  }
+  
+  document.body.appendChild(toast);
+  
+  // Показываем тост
+  setTimeout(() => {
+    toast.style.opacity = '1';
+  }, 10);
+  
+  // Скрываем через 2 секунды
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.remove();
+      }
+    }, 300);
+  }, 2000);
 }
 
 // ========== ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ ОБНОВЛЕНИЯ ПРЕВЬЮ ЧАТА ==========
 async function updateChatPreviewAfterDelete(chatId, isForEveryone = false) {
-  const snapshot = await db.collection('chats').doc(chatId)
-    .collection('messages')
-    .orderBy('timestamp', 'desc')
-    .limit(20)
-    .get();
+  try {
+    const snapshot = await db.collection('chats').doc(chatId)
+      .collection('messages')
+      .orderBy('timestamp', 'desc')
+      .limit(20)
+      .get();
 
-  let newLastMessage = null;
-  let newLastMessageTime = null;
+    let newLastMessage = null;
+    let newLastMessageTime = null;
 
-  for (const doc of snapshot.docs) {
-    const msg = doc.data();
-    if (!msg.deletedFor || (!msg.deletedFor.includes('everyone') && !msg.deletedFor.includes(currentUser.uid))) {
-      newLastMessage = msg.text;
-      newLastMessageTime = msg.timestamp ? msg.timestamp.toDate() : null;
-      break;
+    for (const doc of snapshot.docs) {
+      const msg = doc.data();
+      if (!msg.deletedFor || (!msg.deletedFor.includes('everyone') && !msg.deletedFor.includes(currentUser.uid))) {
+        newLastMessage = msg.text;
+        newLastMessageTime = msg.timestamp ? msg.timestamp.toDate() : null;
+        break;
+      }
     }
-  }
 
-  if (isForEveryone) {
-    await db.collection('chats').doc(chatId).update({
-      lastMessage: newLastMessage,
-      lastMessageTime: newLastMessageTime ? firebase.firestore.Timestamp.fromDate(newLastMessageTime) : null
-    });
-  } else {
-    const chatIndex = allChats.findIndex(c => c.id === chatId);
-    if (chatIndex !== -1) {
-      allChats[chatIndex].lastMessage = newLastMessage;
-      allChats[chatIndex].lastMessageTime = newLastMessageTime;
+    if (isForEveryone) {
+      await db.collection('chats').doc(chatId).update({
+        lastMessage: newLastMessage,
+        lastMessageTime: newLastMessageTime ? firebase.firestore.Timestamp.fromDate(newLastMessageTime) : null
+      });
+    } else {
+      const chatIndex = allChats.findIndex(c => c.id === chatId);
+      if (chatIndex !== -1) {
+        allChats[chatIndex].lastMessage = newLastMessage;
+        allChats[chatIndex].lastMessageTime = newLastMessageTime;
+      }
+      if (selectedChat && selectedChat.id === chatId) {
+        selectedChat.lastMessage = newLastMessage;
+        selectedChat.lastMessageTime = newLastMessageTime;
+      }
+      displayChats(allChats);
     }
-    if (selectedChat && selectedChat.id === chatId) {
-      selectedChat.lastMessage = newLastMessage;
-      selectedChat.lastMessageTime = newLastMessageTime;
-    }
-    displayChats(allChats);
+  } catch (error) {
+    console.error('Ошибка обновления превью чата:', error);
   }
 }
 
@@ -906,8 +1018,8 @@ async function createGroupChat() {
   if (isCreatingGroup) return;
   const groupName = document.getElementById('groupName').value.trim();
   const checkboxes = document.querySelectorAll('#usersListModal input[type="checkbox"]:checked');
-  if (!groupName) { alert('Введите название беседы'); return; }
-  if (checkboxes.length === 0) { alert('Выберите хотя бы одного участника'); return; }
+  if (!groupName) { showToast('Введите название беседы', 'error'); return; }
+  if (checkboxes.length === 0) { showToast('Выберите хотя бы одного участника', 'error'); return; }
   isCreatingGroup = true;
   hideCreateGroupModal();
   const participants = [currentUser.uid];
@@ -923,9 +1035,10 @@ async function createGroupChat() {
       lastMessageTime: null
     });
     document.getElementById('groupName').value = '';
+    showToast('Беседа создана', 'success');
   } catch (error) {
     console.error('Ошибка создания беседы:', error);
-    alert('Ошибка при создании беседы: ' + error.message);
+    showToast('Ошибка при создании беседы', 'error');
   } finally {
     setTimeout(() => { isCreatingGroup = false; }, 1000);
   }
@@ -976,6 +1089,7 @@ async function openChatInfo(chatId) {
     document.getElementById('groupInfoModal').style.display = 'flex';
   } catch (error) {
     console.error('Ошибка загрузки информации о беседе:', error);
+    showToast('Ошибка загрузки информации', 'error');
   }
 }
 function hideGroupInfoModal() {
@@ -1010,16 +1124,17 @@ async function removeParticipant(userId) {
     updateChatHeaderParticipantCount();
     if (unsubscribeChats) { unsubscribeChats(); }
     listenForChats();
+    showToast('Участник удален', 'success');
   } catch (error) {
     console.error('Ошибка удаления участника:', error);
-    alert('Ошибка при удалении участника');
+    showToast('Ошибка при удалении участника', 'error');
   }
 }
 
 async function addSelectedParticipants() {
   if (!selectedChat) return;
   const checkboxes = document.querySelectorAll('#addParticipantsList input[type="checkbox"]:checked');
-  if (checkboxes.length === 0) { alert('Выберите пользователей для добавления'); return; }
+  if (checkboxes.length === 0) { showToast('Выберите пользователей для добавления', 'error'); return; }
   const newParticipants = [];
   checkboxes.forEach(cb => newParticipants.push(cb.value));
   try {
@@ -1050,9 +1165,10 @@ async function addSelectedParticipants() {
     updateChatHeaderParticipantCount();
     if (unsubscribeChats) { unsubscribeChats(); }
     listenForChats();
+    showToast('Участники добавлены', 'success');
   } catch (error) {
     console.error('Ошибка добавления участников:', error);
-    alert('Ошибка при добавлении участников');
+    showToast('Ошибка при добавлении участников', 'error');
   }
 }
 
@@ -1075,9 +1191,10 @@ async function leaveCurrentGroup() {
     });
     hideGroupInfoModal();
     exitChatMode();
+    showToast('Вы покинули беседу', 'success');
   } catch (error) {
     console.error('Ошибка при выходе из беседы:', error);
-    alert('Ошибка при выходе из беседы');
+    showToast('Ошибка при выходе из беседы', 'error');
   }
 }
 
@@ -1094,9 +1211,10 @@ async function deleteCurrentGroup() {
     await batch.commit();
     hideGroupInfoModal();
     exitChatMode();
+    showToast('Беседа удалена', 'success');
   } catch (error) {
     console.error('Ошибка удаления беседы:', error);
-    alert('Ошибка при удалении беседы');
+    showToast('Ошибка при удалении беседы', 'error');
   }
 }
 
@@ -1149,7 +1267,7 @@ function toggleMobileMenu() {
   overlay.classList.toggle('active');
 }
 
-// ========== ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ ==========
+// ========== ИНИЦИАЛИЗАЦИЯ ==========
 window.addEventListener('load', function() {
   if (window.innerWidth <= 768) {
     document.body.classList.remove('chat-mode');
@@ -1158,7 +1276,11 @@ window.addEventListener('load', function() {
     const chatsSidebar = document.getElementById('chatsSidebar');
     if (chatsSidebar) chatsSidebar.style.display = 'flex';
   }
+  
+  // Настраиваем слушатель скролла
+  setupScrollListener();
 });
+
 window.addEventListener('resize', function() {
   if (window.innerWidth > 768) {
     document.body.classList.remove('chat-mode');
