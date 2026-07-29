@@ -227,7 +227,7 @@
 
 
 /* ==========================================
-   3. ЕДИНЫЕ СТИЛИ ДЛЯ АВАТАРОВ И ТЕКСТА ПОЛЬЗОВАТЕЛЕЙ
+   3. ЕДИНЫЕ СТИЛИ ДЛЯ АВАТАРОВ И ТЕКСТА (Включая шапку чата)
    ========================================== */
 .chat-avatar-placeholder,
 .user-avatar-placeholder {
@@ -261,6 +261,7 @@
   overflow: hidden;
 }
 
+/* Единый стиль никнейма для всех карточек */
 .chat-name,
 .user-name {
   font-size: 1.1rem;
@@ -273,6 +274,7 @@
   text-overflow: ellipsis;
 }
 
+/* Единый стиль тэга (серенький и маленький) для всех карточек */
 .chat-tag,
 .user-tag,
 .chat-last-message {
@@ -296,18 +298,17 @@
   background: #ffffff;
   height: 100%;
   min-width: 0;
-  padding-top: 14px;
+  padding-top: 14px; /* Отступ 14px сверху до края страницы */
   box-sizing: border-box;
 }
 
-/* Шапка чата: без margin-bottom, чтобы отступ до чата снизу (14px из padding сообщения) 
-   был в точности равен отступу сверху от края страницы (14px из padding-top chat-area) */
+/* Шапка чата */
 .chat-header {
   display: flex;
   align-items: center;
   height: 70px;
   padding: 0 16px;
-  margin-bottom: 0;
+  margin-bottom: 14px; /* Отступ 14px снизу до начала сообщений */
   box-sizing: border-box;
   border-bottom: 1px solid #eef2f6;
   background: #ffffff;
@@ -351,7 +352,7 @@
 .messages-container {
   flex: 1;
   overflow-y: auto;
-  padding: 14px 24px 24px 24px;
+  padding: 0 24px 24px 24px; /* Верхний padding убран, так как margin-bottom у header даёт ровно 14px */
   background: #fafbff;
   display: flex;
   flex-direction: column;
