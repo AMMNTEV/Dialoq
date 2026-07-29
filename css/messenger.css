@@ -1,12 +1,16 @@
 /* ========== МЕССЕНДЖЕР ========== */
+
+/* --- Базовый контейнер --- */
 .messenger-container {
   display: flex;
   height: 100%;
-  background: white;
+  background: #ffffff;
   gap: 0;
 }
 
-/* Навигация (Левая панель) */
+/* ==========================================
+   1. ЛЕВАЯ ПАНЕЛЬ (Навигация и Профиль)
+   ========================================== */
 .nav-sidebar {
   width: 260px;
   background: #ffffff;
@@ -18,7 +22,6 @@
   box-sizing: border-box;
 }
 
-/* Карточка пользователя в левой панели */
 .nav-user-box {
   display: flex;
   align-items: center;
@@ -56,13 +59,12 @@
   line-height: 1.2;
 }
 
-/* Аватарка профиля */
 .nav-user-avatar {
   width: 44px;
   height: 44px;
-  border-radius: 50% !important;
+  border-radius: 50%;
   background: #1a1a1a;
-  color: white;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -73,7 +75,6 @@
   overflow: hidden;
 }
 
-/* Кнопки меню */
 .nav-buttons {
   display: flex;
   flex-direction: column;
@@ -107,7 +108,6 @@
   background: #fee2e2;
 }
 
-/* Разделитель */
 .nav-divider {
   height: 1px;
   background: #eef2f6;
@@ -115,10 +115,13 @@
   width: 100%;
 }
 
-/* Список чатов (Средняя панель) */
+
+/* ==========================================
+   2. СРЕДНЯЯ ПАНЕЛЬ (Список чатов и поиск)
+   ========================================== */
 .chats-sidebar {
   width: 320px;
-  background: white;
+  background: #ffffff;
   border-right: 1px solid #eef2f6;
   display: flex;
   flex-direction: column;
@@ -140,12 +143,11 @@
   margin-bottom: 4px;
 }
 
-/* Поисковая строка */
 .search-box {
   display: flex;
   align-items: center;
   height: 70px;
-  padding: 0 16px; 
+  padding: 0 16px;
   box-sizing: border-box;
   flex-shrink: 0;
 }
@@ -163,7 +165,7 @@
 .search-box input:focus {
   outline: none;
   border-color: #3b82f6;
-  background: white;
+  background: #ffffff;
 }
 
 .chats-list {
@@ -204,14 +206,36 @@
   color: #0f172a;
 }
 
-/* Аватарки */
+.unread-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #3b82f6;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  padding: 0 5px;
+  margin-left: 8px;
+  text-align: center;
+  line-height: 1;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+  animation: pulse 2s infinite;
+}
+
+
+/* ==========================================
+   3. ЕДИНЫЕ СТИЛИ ДЛЯ АВАТАРОВ И ТЕКСТА ПОЛЬЗОВАТЕЛЕЙ
+   ========================================== */
 .chat-avatar-placeholder,
 .user-avatar-placeholder {
   width: 44px;
   height: 44px;
   border-radius: 50%;
   background: #3b82f6;
-  color: white;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -231,6 +255,10 @@
 .user-info {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .chat-name,
@@ -239,64 +267,50 @@
   font-weight: 600;
   color: #1a1a1a;
   margin-bottom: 2px;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
   line-height: 1.2;
-}
-
-.chat-last-message,
-.user-tag {
-  font-size: 0.85rem;
-  font-weight: 400;
-  color: #888888;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.chat-tag,
+.user-tag,
+.chat-last-message {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: #888888;
   line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.unread-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #3b82f6;
-  color: white;
-  font-size: 0.7rem;
-  font-weight: 600;
-  min-width: 20px;
-  height: 20px;
-  border-radius: 10px;
-  padding: 0 5px;
-  margin-left: 8px;
-  text-align: center;
-  line-height: 1;
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
-  animation: pulse 2s infinite;
-}
 
-/* Область чата (Правая панель) */
+/* ==========================================
+   4. ПРАВАЯ ПАНЕЛЬ (Область чата)
+   ========================================== */
 .chat-area {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: white;
+  background: #ffffff;
   height: 100%;
   min-width: 0;
   padding-top: 14px;
   box-sizing: border-box;
 }
 
-/* Шапка чата */
+/* Шапка чата: без margin-bottom, чтобы отступ до чата снизу (14px из padding сообщения) 
+   был в точности равен отступу сверху от края страницы (14px из padding-top chat-area) */
 .chat-header {
   display: flex;
   align-items: center;
   height: 70px;
   padding: 0 16px;
-  margin-bottom: 14px;
+  margin-bottom: 0;
   box-sizing: border-box;
   border-bottom: 1px solid #eef2f6;
-  background: white;
+  background: #ffffff;
   flex-shrink: 0;
 }
 
@@ -308,7 +322,7 @@
   margin: 0 auto;
 }
 
-/* Карточка собеседника в шапке */
+/* Карточка выбранного собеседника в шапке */
 .selected-chat {
   display: flex;
   align-items: center;
@@ -325,49 +339,15 @@
   background: #f1f5f9;
 }
 
-.selected-chat .chat-info {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  overflow: hidden;
-}
-
-/* Имя собеседника в шапке */
-.selected-chat .chat-name,
-.selected-chat .user-name {
-  font-size: 1.1rem !important;
-  font-weight: 600 !important;
-  color: #1a1a1a !important;
-  margin-bottom: 2px !important;
-  line-height: 1.2 !important;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Тэг собеседника в шапке (строго серый) */
-.selected-chat .chat-tag,
-.selected-chat .user-tag,
-.selected-chat .chat-last-message {
-  font-size: 0.85rem !important;
-  font-weight: 400 !important;
-  color: #888888 !important;
-  line-height: 1.2 !important;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .selected-chat .chat-avatar-placeholder,
 .selected-chat .user-avatar-placeholder {
-  width: 44px !important;
-  height: 44px !important;
-  border-radius: 50% !important;
-  font-size: 1.2rem !important;
-  margin-right: 0 !important;
+  margin-right: 0;
 }
 
-/* Сообщения */
+
+/* ==========================================
+   5. СООБЩЕНИЯ И ВВОД
+   ========================================== */
 .messages-container {
   flex: 1;
   overflow-y: auto;
@@ -393,13 +373,13 @@
 .my-message {
   align-self: flex-end;
   background: #3b82f6;
-  color: white;
+  color: #ffffff;
   border-bottom-right-radius: 4px;
 }
 
 .other-message {
   align-self: flex-start;
-  background: white;
+  background: #ffffff;
   color: #1e293b;
   border: 1px solid #e2e8f0;
   border-bottom-left-radius: 4px;
@@ -420,7 +400,7 @@
 }
 
 .my-message .message-sender {
-  color: rgba(255,255,255,0.8);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .message-delete-btn {
@@ -430,7 +410,7 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: white;
+  background: #ffffff;
   border: 1px solid #e2e8f0;
   color: #64748b;
   font-size: 1.2rem;
@@ -455,11 +435,10 @@
   border-color: #fecaca;
 }
 
-/* Поле ввода сообщения */
 .message-input-area {
   padding: 20px 24px;
   border-top: 1px solid #eef2f6;
-  background: white;
+  background: #ffffff;
   display: flex;
   gap: 12px;
   flex-shrink: 0;
@@ -477,7 +456,7 @@
 .message-input-area input:focus {
   outline: none;
   border-color: #3b82f6;
-  background: white;
+  background: #ffffff;
 }
 
 .message-input-area button {
@@ -485,7 +464,7 @@
   height: 52px;
   border-radius: 30px;
   background: #3b82f6;
-  color: white;
+  color: #ffffff;
   border: none;
   cursor: pointer;
   font-size: 1.2rem;
@@ -501,7 +480,10 @@
   background: #2563eb;
 }
 
-/* Дополнительные элементы */
+
+/* ==========================================
+   6. МОДАЛЬНЫЕ ОКНА И ВСПОМОГАТЕЛЬНЫЕ ЭЛЕМЕНТЫ
+   ========================================== */
 .search-section {
   padding: 10px 16px;
   background: #f8fafc;
@@ -576,8 +558,8 @@
 .search-input:focus {
   outline: none;
   border-color: #3b82f6;
-  box-shadow: 0 0 0 4px rgba(59,130,246,0.1);
-  background: white;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  background: #ffffff;
 }
 
 .group-participants-list {
@@ -649,7 +631,10 @@
   color: #dc2626;
 }
 
-/* Мобильное меню и оверлей */
+
+/* ==========================================
+   7. МОБИЛЬНОЕ МЕНЮ И ОВЕРЛЕЙ
+   ========================================== */
 .mobile-menu-btn {
   display: none;
   position: fixed;
@@ -659,13 +644,13 @@
   height: 56px;
   border-radius: 50%;
   background: #3b82f6;
-  color: white;
+  color: #ffffff;
   border: none;
   cursor: pointer;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
-  box-shadow: 0 4px 12px rgba(59,130,246,0.4);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
   z-index: 1001;
 }
 
@@ -677,9 +662,9 @@
   position: fixed;
   bottom: 80px;
   right: 20px;
-  background: white;
+  background: #ffffff;
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   padding: 8px;
   display: none;
   flex-direction: column;
@@ -725,7 +710,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   z-index: 1001;
 }
 
@@ -733,7 +718,10 @@
   display: block;
 }
 
-/* ========== АДАПТИВНОСТЬ И МОБИЛЬНЫЕ СТИЛИ ========== */
+
+/* ==========================================
+   8. АДАПТИВНОСТЬ И МОБИЛЬНЫЕ СТИЛИ
+   ========================================== */
 @media (max-width: 768px) {
   .messenger-container {
     height: 100vh;
@@ -746,9 +734,11 @@
     right: 0;
     bottom: 0;
   }
+
   .nav-sidebar {
     display: none;
   }
+
   .chats-sidebar {
     width: 100% !important;
     display: flex !important;
@@ -759,33 +749,38 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
+
   .search-box {
     height: auto;
     padding: 12px 16px;
   }
+
   .chat-area {
     width: 100% !important;
     display: none;
     height: 100%;
-    background: white;
+    background: #ffffff;
     padding-top: 0 !important;
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
+
   body.chat-mode .chats-sidebar {
     display: none !important;
   }
+
   body.chat-mode .chat-area {
     display: flex !important;
     height: 100dvh;
     padding-bottom: 0;
     flex-direction: column;
   }
+
   .chat-header {
     flex-shrink: 0;
     height: auto;
     padding: 12px 16px;
-    margin-bottom: 0;
   }
+
   .messages-container {
     flex: 1 1 auto;
     height: calc(100% - 130px);
@@ -794,28 +789,34 @@
     padding-bottom: env(safe-area-inset-bottom, 10px);
     min-height: 0;
   }
+
   .message-input-area {
     flex-shrink: 0;
     padding: 12px 16px;
     padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
-    background: white;
+    background: #ffffff;
     border-top: 1px solid #eef2f6;
     width: 100%;
     position: relative;
     bottom: 0;
   }
+
   .chat-item {
     padding: 10px;
   }
+
   .users-checkbox-list {
     max-height: 200px;
   }
+
   .user-checkbox {
     padding: 8px;
   }
+
   .mobile-menu-btn {
     display: flex;
   }
+
   .no-chat-selected,
   .no-messages,
   .no-users,
