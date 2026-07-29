@@ -398,7 +398,7 @@ function displayChats(chats) {
     
     let avatarContent = '';
     if (chat.chatImage) {
-      avatarContent = `<img src="${chat.chatImage}" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">`;
+      avatarContent = `<img src="${chat.chatImage}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
     } else {
       avatarContent = chat.isGroup ? '👥 ' + (chat.displayName ? chat.displayName.charAt(0).toUpperCase() : '?') : (chat.displayName ? chat.displayName.charAt(0).toUpperCase() : '?');
     }
