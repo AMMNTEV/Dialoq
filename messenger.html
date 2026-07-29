@@ -11,6 +11,14 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <style>
+    /* Стили для аватара и центровки поиска под новые требования */
+    .nav-user-avatar {
+      border-radius: 50% !important;
+      overflow: hidden;
+    }
+    .chats-sidebar .search-box {
+      margin-top: 0;
+    }
     /* Дополнительные мобильные фиксы (оставляем минимум) */
     @media (max-width: 768px) {
       .messenger-container {
@@ -88,7 +96,6 @@
 </div>
 
     <div class="chats-sidebar" id="chatsSidebar">
-      <div class="chats-header"><h2>Чаты</h2></div>
       <div class="search-box">
         <input type="text" id="searchInput" placeholder="Поиск пользователей и бесед..." onkeyup="searchAll()">
       </div>
