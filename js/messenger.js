@@ -1377,8 +1377,17 @@ function updateSidebarUser(userData) {
   if (nameEl) nameEl.textContent = userData.nickname || 'Пользователь';
   if (tagEl) tagEl.textContent = userData.tag || '@user';
   
-  // Устанавливаем первую букву никнейма в темный скругленный квадрат
   if (avatarEl) {
-    avatarEl.textContent = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
+    // Проверяем наличие свойства avatar (битмаппинг/ссылка)
+    if (userData.avatar) {
+      // Вставляем картинку, заполняющую весь контейнер
+      avatarEl.innerHTML = `<img src="${userData.avatar}" alt="Аватар" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block;">`;
+      avatarEl.style.background = 'transparent'; // Убираем темный фон контейнера
+    } else {
+      // Запасной вариант: первая буква никнейма, если аватарки нет
+      avatarEl.innerHTML = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
+      avatarEl.style.background = '#1a1a1a'; // Возвращаем темный фон
+      avatarEl.style.color = 'white';
+    }
   }
 }
