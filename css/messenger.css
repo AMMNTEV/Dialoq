@@ -146,9 +146,9 @@
   align-items: center;
   height: 70px;
   padding: 0 16px; 
-  margin-bottom: 14px;
+  margin-bottom: 0;
   box-sizing: border-box;
-  border-bottom: 1px solid #eef2f6;
+  border-bottom: none;
   flex-shrink: 0;
   margin-top: 0;
 }
@@ -171,7 +171,7 @@
 
 .chats-list {
   flex: 1;
-  padding: 16px;
+  padding: 14px 16px 16px 16px;
   min-height: 0;
   overflow-y: auto;
 }
@@ -232,21 +232,27 @@
   min-width: 0;
 }
 
-.chat-name {
+.chat-name,
+.user-name {
+  font-size: 1.1rem;
   font-weight: 600;
-  color: #0f172a;
-  margin-bottom: 4px;
+  color: #1a1a1a;
+  margin-bottom: 2px;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  line-height: 1.2;
 }
 
-.chat-last-message {
+.chat-last-message,
+.user-tag {
   font-size: 0.85rem;
-  color: #64748b;
+  font-weight: 400;
+  color: #888888;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.2;
 }
 
 .unread-badge {
@@ -291,6 +297,14 @@
   border-bottom: 1px solid #eef2f6;
   background: white;
   flex-shrink: 0;
+}
+
+.no-chat-selected {
+  width: 100%;
+  text-align: center;
+  color: #64748b;
+  font-weight: 500;
+  margin: 0 auto;
 }
 
 /* Карточка собеседника в шапке */
@@ -359,7 +373,7 @@
 .messages-container {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
+  padding: 14px 24px 24px 24px;
   background: #fafbff;
   display: flex;
   flex-direction: column;
@@ -522,20 +536,6 @@
 
 .user-info {
   flex: 1;
-}
-
-.user-name {
-  font-weight: 600;
-  color: #0f172a;
-  margin-bottom: 4px;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.user-tag {
-  font-size: 0.85rem;
-  color: #64748b;
 }
 
 .search-section {
