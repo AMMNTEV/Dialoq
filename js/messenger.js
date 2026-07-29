@@ -632,11 +632,14 @@ function updateChatHeader(chat) {
     avatarContent = chat.isGroup ? '👥 ' + (chat.displayName ? chat.displayName.charAt(0).toUpperCase() : '?') : (chat.displayName ? chat.displayName.charAt(0).toUpperCase() : '?');
   }
 
+  // Общий SVG-код стрелки "Назад" для мобильных и десктопов
+  const backIconSvg = `<svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>`;
+
   if (chat.isGroup) {
     const participantsCount = chat.participants ? chat.participants.length : 2;
     headerContent = `
       <div class="selected-chat" onclick="openChatInfo('${chat.id}')">
-        <button class="mobile-back-btn" onclick="event.stopPropagation(); exitChatMode()"><</button>
+        <button class="mobile-back-btn" onclick="event.stopPropagation(); exitChatMode()">${backIconSvg}</button>
         <div class="chat-avatar-placeholder large" style="overflow:hidden; display:flex; align-items:center; justify-content:center; padding:0;">${avatarContent}</div>
         <div class="chat-info">
           <h3>${chat.displayName}</h3>
@@ -648,7 +651,7 @@ function updateChatHeader(chat) {
     const otherUserId = chat.participants.find(id => id !== currentUser.uid);
     headerContent = `
       <div class="selected-chat" onclick="openUserProfile('${otherUserId}')">
-        <button class="mobile-back-btn" onclick="event.stopPropagation(); exitChatMode()"><</button>
+        <button class="mobile-back-btn" onclick="event.stopPropagation(); exitChatMode()">${backIconSvg}</button>
         <div class="chat-avatar-placeholder large" style="overflow:hidden; display:flex; align-items:center; justify-content:center; padding:0;">${avatarContent}</div>
         <div class="chat-info">
           <h3>${chat.displayName}</h3>
