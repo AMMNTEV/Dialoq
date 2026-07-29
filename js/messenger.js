@@ -9,38 +9,61 @@ onAuthStateChanged(async (user) => {
     return;
   }
   currentUser = user;
+  
+  // ВЕТВЬ 1: Если пользователь есть в кэше
   if (userCache.has(user.uid)) {
     currentUserData = userCache.get(user.uid);
-    loadProfileInfo();
-    listenForNewPosts();
+    
+    // ИСПРАВЛЕНИЕ: Обязательно обновляем сайдбар из кэша
+    updateSidebarUser(currentUserData); 
+    
+    // ИСПРАВЛЕНИЕ: Защищаем от ошибки, проверяя существование элементов
+    if (document.getElementById('profileInfo')) loadProfileInfo();
+    if (document.getElementById('postsContainer')) listenForNewPosts();
     return;
   }
+  
+  // ВЕТВЬ 2: Если загружаем пользователя из базы
   try {
     const doc = await db.collection('users').doc(user.uid).get();
     if (!doc.exists) {
-      // Если документа нет – создаём его (для обратной совместимости)
+      // Если документа нет – создаём его
       await db.collection('users').doc(user.uid).set({
         nickname: user.displayName ? user.displayName.split('|')[0] : 'Пользователь',
         tag: user.displayName ? '@' + user.displayName.split('|')[1] : '@user',
         email: user.email,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-      // После создания перезагружаем страницу, чтобы данные подтянулись
       window.location.reload();
       return;
     }
     currentUserData = doc.data();
     userCache.set(user.uid, currentUserData);
+    
+    // Обновляем боковую панель актуальными данными
     updateSidebarUser(currentUserData);
-    document.getElementById('profileAvatar').innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
-    loadProfileInfo();
-    listenForNewPosts();
+    
+    // ИСПРАВЛЕНИЕ: Безопасное обращение к элементам профиля (защита от краша в мессенджере)
+    const profileAvatarEl = document.getElementById('profileAvatar');
+    if (profileAvatarEl) {
+      if (currentUserData.avatar) {
+        profileAvatarEl.innerHTML = `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
+      } else {
+        profileAvatarEl.innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
+      }
+    }
+    
+    if (document.getElementById('profileInfo')) loadProfileInfo();
+    if (document.getElementById('postsContainer')) listenForNewPosts();
+    
   } catch (error) {
     console.error('Ошибка загрузки профиля:', error);
-    document.getElementById('profileInfo').innerHTML = '<div class="error">Ошибка загрузки профиля</div>';
+    const profileInfoEl = document.getElementById('profileInfo');
+    if (profileInfoEl) {
+        profileInfoEl.innerHTML = '<div class="error">Ошибка загрузки профиля</div>';
+    }
   }
 });
-
 function loadProfileInfo() {
   const profileInfo = document.getElementById('profileInfo');
   profileInfo.innerHTML = `
