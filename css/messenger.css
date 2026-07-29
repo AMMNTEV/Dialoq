@@ -309,18 +309,15 @@
   background: #ffffff;
   height: 100%;
   min-width: 0;
-  padding-top: 14px; /* Отступ 14px сверху до края страницы */
+  padding-top: 0; /* Отступ перенесен внутрь .chat-header для точного отступа снизу */
   box-sizing: border-box;
 }
 
-/* Шапка чата — строго 70px высоты для обоих состояний */
+/* Шапка чата: 14px сверху, карточка 70px, 14px снизу, затем полоса border-bottom */
 .chat-header {
   display: flex;
   align-items: center;
-  height: 70px;
-  min-height: 70px;
-  max-height: 70px;
-  padding: 0 16px;
+  padding: 14px 16px; /* Ровно 14px сверху и 14px снизу до разделительной линии */
   margin-bottom: 0;
   box-sizing: border-box;
   border-bottom: 1px solid #eef2f6 !important;
@@ -330,7 +327,10 @@
 
 .no-chat-selected {
   width: 100%;
-  text-align: center;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #64748b;
   font-weight: 500;
   margin: 0 auto;
@@ -338,14 +338,15 @@
   line-height: 1.2;
 }
 
-/* Карточка выбранного собеседника в шапке */
+/* Карточка выбранного собеседника в шапке (ровно 70px высоты) */
 .selected-chat {
   display: flex;
   align-items: center;
   gap: 12px;
   cursor: pointer;
-  padding: 6px 12px; /* Симметричные внутренние отступы */
-  border-radius: 14px;
+  padding: 13px 12px;
+  height: 70px;
+  border-radius: 16px;
   width: 100%;
   box-sizing: border-box;
   transition: background 0.2s ease;
@@ -795,9 +796,7 @@
 
   .chat-header {
     flex-shrink: 0;
-    height: 70px;
-    min-height: 70px;
-    padding: 0 16px;
+    padding: 10px 16px;
   }
 
   .messages-container {
