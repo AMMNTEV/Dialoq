@@ -24,17 +24,24 @@ onAuthStateChanged(async (user) => {
       return;
     }
     const userData = userDoc.data();
-    const firstLetter = userData.nickname.charAt(0).toUpperCase();
+    
+    // Получаем первую букву, если аватарки нет
+    const firstLetter = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
+
+    // Формируем HTML для аватарки: если есть Base64 код, выводим картинку, иначе букву
+    const avatarHTML = userData.avatar 
+      ? `<img src="${userData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">` 
+      : firstLetter;
 
     document.getElementById('profileContent').innerHTML = `
       <div class="profile-left">
         <div class="profile-card">
           <div class="profile-avatar-placeholder">
-            <div class="avatar-large">${firstLetter}</div>
+            <div class="avatar-large">${avatarHTML}</div>
           </div>
           <div class="profile-info">
-            <div class="info-row"><label>Никнейм:</label><span>${userData.nickname}</span></div>
-            <div class="info-row"><label>Тег:</label><span>${userData.tag}</span></div>
+            <div class="info-row"><label>Никнейм:</label><span>${userData.nickname || 'Не указан'}</span></div>
+            <div class="info-row"><label>Тег:</label><span>${userData.tag || 'Не указан'}</span></div>
           </div>
         </div>
       </div>

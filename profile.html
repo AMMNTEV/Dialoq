@@ -24,6 +24,12 @@
             <div class="avatar-large" id="profileAvatar">
               <div class="skeleton-circle"></div>
             </div>
+            <!-- Скрытый инпут для выбора файла -->
+            <input type="file" id="avatarInput" accept="image/png, image/jpeg, image/webp" style="display: none;">
+            <!-- Кнопка загрузки, стилизованная под ваши текущие кнопки -->
+            <button onclick="document.getElementById('avatarInput').click()" class="save-btn" style="width: auto; padding: 8px 16px; margin-top: 15px; font-size: 0.9rem;">
+              Загрузить аватарку
+            </button>
           </div>
           <div class="profile-info" id="profileInfo">
             <div class="skeleton-line"></div>

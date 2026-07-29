@@ -31,7 +31,7 @@ onAuthStateChanged(async (user) => {
     }
     currentUserData = doc.data();
     userCache.set(user.uid, currentUserData);
-    document.getElementById('profileAvatar').innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
+    renderAvatar(currentUserData.avatar);
     loadProfileInfo();
     listenForNewPosts();
   } catch (error) {
@@ -190,3 +190,73 @@ window.onclick = function(event) {
   const modal = document.getElementById('postModal');
   if (event.target === modal) modal.style.display = 'none';
 };
+
+// Обработка выбора файла
+document.getElementById('avatarInput')?.addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    const img = new Image();
+    img.onload = function() {
+      // Создаем холст для изменения размера
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const targetSize = 800;
+      
+      canvas.width = targetSize;
+      canvas.height = targetSize;
+
+      // Вычисляем координаты для обрезки (crop) по центру в идеальный квадрат
+      const minDim = Math.min(img.width, img.height);
+      const startX = (img.width - minDim) / 2;
+      const startY = (img.height - minDim) / 2;
+
+      // Отрисовываем картинку (сжимаем и обрезаем)
+      ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, targetSize, targetSize);
+
+      // Получаем Base64 строку (JPEG, качество 70% для экономии места)
+      const base64Avatar = canvas.toDataURL('image/jpeg', 0.7);
+
+      // Проверка на лимит Firestore (1 МБ = 1048576 байт)
+      if (base64Avatar.length > 1000000) {
+        alert('Файл слишком большой даже после сжатия. Пожалуйста, выберите другую картинку.');
+        return;
+      }
+
+      saveAvatarToFirebase(base64Avatar);
+    };
+    img.src = event.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+// Сохранение в базу данных
+async function saveAvatarToFirebase(base64String) {
+  const user = auth.currentUser;
+  try {
+    // Пишем в базу
+    await db.collection('users').doc(user.uid).update({ avatar: base64String });
+    
+    // Обновляем локальный кэш
+    currentUserData.avatar = base64String;
+    userCache.set(user.uid, currentUserData);
+    
+    // Сразу показываем на экране
+    renderAvatar(base64String);
+  } catch (error) {
+    console.error('Ошибка сохранения аватарки:', error);
+    alert('Ошибка при загрузке аватарки');
+  }
+}
+
+// Функция для красивого отображения аватарки
+function renderAvatar(avatarData) {
+  const avatarDiv = document.getElementById('profileAvatar');
+  if (avatarData) {
+    avatarDiv.innerHTML = `<img src="${avatarData}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
+  } else {
+    avatarDiv.innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
+  }
+}

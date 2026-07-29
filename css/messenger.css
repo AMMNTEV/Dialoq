@@ -125,11 +125,12 @@
 .chat-item.has-unread:hover {
   background-color: #e0f2fe;
 }
-.chat-avatar-placeholder {
+.chat-avatar-placeholder,
+.user-avatar-placeholder {
   width: 48px;
   height: 48px;
-  border-radius: 16px;
-  background: #3b82f6;
+  border-radius: 50%; /* Делаем контейнер круглым, как и саму аватарку */
+  background: #3b82f6; /* Синий фон остается только как заглушка для текстовых аватаров */
   color: white;
   display: flex;
   align-items: center;
@@ -138,11 +139,16 @@
   font-weight: 600;
   margin-right: 14px;
   flex-shrink: 0;
+  overflow: hidden; /* Обрезаем всё, что выходит за пределы круга */
 }
 .chat-avatar-placeholder.large {
   width: 52px;
   height: 52px;
   font-size: 1.3rem;
+}
+.chat-avatar-placeholder:has(img),
+.user-avatar-placeholder:has(img) {
+  background: transparent;
 }
 .chat-info {
   flex: 1;
