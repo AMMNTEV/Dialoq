@@ -13,22 +13,20 @@
   border-right: 1px solid #eef2f6;
   display: flex;
   flex-direction: column;
-  padding: 24px 16px 24px 16px; /* Вернули верхний паддинг 24px */
+  padding: 24px 16px;
   height: 100%;
 }
 
-/* Карточка пользователя сверху - вернули прошлые размеры */
+/* Карточка пользователя сверху */
 .nav-user-box {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px; /* Вернули 14px */
+  padding: 14px 16px;
   border: 1px solid #e2e8f0;
   border-radius: 16px;
-  margin-bottom: 24px; /* Вернули 24px */
+  margin-bottom: 24px;
   background: #ffffff;
-  min-height: auto; /* Убрали фиксированную высоту */
-  height: auto;
 }
 
 .nav-user-info {
@@ -45,26 +43,24 @@
   overflow: hidden;
   text-overflow: ellipsis;
   margin-bottom: 2px;
-  line-height: 1.3;
 }
 
 .nav-user-tag {
   font-size: 0.85rem;
   color: #888888;
-  line-height: 1.3;
 }
 
-/* Аватарка - вернули прошлый размер */
+/* Аватарка-скругленный квадрат */
 .nav-user-avatar {
-  width: 44px; /* Вернули 44px */
-  height: 44px; /* Вернули 44px */
+  width: 44px;
+  height: 44px;
   border-radius: 14px;
   background: #1a1a1a;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem; /* Вернули 1.2rem */
+  font-size: 1.2rem;
   font-weight: 600;
   flex-shrink: 0;
   margin-left: 12px;
@@ -123,28 +119,31 @@
 }
 
 .chats-header {
-  padding: 0;
-  border-bottom: none;
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid #eef2f6;
   flex-shrink: 0;
-  display: none;
 }
 
-/* Поисковая строка - увеличили верхний отступ */
+.chats-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
 .search-box {
-  padding: 24px 20px 12px 20px; /* Увеличили верхний отступ с 12px до 24px */
+  padding: 30px 20px 16px 20px; /* Увеличил верхний отступ с 16px до 30px */
   border-bottom: 1px solid #eef2f6;
   flex-shrink: 0;
 }
 
 .search-box input {
   width: 100%;
-  padding: 12px 18px; /* Вернули 12px */
+  padding: 12px 18px;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 30px;
   font-size: 0.95rem;
-  height: auto; /* Убрали фиксированную высоту */
-  box-sizing: border-box;
 }
 
 .search-box input:focus {
