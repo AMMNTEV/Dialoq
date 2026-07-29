@@ -8,62 +8,105 @@
 
 /* Навигация */
 .nav-sidebar {
-  width: 200px;
-  background: #f8fafc;
+  width: 260px; /* Сделали чуть шире для комфортного размещения карточки */
+  background: #ffffff; /* Белый фон */
   border-right: 1px solid #eef2f6;
   display: flex;
   flex-direction: column;
   padding: 24px 16px;
   height: 100%;
 }
-.nav-sidebar h2 {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 20px;
+
+/* Карточка пользователя сверху */
+.nav-user-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border: 1px solid #e2e8f0; /* Тонкая серая рамочка */
+  border-radius: 16px;
+  margin-bottom: 24px;
+  background: #ffffff;
 }
+
+.nav-user-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.nav-user-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a1a1a; /* Крупно черным */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.nav-user-tag {
+  font-size: 0.85rem;
+  color: #888888; /* Мелким серым */
+}
+
+/* Аватарка-скругленный квадрат */
+.nav-user-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px; 
+  background: #1a1a1a; /* Темный фон как на фото */
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+/* Кнопки меню */
 .nav-buttons {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
+
 .nav-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   padding: 12px 16px;
   border-radius: 12px;
   font-size: 0.95rem;
   font-weight: 500;
   text-decoration: none;
-  transition: all 0.2s;
-  text-align: left;
-  width: 100%;
+  color: #1a1a1a;
+  background: transparent;
   border: none;
   cursor: pointer;
-}
-.nav-button.profile {
-  background: #f1f5f9;
-  color: #334155;
-}
-.nav-button.profile:hover {
-  background: #e2e8f0;
-}
-.nav-button.logout {
-  background: #fee2e2;
-  color: #dc2626;
-}
-.nav-button.logout:hover {
-  background: #fecaca;
-}
-.nav-button.create-group {
-  background: #3b82f6;
-  color: white;
-  margin-top: 8px;
-}
-.nav-button.create-group:hover {
-  background: #2563eb;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
 }
 
+.nav-button:hover {
+  background: #f1f5f9; /* Светло-серый фон при наведении, как на картинке */
+}
+
+.nav-button.logout-btn:hover {
+  color: #dc2626; /* Легкий красный оттенок при наведении на выход (опционально) */
+  background: #fee2e2;
+}
+
+/* Тонкие линии-разделители */
+.nav-divider {
+  height: 1px;
+  background: #eef2f6; 
+  margin: 12px 0;
+  width: 100%;
+}
 /* Список чатов */
 .chats-sidebar {
   width: 320px;
