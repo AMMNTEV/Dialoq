@@ -31,6 +31,7 @@ onAuthStateChanged(async (user) => {
     }
     currentUserData = doc.data();
     userCache.set(user.uid, currentUserData);
+    updateSidebarUser(currentUserData);
     document.getElementById('profileAvatar').innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
     loadProfileInfo();
     listenForNewPosts();
@@ -1366,3 +1367,18 @@ onAuthStateChanged(async (user) => {
   await loadAllUsersForModal();
   listenForChats();
 });
+
+// Функция обновления карточки пользователя в боковой панели
+function updateSidebarUser(userData) {
+  const nameEl = document.getElementById('sidebarUserName');
+  const tagEl = document.getElementById('sidebarUserTag');
+  const avatarEl = document.getElementById('sidebarUserAvatar');
+  
+  if (nameEl) nameEl.textContent = userData.nickname || 'Пользователь';
+  if (tagEl) tagEl.textContent = userData.tag || '@user';
+  
+  // Устанавливаем первую букву никнейма в темный скругленный квадрат
+  if (avatarEl) {
+    avatarEl.textContent = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
+  }
+}
