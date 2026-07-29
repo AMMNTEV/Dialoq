@@ -18,7 +18,7 @@
   box-sizing: border-box;
 }
 
-/* Карточка пользователя в левой панели (Высота 70px) */
+/* Карточка пользователя в левой панели */
 .nav-user-box {
   display: flex;
   align-items: center;
@@ -140,17 +140,14 @@
   margin-bottom: 4px;
 }
 
-/* Поисковая строка (Строго на одном уровне 70px) */
+/* Поисковая строка */
 .search-box {
   display: flex;
   align-items: center;
   height: 70px;
   padding: 0 16px; 
-  margin-bottom: 0;
   box-sizing: border-box;
-  border-bottom: none;
   flex-shrink: 0;
-  margin-top: 0;
 }
 
 .search-box input {
@@ -176,7 +173,8 @@
   overflow-y: auto;
 }
 
-.chat-item {
+.chat-item,
+.user-item {
   display: flex;
   align-items: center;
   padding: 12px;
@@ -186,19 +184,27 @@
   margin-bottom: 4px;
 }
 
-.chat-item:hover {
+.chat-item:hover,
+.user-item:hover {
   background: #f1f5f9;
 }
 
-.chat-item.has-unread {
+.chat-item.has-unread,
+.user-item.has-unread {
   background-color: #f0f9ff;
 }
 
-.chat-item.has-unread:hover {
+.chat-item.has-unread:hover,
+.user-item.has-unread:hover {
   background-color: #e0f2fe;
 }
 
-/* Аватарки в списке чатов */
+.user-item.has-unread .user-name {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Аватарки */
 .chat-avatar-placeholder,
 .user-avatar-placeholder {
   width: 44px;
@@ -216,18 +222,13 @@
   overflow: hidden;
 }
 
-.chat-avatar-placeholder.large {
-  width: 44px;
-  height: 44px;
-  font-size: 1.2rem;
-}
-
 .chat-avatar-placeholder:has(img),
 .user-avatar-placeholder:has(img) {
   background: transparent;
 }
 
-.chat-info {
+.chat-info,
+.user-info {
   flex: 1;
   min-width: 0;
 }
@@ -286,7 +287,7 @@
   box-sizing: border-box;
 }
 
-/* Шапка чата (Высота 70px) */
+/* Шапка чата */
 .chat-header {
   display: flex;
   align-items: center;
@@ -331,10 +332,9 @@
   overflow: hidden;
 }
 
-/* Имя собеседника */
+/* Имя собеседника в шапке */
 .selected-chat .chat-name,
-.selected-chat .user-name,
-.selected-chat .nav-user-name {
+.selected-chat .user-name {
   font-size: 1.1rem !important;
   font-weight: 600 !important;
   color: #1a1a1a !important;
@@ -345,13 +345,10 @@
   text-overflow: ellipsis;
 }
 
-/* Точное совпадение тэга собеседника */
+/* Тэг собеседника в шапке (строго серый) */
 .selected-chat .chat-tag,
 .selected-chat .user-tag,
-.selected-chat .nav-user-tag,
-.selected-chat .chat-last-message,
-.selected-chat span,
-.selected-chat small {
+.selected-chat .chat-last-message {
   font-size: 0.85rem !important;
   font-weight: 400 !important;
   color: #888888 !important;
@@ -370,6 +367,7 @@
   margin-right: 0 !important;
 }
 
+/* Сообщения */
 .messages-container {
   flex: 1;
   overflow-y: auto;
@@ -417,11 +415,7 @@
 .message-sender {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #3b82f6;
   margin-bottom: 4px;
-}
-
-.other-message .message-sender {
   color: #3b82f6;
 }
 
@@ -461,6 +455,7 @@
   border-color: #fecaca;
 }
 
+/* Поле ввода сообщения */
 .message-input-area {
   padding: 20px 24px;
   border-top: 1px solid #eef2f6;
@@ -506,38 +501,7 @@
   background: #2563eb;
 }
 
-/* Поиск пользователей */
-.user-item {
-  display: flex;
-  align-items: center;
-  padding: 12px;
-  border-radius: 16px;
-  cursor: pointer;
-  transition: background 0.2s;
-  margin-bottom: 4px;
-}
-
-.user-item:hover {
-  background: #f1f5f9;
-}
-
-.user-item.has-unread {
-  background-color: #f0f9ff;
-}
-
-.user-item.has-unread:hover {
-  background-color: #e0f2fe;
-}
-
-.user-item.has-unread .user-name {
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.user-info {
-  flex: 1;
-}
-
+/* Дополнительные элементы */
 .search-section {
   padding: 10px 16px;
   background: #f8fafc;
@@ -553,12 +517,12 @@
   letter-spacing: 0.05em;
 }
 
-/* Групповые чаты и модальные окна */
 .group-participants {
   margin-top: 16px;
 }
 
-.group-participants h4 {
+.group-participants h4,
+.group-info-section h4 {
   font-size: 1rem;
   font-weight: 600;
   color: #1a1a1a;
@@ -597,19 +561,23 @@
   color: #1a1a1a;
 }
 
-.modal-input {
+.modal-input,
+.search-input {
   width: 100%;
   padding: 12px 16px;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   font-size: 1rem;
   margin-bottom: 20px;
+  background: #f8fafc;
 }
 
-.modal-input:focus {
+.modal-input:focus,
+.search-input:focus {
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 4px rgba(59,130,246,0.1);
+  background: white;
 }
 
 .group-participants-list {
@@ -625,13 +593,6 @@
   padding: 16px;
   background: #f8fafc;
   border-radius: 12px;
-}
-
-.group-info-section h4 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin-bottom: 12px;
 }
 
 .participants-list {
@@ -686,22 +647,6 @@
 .modal-leave-btn:hover {
   background: #fee2e2;
   color: #dc2626;
-}
-
-.search-input {
-  width: 100%;
-  padding: 10px 14px;
-  border: 1px solid #e2e8f0;
-  border-radius: 30px;
-  font-size: 0.95rem;
-  margin-bottom: 12px;
-  background: #f8fafc;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  background: white;
 }
 
 /* Мобильное меню и оверлей */
@@ -817,7 +762,6 @@
   .search-box {
     height: auto;
     padding: 12px 16px;
-    margin-bottom: 0;
   }
   .chat-area {
     width: 100% !important;
@@ -885,8 +829,5 @@
   .mobile-popup-menu,
   .sidebar-overlay {
     display: none !important;
-  }
-  .mobile-back-btn {
-    display: inline-block;
   }
 }
