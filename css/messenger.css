@@ -132,7 +132,7 @@
 }
 
 .search-box {
-  padding: 30px 20px 16px 20px; /* Увеличил верхний отступ с 16px до 30px */
+  padding: 44px 20px 16px 20px; /* Увеличил верхний отступ с 30px до 44px */
   border-bottom: 1px solid #eef2f6;
   flex-shrink: 0;
 }
