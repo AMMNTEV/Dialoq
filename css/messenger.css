@@ -129,8 +129,8 @@
 .user-avatar-placeholder {
   width: 48px;
   height: 48px;
-  border-radius: 16px; /* Скругленный квадрат вместо круга */
-  background: #3b82f6; 
+  border-radius: 50%; /* Делаем контейнер круглым, как и саму аватарку */
+  background: #3b82f6; /* Синий фон остается только как заглушка для текстовых аватаров */
   color: white;
   display: flex;
   align-items: center;
@@ -139,7 +139,7 @@
   font-weight: 600;
   margin-right: 14px;
   flex-shrink: 0;
-  overflow: hidden; 
+  overflow: hidden; /* Обрезаем всё, что выходит за пределы круга */
 }
 .chat-avatar-placeholder.large {
   width: 52px;
