@@ -274,10 +274,43 @@ async function getUserById(userId) {
 }
 
 // ========== ПРОСЛУШИВАНИЕ ЧАТОВ ==========
+// ========== ПРОСЛУШИВАНИЕ ЧАТОВ ==========
 function listenForChats() {
   if (!currentUser) return;
+
+  // 1. ЧТЕНИЕ ИЗ КЭША (Stale-While-Revalidate)
+  // Пытаемся моментально отрендерить список чатов до того, как Firebase ответит
+  const cacheKeyChats = `cachedChats_${currentUser.uid}`;
+  const cacheKeyUnreads = `cachedUnreads_${currentUser.uid}`;
+  
+  try {
+    const cachedChatsStr = localStorage.getItem(cacheKeyChats);
+    const cachedUnreadsStr = localStorage.getItem(cacheKeyUnreads);
+    
+    if (cachedChatsStr) {
+      // Восстанавливаем объекты Date, так как JSON.stringify превращает их в строки
+      allChats = JSON.parse(cachedChatsStr).map(chat => ({
+        ...chat,
+        lastMessageTime: chat.lastMessageTime ? new Date(chat.lastMessageTime) : null,
+        createdAt: chat.createdAt ? new Date(chat.createdAt) : null
+      }));
+      
+      if (cachedUnreadsStr) {
+        unreadCounts = JSON.parse(cachedUnreadsStr);
+      }
+      
+      // Моментальный рендер, если мы не находимся в процессе создания нового чата
+      if (!isNewChatPending && allChats.length > 0) {
+        displayChats(allChats);
+      }
+    }
+  } catch (error) {
+    console.error('Ошибка чтения кэша чатов:', error);
+  }
+
   if (unsubscribeChats) unsubscribeChats();
 
+  // 2. ФОНОВОЕ ОБНОВЛЕНИЕ ИЗ FIREBASE
   unsubscribeChats = db.collection('chats')
     .where('participants', 'array-contains', currentUser.uid)
     .onSnapshot(snapshot => {
@@ -287,6 +320,8 @@ function listenForChats() {
       if (snapshot.empty) {
         chatsList.innerHTML = '<div class="no-chats">У вас пока нет чатов. Найдите пользователя через поиск.</div>';
         allChats = [];
+        localStorage.removeItem(cacheKeyChats); // Очищаем кэш, если чатов нет
+        localStorage.removeItem(cacheKeyUnreads);
         if (!isNewChatPending) {
           displayChats(allChats);
         }
@@ -300,6 +335,8 @@ function listenForChats() {
       snapshot.forEach(doc => {
         const chat = doc.data();
         const promise = (async () => {
+          // ... (здесь остается ВЕСЬ ваш текущий код получения данных чата, аватарок и последних сообщений) ...
+          
           let chatName = '';
           let chatAvatar = '';
           let chatImage = null;
@@ -398,6 +435,16 @@ function listenForChats() {
           const timeB = b.lastMessageTime || b.createdAt || new Date(0);
           return timeB - timeA;
         });
+
+        // 3. ОБНОВЛЕНИЕ КЭША НОВЫМИ ДАННЫМИ ИЗ БАЗЫ
+        try {
+          localStorage.setItem(cacheKeyChats, JSON.stringify(allChats));
+          localStorage.setItem(cacheKeyUnreads, JSON.stringify(unreadCounts));
+        } catch (e) {
+          console.warn('Не удалось сохранить чаты в localStorage (возможно превышен лимит):', e);
+        }
+
+        // Бесшовное обновление UI актуальными данными
         if (!isNewChatPending) {
           displayChats(allChats);
         } else {
