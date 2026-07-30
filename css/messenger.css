@@ -177,7 +177,7 @@
 
 .chats-list {
   flex: 1;
-  padding: 0px 16px 16px 16px;
+  padding: 14px 16px 16px 16px;
   min-height: 0;
   overflow-y: auto;
 }
@@ -764,7 +764,7 @@
 
   .search-box {
     height: auto;
-    padding: 12px 16px;
+    padding: 12px 16px 0px 16px;
   }
 
   .chat-area {
