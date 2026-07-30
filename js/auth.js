@@ -100,19 +100,3 @@ function preventAtSymbolDeletion(event, input) {
   }
 }
 
-// ========== АВТОРИЗАЦИЯ ПО ТЕЛЕФОНУ ==========
-
-// Инициализация невидимой reCAPTCHA
-function setupRecaptcha(containerId, buttonId) {
-  window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(buttonId, {
-    'size': 'invisible',
-    'callback': (response) => {
-      // reCAPTCHA пройдена
-    }
-  });
-}
-
-// Отправка СМС с кодом
-async function sendSMS(phoneNumber, appVerifier) {
-  return auth.signInWithPhoneNumber(phoneNumber, appVerifier);
-}
