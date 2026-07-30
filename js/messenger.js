@@ -1385,9 +1385,11 @@ function exitChatMode() {
   isChatMode = false;
   document.body.classList.remove('chat-mode');
 
-  // Возвращаем нижнюю панель навигации при выходе из диалога
+  // Возвращаем нижнюю панель ТОЛЬКО если это мобильное устройство (<= 768px)
   const bottomNav = document.getElementById('mobileBottomNav');
-  if (bottomNav) bottomNav.style.display = 'flex';
+  if (bottomNav) {
+    bottomNav.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+  }
 
   const chatsSidebar = document.getElementById('chatsSidebar');
   if (chatsSidebar) chatsSidebar.style.display = 'flex';
