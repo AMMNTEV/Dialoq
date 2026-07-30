@@ -14,10 +14,10 @@ onAuthStateChanged(async (user) => {
   if (userCache.has(user.uid)) {
     currentUserData = userCache.get(user.uid);
     
-    // ИСПРАВЛЕНИЕ: Обязательно обновляем сайдбар из кэша
+    // Обязательно обновляем сайдбар из кэша
     updateSidebarUser(currentUserData); 
     
-    // ИСПРАВЛЕНИЕ: Защищаем от ошибки, проверяя существование элементов
+    // Защищаем от ошибки, проверяя существование элементов
     if (document.getElementById('profileInfo')) loadProfileInfo();
     if (document.getElementById('postsContainer')) listenForNewPosts();
     return;
@@ -43,7 +43,7 @@ onAuthStateChanged(async (user) => {
     // Обновляем боковую панель актуальными данными
     updateSidebarUser(currentUserData);
     
-    // ИСПРАВЛЕНИЕ: Безопасное обращение к элементам профиля (защита от краша в мессенджере)
+    // Безопасное обращение к элементам профиля (защита от краша в мессенджере)
     const profileAvatarEl = document.getElementById('profileAvatar');
     if (profileAvatarEl) {
       if (currentUserData.avatar) {
@@ -64,6 +64,7 @@ onAuthStateChanged(async (user) => {
     }
   }
 });
+
 function loadProfileInfo() {
   const profileInfo = document.getElementById('profileInfo');
   profileInfo.innerHTML = `
@@ -722,7 +723,7 @@ async function markMessagesAsRead(chatId) {
     await batch.commit();
     unreadCounts[chatId] = 0;
     
-    // ИСПРАВЛЕНИЕ: Обновляем кэш непрочитанных сразу после прочтения
+    // Обновляем кэш непрочитанных сразу после прочтения
     try {
       localStorage.setItem(`cachedUnreads_${currentUser.uid}`, JSON.stringify(unreadCounts));
     } catch (e) { console.warn('Ошибка записи кэша', e); }
@@ -819,7 +820,7 @@ async function loadMessages(showLoading = false) {
       await batch.commit();
       unreadCounts[currentChatId] = 0;
       
-      // ИСПРАВЛЕНИЕ: Обновляем кэш непрочитанных при групповом прочтении
+      // Обновляем кэш непрочитанных при групповом прочтении
       try {
         localStorage.setItem(`cachedUnreads_${currentUser.uid}`, JSON.stringify(unreadCounts));
       } catch (e) { console.warn('Ошибка записи кэша', e); }
@@ -1329,13 +1330,9 @@ async function updateChatPreviewAfterDelete(chatId, isForEveryone = false) {
 async function deleteMessageForMe() {
   if (!selectedMessageId || !currentChatId) return;
   
-  // 1. Сохраняем ID перед очисткой переменной
   const messageIdToDelete = selectedMessageId;
-
-  // 2. Моментально закрываем окошко действий
   hideMessageOptions();
 
-  // 3. Выполняем удаление в фоне
   try {
     await db.collection('chats').doc(currentChatId)
       .collection('messages')
@@ -1346,8 +1343,6 @@ async function deleteMessageForMe() {
     await updateChatPreviewAfterDelete(currentChatId, false);
   } catch (error) {
     console.error('Ошибка удаления сообщения:', error);
-    // Опционально: здесь можно добавить всплывающее уведомление (toast) об ошибке
-    // вместо alert, так как окно опций уже закрыто
     alert('Ошибка при удалении сообщения');
   }
 }
@@ -1355,10 +1350,7 @@ async function deleteMessageForMe() {
 async function deleteMessageForEveryone() {
   if (!selectedMessageId || !currentChatId) return;
   
-  // Сохраняем ID перед очисткой
   const messageIdToDelete = selectedMessageId;
-
-  // Моментально закрываем окошко действий, не дожидаясь ответа сервера
   hideMessageOptions();
 
   try {
@@ -1379,15 +1371,24 @@ async function deleteMessageForEveryone() {
 function enterChatMode() {
   isChatMode = true;
   document.body.classList.add('chat-mode');
-  document.getElementById('mobileMenuBtn').style.display = 'none';
+  
+  // Скрываем нижнюю панель навигации при входе в диалог
+  const bottomNav = document.getElementById('mobileBottomNav');
+  if (bottomNav) bottomNav.style.display = 'none';
+
   const chatsSidebar = document.getElementById('chatsSidebar');
   if (chatsSidebar) chatsSidebar.style.display = 'none';
   history.pushState({ chatMode: true }, '', window.location.href);
 }
+
 function exitChatMode() {
   isChatMode = false;
   document.body.classList.remove('chat-mode');
-  document.getElementById('mobileMenuBtn').style.display = 'flex';
+
+  // Возвращаем нижнюю панель навигации при выходе из диалога
+  const bottomNav = document.getElementById('mobileBottomNav');
+  if (bottomNav) bottomNav.style.display = 'flex';
+
   const chatsSidebar = document.getElementById('chatsSidebar');
   if (chatsSidebar) chatsSidebar.style.display = 'flex';
   if (unsubscribeMessages) { unsubscribeMessages(); unsubscribeMessages = null; }
@@ -1407,31 +1408,27 @@ function openUserProfile(userId) {
   window.location.href = `user.html?id=${userId}`;
 }
 
-function toggleMobileMenu() {
-  const menu = document.getElementById('mobilePopupMenu');
-  const overlay = document.getElementById('mobileMenuOverlay');
-  menu.classList.toggle('active');
-  overlay.classList.toggle('active');
-}
-
-// ========== ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ ==========
+// ========== ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ И РЕСАЙЗЕ ==========
 window.addEventListener('load', function() {
   if (window.innerWidth <= 768) {
     document.body.classList.remove('chat-mode');
-    document.getElementById('mobileMenuBtn').style.display = 'flex';
+    const bottomNav = document.getElementById('mobileBottomNav');
+    if (bottomNav) bottomNav.style.display = 'flex';
     document.getElementById('messageInputArea').style.display = 'none';
     const chatsSidebar = document.getElementById('chatsSidebar');
     if (chatsSidebar) chatsSidebar.style.display = 'flex';
   }
 });
+
 window.addEventListener('resize', function() {
+  const bottomNav = document.getElementById('mobileBottomNav');
   if (window.innerWidth > 768) {
     document.body.classList.remove('chat-mode');
-    document.getElementById('mobileMenuBtn').style.display = 'none';
+    if (bottomNav) bottomNav.style.display = 'none';
     const chatsSidebar = document.getElementById('chatsSidebar');
     if (chatsSidebar) chatsSidebar.style.display = 'flex';
   } else {
-    document.getElementById('mobileMenuBtn').style.display = isChatMode ? 'none' : 'flex';
+    if (bottomNav) bottomNav.style.display = isChatMode ? 'none' : 'flex';
     const chatsSidebar = document.getElementById('chatsSidebar');
     if (chatsSidebar) chatsSidebar.style.display = isChatMode ? 'none' : 'flex';
   }
