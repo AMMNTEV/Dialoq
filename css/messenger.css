@@ -844,38 +844,39 @@
 }
 
 /* ==========================================
-   ПАРЯЩАЯ ЗАКТРУГЛЕННАЯ ПАНЕЛЬ (DOCK DESIGN)
+   ПАРЯЩАЯ ЗАКТРУГЛЕННАЯ ПАНЕЛЬ (СВЕТЛАЯ ТЕМА)
    ========================================== */
 .mobile-bottom-nav {
   position: fixed;
-  /* Приподнимаем над низом экрана */
-  bottom: calc(16px + env(safe-area-inset-bottom, 0px)); 
+  /* Уменьшен отступ от низа экрана */
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px)); 
   left: 50%;
   transform: translateX(-50%);
   
-  /* Размеры парящей капсулы */
+  /* Делаем панель тоньше: высота 56px вместо 64px */
+  height: 56px;
   width: calc(100% - 32px);
   max-width: 400px;
-  height: 64px;
   
-  /* Фон и эффект стекла (как на референсе) */
-  background: rgba(28, 30, 36, 0.92);
+  /* Светлый полупрозрачный фон с размытием (инверсия референса) */
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 32px;
+  /* Тонкая граница, чтобы панель не сливалась с белым фоном чатов */
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 28px; 
   
-  /* Выравнивание и позиционирование */
-  display: none; /* Управляется через JS (меняется на flex) */
+  /* Позиционирование элементов */
+  display: none; /* Управляется через JS */
   justify-content: space-around;
   align-items: center;
-  padding: 0 12px;
+  padding: 0 8px;
   z-index: 1005;
   
-  /* Мягкая парящая тень */
+  /* Мягкая парящая тень, адаптированная для светлого фона */
   box-shadow: 
-    0 16px 36px rgba(0, 0, 0, 0.35),
-    0 4px 12px rgba(0, 0, 0, 0.15);
+    0 12px 28px rgba(0, 0, 0, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 /* Иконки внутри панели */
@@ -883,15 +884,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 46px;
-  height: 46px;
+  width: 42px; /* Уменьшен размер активного кружка */
+  height: 42px;
   border-radius: 50%;
-  color: rgba(255, 255, 255, 0.55);
+  /* Цвет неактивных иконок берем из вашей темы */
+  color: #64748b; 
   background: transparent;
   border: none;
   cursor: pointer;
   text-decoration: none;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   padding: 0;
 }
 
@@ -901,19 +903,20 @@
 }
 
 .mobile-bottom-nav .nav-item:hover {
-  color: rgba(255, 255, 255, 0.85);
+  color: #3b82f6;
 }
 
-/* Активная иконка (Круглая подложка-выделение как на изображении) */
+/* Активная иконка (Круглая подложка-выделение как на референсе, но светлая) */
 .mobile-bottom-nav .nav-item.active {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.16);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  color: #3b82f6; /* Фирменный синий */
+  background: #eff6ff; /* Нежно-синий фон подложки */
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.1);
 }
 
-/* Отступ списка чатов, чтобы нижние элементы прокручивались НАД парящей панелью */
+/* Отступ списка чатов */
 @media (max-width: 768px) {
   .chats-sidebar {
-    padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)) !important;
+    /* Уменьшили отступ, чтобы под панелью был виден контент, а не белая пустота */
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
