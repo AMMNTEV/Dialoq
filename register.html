@@ -7,15 +7,49 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
   <link rel="stylesheet" href="css/common.css">
   <link rel="stylesheet" href="css/auth.css">
-  <!-- Дополнительные стили для поля тега (уже есть в auth.css, поэтому не дублируем) -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <style>
+    /* Стили для переключателя методов регистрации */
+    .auth-toggle {
+      display: flex;
+      margin-bottom: 20px;
+      background: #f1f1f1;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .auth-toggle button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-weight: bold;
+      color: #666;
+      transition: 0.3s;
+    }
+    .auth-toggle button.active {
+      background: #667eea;
+      color: white;
+    }
+    .hidden {
+      display: none !important;
+    }
+  </style>
 </head>
 <body class="auth-page">
   <div class="auth-card">
     <h1>Регистрация</h1>
     <p class="auth-subtitle">Создайте аккаунт чтобы начать общение</p>
+    
+    <!-- Переключатель способа регистрации -->
+    <div class="auth-toggle">
+      <button id="btnEmail" class="active" onclick="switchMethod('email')">По Email</button>
+      <button id="btnPhone" onclick="switchMethod('phone')">По Телефону</button>
+    </div>
+
+    <!-- Основная форма регистрации -->
     <form id="registerForm">
       <div class="auth-input-group">
         <label>Никнейм</label>
@@ -31,16 +65,40 @@
         </div>
         <div id="tagStatus" class="tag-status"></div>
       </div>
-      <div class="auth-input-group">
-        <label>Email</label>
-        <input type="email" id="email" placeholder="your@email.com" required>
+
+      <!-- Поля для Email -->
+      <div id="emailFields">
+        <div class="auth-input-group">
+          <label>Email</label>
+          <input type="email" id="email" placeholder="your@email.com">
+        </div>
+        <div class="auth-input-group">
+          <label>Пароль</label>
+          <input type="password" id="password" placeholder="Минимум 6 символов" minlength="6">
+        </div>
       </div>
-      <div class="auth-input-group">
-        <label>Пароль</label>
-        <input type="password" id="password" placeholder="Минимум 6 символов" required minlength="6">
+
+      <!-- Поля для Телефона -->
+      <div id="phoneFields" class="hidden">
+        <div class="auth-input-group">
+          <label>Номер телефона</label>
+          <input type="tel" id="phone" placeholder="+7 999 123 45 67">
+        </div>
       </div>
+
       <button type="submit" class="auth-button" id="registerBtn" disabled>Зарегистрироваться</button>
     </form>
+
+    <!-- Форма ввода кода из СМС (изначально скрыта) -->
+    <form id="smsForm" class="hidden">
+      <p style="text-align: center; margin-bottom: 15px;">Мы отправили код на ваш номер.</p>
+      <div class="auth-input-group">
+        <label>СМС Код</label>
+        <input type="text" id="smsCode" placeholder="123456" required>
+      </div>
+      <button type="submit" class="auth-button" id="confirmSmsBtn">Подтвердить код</button>
+    </form>
+
     <div class="auth-footer">
       Уже есть аккаунт? <a href="index.html">Войти</a>
     </div>
@@ -50,19 +108,40 @@
   <script src="js/firebase-config.js"></script>
   <script src="js/auth.js"></script>
   <script>
-    // ========== ЛОГИКА РЕГИСТРАЦИИ ==========
+    // ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
     let tagCheckTimeout = null;
     let isTagAvailable = false;
     let currentTagValue = '';
+    let currentMethod = 'email'; // 'email' или 'phone'
+    let confirmationResultObj = null;
 
-    // Обработка ввода тега (удаляем @, ограничиваем символы)
+    // Инициализируем капчу при загрузке страницы
+    window.onload = () => {
+      setupRecaptcha('recaptcha-container', 'registerBtn');
+    };
+
+    // ========== ЛОГИКА ИНТЕРФЕЙСА ==========
+    function switchMethod(method) {
+      currentMethod = method;
+      document.getElementById('btnEmail').classList.toggle('active', method === 'email');
+      document.getElementById('btnPhone').classList.toggle('active', method === 'phone');
+      
+      document.getElementById('emailFields').classList.toggle('hidden', method !== 'email');
+      document.getElementById('phoneFields').classList.toggle('hidden', method !== 'phone');
+
+      // Управляем обязательностью полей в зависимости от метода
+      document.getElementById('email').required = (method === 'email');
+      document.getElementById('password').required = (method === 'email');
+      document.getElementById('phone').required = (method === 'phone');
+    }
+
+    // Утилиты для тега
     function handleTagInput(input) {
       let value = input.value.replace(/@/g, '').slice(0, 20);
       value = value.replace(/[^a-zA-Z0-9_]/g, '');
       input.value = value;
     }
 
-    // Защита от удаления @
     function preventAtSymbolDeletion(event, input) {
       if (event.key === 'Backspace' && input.selectionStart === 0 && input.selectionEnd === 0) {
         event.preventDefault();
@@ -75,7 +154,6 @@
       }
     }
 
-    // Проверка уникальности тега (с задержкой)
     async function checkTagUnique(input) {
       const tagValue = input.value.trim();
       const tagStatus = document.getElementById('tagStatus');
@@ -104,10 +182,6 @@
       tagCheckTimeout = setTimeout(async () => {
         if (currentTagValue !== tagValue) return;
         try {
-          if (typeof db === 'undefined') {
-            throw new Error('Firestore не инициализирован. Проверьте путь к firebase-config.js');
-          }
-
           const fullTag = '@' + tagValue;
           const snapshot = await db.collection('users').where('tag', '==', fullTag).get();
 
@@ -132,7 +206,7 @@
       }, 500);
     }
 
-    // Обработка отправки формы
+    // ========== ОТПРАВКА ОСНОВНОЙ ФОРМЫ ==========
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -142,64 +216,103 @@
       }
 
       const nickname = document.getElementById('nickname').value.trim();
-      let tag = document.getElementById('tag').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-
-      tag = '@' + tag;
-
+      const tag = '@' + document.getElementById('tag').value.trim();
       const registerBtn = document.getElementById('registerBtn');
       const messageDiv = document.getElementById('message');
 
       registerBtn.disabled = true;
-      registerBtn.textContent = 'Регистрация...';
+      registerBtn.textContent = 'Обработка...';
+      messageDiv.innerHTML = '';
 
       try {
-        await register(email, password, nickname, tag);
+        if (currentMethod === 'email') {
+          // ----- РЕГИСТРАЦИЯ ПО EMAIL -----
+          const email = document.getElementById('email').value.trim();
+          const password = document.getElementById('password').value;
+          
+          await register(email, password, nickname, tag);
+
+          messageDiv.innerHTML = `
+            <div class="success">
+              <h3>✅ Регистрация успешна!</h3>
+              <p>На почту ${email} отправлено письмо с подтверждением.</p>
+              <p><a href="index.html" style="color: #667eea;">Перейти ко входу →</a></p>
+            </div>
+          `;
+          document.getElementById('registerForm').style.display = 'none';
+
+        } else if (currentMethod === 'phone') {
+          // ----- РЕГИСТРАЦИЯ ПО ТЕЛЕФОНУ (Шаг 1: Отправка СМС) -----
+          const phone = document.getElementById('phone').value.trim();
+          const appVerifier = window.recaptchaVerifier;
+
+          confirmationResultObj = await sendSMS(phone, appVerifier);
+          
+          // Скрываем основную форму, показываем форму ввода СМС
+          document.getElementById('registerForm').classList.add('hidden');
+          document.getElementById('smsForm').classList.remove('hidden');
+          document.querySelector('.auth-toggle').classList.add('hidden');
+        }
+
+      } catch (error) {
+        console.error('Ошибка:', error);
+        registerBtn.disabled = false;
+        registerBtn.textContent = 'Зарегистрироваться';
+        
+        let errorMessage = '❌ Ошибка при регистрации. Проверьте данные.';
+        if (error.code === 'auth/email-already-in-use') errorMessage = '❌ Этот email уже зарегистрирован.';
+        if (error.code === 'auth/invalid-phone-number') errorMessage = '❌ Неверный формат номера телефона (используйте международный формат, например +7...)';
+        if (error.code === 'auth/too-many-requests') errorMessage = '⏳ Слишком много попыток. Подождите.';
+        
+        messageDiv.innerHTML = `<div class="error">${errorMessage}</div>`;
+      }
+    });
+
+    // ========== ПОДТВЕРЖДЕНИЕ СМС И СОЗДАНИЕ ПРОФИЛЯ ==========
+    document.getElementById('smsForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const smsCode = document.getElementById('smsCode').value.trim();
+      const confirmBtn = document.getElementById('confirmSmsBtn');
+      const messageDiv = document.getElementById('message');
+      
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Проверка...';
+
+      try {
+        // Подтверждаем СМС код (Firebase автоматически авторизует пользователя)
+        const result = await confirmationResultObj.confirm(smsCode);
+        const user = result.user;
+
+        // Данные профиля
+        const nickname = document.getElementById('nickname').value.trim();
+        const tag = '@' + document.getElementById('tag').value.trim();
+
+        // 1. Обновляем профиль Firebase
+        await user.updateProfile({ displayName: nickname + '|' + tag });
+
+        // 2. Создаем документ в Firestore
+        await db.collection('users').doc(user.uid).set({
+          nickname: nickname,
+          tag: tag,
+          phone: user.phoneNumber, // сохраняем номер вместо email
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
 
         messageDiv.innerHTML = `
           <div class="success">
             <h3>✅ Регистрация успешна!</h3>
-            <p>На почту ${email} отправлено письмо с подтверждением.</p>
-            <p><strong>Важно:</strong> Данные будут сохранены только после подтверждения email.</p>
-            <p><a href="index.html" style="color: #667eea;">Перейти ко входу →</a></p>
+            <p>Ваш профиль создан.</p>
+            <p><a href="messenger.html" style="color: #667eea;">Перейти в мессенджер →</a></p>
           </div>
         `;
-        document.getElementById('registerForm').style.display = 'none';
+        document.getElementById('smsForm').style.display = 'none';
 
       } catch (error) {
-        console.error('Ошибка регистрации:', error);
-        registerBtn.disabled = false;
-        registerBtn.textContent = 'Зарегистрироваться';
-
-        let errorMessage = '';
-
-        // Обработка ошибок Firebase
-        switch (error.code) {
-          case 'auth/network-request-failed':
-            errorMessage = '🌐 Проблема с интернетом. Проверьте подключение и попробуйте снова.';
-            break;
-          case 'auth/email-already-in-use':
-            errorMessage = '❌ Этот email уже зарегистрирован. <a href="index.html">Войти</a>';
-            break;
-          case 'auth/invalid-email':
-            errorMessage = '📧 Некорректный email';
-            break;
-          case 'auth/weak-password':
-            errorMessage = '🔒 Пароль должен быть минимум 6 символов';
-            break;
-          case 'auth/too-many-requests':
-            errorMessage = '⏳ Слишком много попыток. Подождите несколько минут.';
-            break;
-          case 'auth/unauthorized-continue-uri':
-            errorMessage = '❌ Ошибка при регистрации. Попробуйте позже.';
-            break;
-          default:
-            // Убираем технические детали ошибки
-            errorMessage = '❌ Ошибка при регистрации. Попробуйте позже.';
-        }
-
-        messageDiv.innerHTML = `<div class="error">${errorMessage}</div>`;
+        console.error('Ошибка подтверждения СМС:', error);
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Подтвердить код';
+        messageDiv.innerHTML = `<div class="error">❌ Неверный код из СМС</div>`;
       }
     });
   </script>
