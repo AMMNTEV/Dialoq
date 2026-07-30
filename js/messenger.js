@@ -274,12 +274,10 @@ async function getUserById(userId) {
 }
 
 // ========== ПРОСЛУШИВАНИЕ ЧАТОВ ==========
-// ========== ПРОСЛУШИВАНИЕ ЧАТОВ ==========
 function listenForChats() {
   if (!currentUser) return;
 
   // 1. ЧТЕНИЕ ИЗ КЭША (Stale-While-Revalidate)
-  // Пытаемся моментально отрендерить список чатов до того, как Firebase ответит
   const cacheKeyChats = `cachedChats_${currentUser.uid}`;
   const cacheKeyUnreads = `cachedUnreads_${currentUser.uid}`;
   
@@ -288,7 +286,6 @@ function listenForChats() {
     const cachedUnreadsStr = localStorage.getItem(cacheKeyUnreads);
     
     if (cachedChatsStr) {
-      // Восстанавливаем объекты Date, так как JSON.stringify превращает их в строки
       allChats = JSON.parse(cachedChatsStr).map(chat => ({
         ...chat,
         lastMessageTime: chat.lastMessageTime ? new Date(chat.lastMessageTime) : null,
@@ -299,7 +296,6 @@ function listenForChats() {
         unreadCounts = JSON.parse(cachedUnreadsStr);
       }
       
-      // Моментальный рендер, если мы не находимся в процессе создания нового чата
       if (!isNewChatPending && allChats.length > 0) {
         displayChats(allChats);
       }
@@ -320,7 +316,7 @@ function listenForChats() {
       if (snapshot.empty) {
         chatsList.innerHTML = '<div class="no-chats">У вас пока нет чатов. Найдите пользователя через поиск.</div>';
         allChats = [];
-        localStorage.removeItem(cacheKeyChats); // Очищаем кэш, если чатов нет
+        localStorage.removeItem(cacheKeyChats);
         localStorage.removeItem(cacheKeyUnreads);
         if (!isNewChatPending) {
           displayChats(allChats);
@@ -335,8 +331,6 @@ function listenForChats() {
       snapshot.forEach(doc => {
         const chat = doc.data();
         const promise = (async () => {
-          // ... (здесь остается ВЕСЬ ваш текущий код получения данных чата, аватарок и последних сообщений) ...
-          
           let chatName = '';
           let chatAvatar = '';
           let chatImage = null;
@@ -441,10 +435,9 @@ function listenForChats() {
           localStorage.setItem(cacheKeyChats, JSON.stringify(allChats));
           localStorage.setItem(cacheKeyUnreads, JSON.stringify(unreadCounts));
         } catch (e) {
-          console.warn('Не удалось сохранить чаты в localStorage (возможно превышен лимит):', e);
+          console.warn('Не удалось сохранить чаты в localStorage:', e);
         }
 
-        // Бесшовное обновление UI актуальными данными
         if (!isNewChatPending) {
           displayChats(allChats);
         } else {
@@ -728,6 +721,12 @@ async function markMessagesAsRead(chatId) {
     });
     await batch.commit();
     unreadCounts[chatId] = 0;
+    
+    // ИСПРАВЛЕНИЕ: Обновляем кэш непрочитанных сразу после прочтения
+    try {
+      localStorage.setItem(`cachedUnreads_${currentUser.uid}`, JSON.stringify(unreadCounts));
+    } catch (e) { console.warn('Ошибка записи кэша', e); }
+
     const chatElement = document.querySelector(`.chat-item[onclick*='${chatId}']`);
     if (chatElement) {
       chatElement.classList.remove('has-unread');
@@ -772,7 +771,6 @@ async function loadMessages(showLoading = false) {
 
     if (visibleMessages.length === 0) {
       messagesContainer.innerHTML = '<div class="no-messages">Нет сообщений. Напишите что-нибудь!</div>';
-      // Мы все равно запускаем слушатель, чтобы перехватывать новые сообщения!
       listenForNewMessages();
       return;
     }
@@ -820,6 +818,12 @@ async function loadMessages(showLoading = false) {
     if (hasUnread) {
       await batch.commit();
       unreadCounts[currentChatId] = 0;
+      
+      // ИСПРАВЛЕНИЕ: Обновляем кэш непрочитанных при групповом прочтении
+      try {
+        localStorage.setItem(`cachedUnreads_${currentUser.uid}`, JSON.stringify(unreadCounts));
+      } catch (e) { console.warn('Ошибка записи кэша', e); }
+
       const chatElement = document.querySelector(`.chat-item[onclick*='${currentChatId}']`);
       if (chatElement) {
         chatElement.classList.remove('has-unread');
@@ -896,8 +900,6 @@ function listenForNewMessages() {
     unsubscribeMessages();
   }
 
-  // Убрана фильтрация по времени. Теперь слушаем всю коллекцию, 
-  // чтобы отлавливать изменения (modified) старых сообщений.
   unsubscribeMessages = db.collection('chats').doc(currentChatId)
     .collection('messages')
     .orderBy('timestamp', 'asc')
@@ -907,10 +909,7 @@ function listenForNewMessages() {
         const msgId = change.doc.id;
 
         if (change.type === 'added') {
-          // Если сообщение уже отрендерено функцией loadMessages, пропускаем
           if (document.getElementById(`msg-${msgId}`)) return;
-
-          // Если сообщение было удалено до того, как мы его загрузили
           if (msg.deletedFor && (msg.deletedFor.includes('everyone') || msg.deletedFor.includes(currentUser.uid))) return;
 
           if (selectedChat.isGroup) {
@@ -927,7 +926,6 @@ function listenForNewMessages() {
 
           const messagesContainer = document.getElementById('messagesContainer');
           
-          // Удаляем плейсхолдер "Нет сообщений", если он есть
           const noMessages = messagesContainer.querySelector('.no-messages');
           if (noMessages) {
             noMessages.remove();
@@ -970,7 +968,6 @@ function listenForNewMessages() {
           messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        // Если документ обновился (например, кто-то его удалил)
         if (change.type === 'modified') {
           if (msg.deletedFor && (msg.deletedFor.includes('everyone') || msg.deletedFor.includes(currentUser.uid))) {
             const msgElement = document.getElementById(`msg-${msgId}`);
@@ -980,7 +977,6 @@ function listenForNewMessages() {
           }
         }
 
-        // Если документ полностью физически удалили из базы
         if (change.type === 'removed') {
           const msgElement = document.getElementById(`msg-${msgId}`);
           if (msgElement) {
@@ -1339,7 +1335,6 @@ async function deleteMessageForMe() {
       .update({
         deletedFor: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
       });
-    // loadMessages(false) убран, так как onSnapshot в listenForNewMessages сам скроет сообщение
     await updateChatPreviewAfterDelete(currentChatId, false);
     hideMessageOptions();
   } catch (error) {
@@ -1358,7 +1353,6 @@ async function deleteMessageForEveryone() {
       .update({
         deletedFor: ['everyone']
       });
-    // loadMessages(false) убран, так как onSnapshot в listenForNewMessages сам скроет сообщение
     await updateChatPreviewAfterDelete(currentChatId, true);
     hideMessageOptions();
   } catch (error) {
@@ -1429,7 +1423,6 @@ window.addEventListener('resize', function() {
   }
 });
 
-// Запускаем прослушивание чатов после загрузки данных
 onAuthStateChanged(async (user) => {
   if (!user || !user.emailVerified) {
     window.location.href = 'index.html';
@@ -1451,15 +1444,12 @@ function updateSidebarUser(userData) {
   if (tagEl) tagEl.textContent = userData.tag || '@user';
   
   if (avatarEl) {
-    // Проверяем наличие свойства avatar (битмаппинг/ссылка)
     if (userData.avatar) {
-      // Вставляем картинку, заполняющую весь контейнер
       avatarEl.innerHTML = `<img src="${userData.avatar}" alt="Аватар" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block;">`;
-      avatarEl.style.background = 'transparent'; // Убираем темный фон контейнера
+      avatarEl.style.background = 'transparent';
     } else {
-      // Запасной вариант: первая буква никнейма, если аватарки нет
       avatarEl.innerHTML = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
-      avatarEl.style.background = '#1a1a1a'; // Возвращаем темный фон
+      avatarEl.style.background = '#1a1a1a';
       avatarEl.style.color = 'white';
     }
   }
