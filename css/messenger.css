@@ -844,51 +844,76 @@
 }
 
 /* ==========================================
-   СТИЛИ ДЛЯ МОБИЛЬНОЙ НИЖНЕЙ ПАНЕЛИ
+   ПАРЯЩАЯ ЗАКТРУГЛЕННАЯ ПАНЕЛЬ (DOCK DESIGN)
    ========================================== */
 .mobile-bottom-nav {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
-  background: #ffffff;
-  border-top: 1px solid #eef2f6;
-  display: none; /* Базово скрыта, JS будет менять на flex */
+  /* Приподнимаем над низом экрана */
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px)); 
+  left: 50%;
+  transform: translateX(-50%);
+  
+  /* Размеры парящей капсулы */
+  width: calc(100% - 32px);
+  max-width: 400px;
+  height: 64px;
+  
+  /* Фон и эффект стекла (как на референсе) */
+  background: rgba(28, 30, 36, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 32px;
+  
+  /* Выравнивание и позиционирование */
+  display: none; /* Управляется через JS (меняется на flex) */
   justify-content: space-around;
   align-items: center;
-  z-index: 1005; /* Выше, чем messenger-container */
-  padding-bottom: env(safe-area-inset-bottom, 0); /* Для айфонов с челкой/вырезом */
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+  padding: 0 12px;
+  z-index: 1005;
+  
+  /* Мягкая парящая тень */
+  box-shadow: 
+    0 16px 36px rgba(0, 0, 0, 0.35),
+    0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+/* Иконки внутри панели */
 .mobile-bottom-nav .nav-item {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
-  color: #64748b;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.55);
   background: transparent;
   border: none;
   cursor: pointer;
   text-decoration: none;
-  transition: color 0.2s, background 0.2s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
+}
+
+.mobile-bottom-nav .nav-item svg {
+  width: 22px;
+  height: 22px;
 }
 
 .mobile-bottom-nav .nav-item:hover {
-  background: #f8fafc;
+  color: rgba(255, 255, 255, 0.85);
 }
 
+/* Активная иконка (Круглая подложка-выделение как на изображении) */
 .mobile-bottom-nav .nav-item.active {
-  color: #3b82f6;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
-/* Настройки для мобильных экранов */
+/* Отступ списка чатов, чтобы нижние элементы прокручивались НАД парящей панелью */
 @media (max-width: 768px) {
-  /* Чтобы панель не перекрывала самые нижние чаты в списке, увеличим отступ */
   .chats-sidebar {
-    padding-bottom: calc(60px + env(safe-area-inset-bottom, 20px));
+    padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
