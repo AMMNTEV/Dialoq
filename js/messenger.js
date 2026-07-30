@@ -1,3 +1,20 @@
+// ========== ИНИЦИАЛИЗАЦИЯ ОФЛАЙН-КЭША FIRESTORE ==========
+try {
+  if (typeof db !== 'undefined' && db.enablePersistence) {
+    db.enablePersistence({
+      synchronizeTabs: true
+    }).catch((err) => {
+      if (err.code === 'failed-precondition') {
+        console.warn('Кэш Firestore работает только в одной открытой вкладке. Закройте остальные для офлайн-доступа.');
+      } else if (err.code === 'unimplemented') {
+        console.warn('Ваш браузер не поддерживает кэширование Firestore.');
+      }
+    });
+  }
+} catch (e) {
+  console.warn("Офлайн-кэш уже инициализирован или недоступен", e);
+}
+
 // ========== ПРОФИЛЬ ТЕКУЩЕГО ПОЛЬЗОВАТЕЛЯ ==========
 let unsubscribePosts = null;
 let isSubmitting = false;
@@ -13,11 +30,8 @@ onAuthStateChanged(async (user) => {
   // ВЕТВЬ 1: Если пользователь есть в кэше
   if (userCache.has(user.uid)) {
     currentUserData = userCache.get(user.uid);
-    
-    // ИСПРАВЛЕНИЕ: Обязательно обновляем сайдбар из кэша
     updateSidebarUser(currentUserData); 
     
-    // ИСПРАВЛЕНИЕ: Защищаем от ошибки, проверяя существование элементов
     if (document.getElementById('profileInfo')) loadProfileInfo();
     if (document.getElementById('postsContainer')) listenForNewPosts();
     return;
@@ -27,7 +41,6 @@ onAuthStateChanged(async (user) => {
   try {
     const doc = await db.collection('users').doc(user.uid).get();
     if (!doc.exists) {
-      // Если документа нет – создаём его
       await db.collection('users').doc(user.uid).set({
         nickname: user.displayName ? user.displayName.split('|')[0] : 'Пользователь',
         tag: user.displayName ? '@' + user.displayName.split('|')[1] : '@user',
@@ -40,10 +53,8 @@ onAuthStateChanged(async (user) => {
     currentUserData = doc.data();
     userCache.set(user.uid, currentUserData);
     
-    // Обновляем боковую панель актуальными данными
     updateSidebarUser(currentUserData);
     
-    // ИСПРАВЛЕНИЕ: Безопасное обращение к элементам профиля (защита от краша в мессенджере)
     const profileAvatarEl = document.getElementById('profileAvatar');
     if (profileAvatarEl) {
       if (currentUserData.avatar) {
@@ -64,6 +75,7 @@ onAuthStateChanged(async (user) => {
     }
   }
 });
+
 function loadProfileInfo() {
   const profileInfo = document.getElementById('profileInfo');
   profileInfo.innerHTML = `
@@ -273,11 +285,10 @@ async function getUserById(userId) {
   }
 }
 
-// ========== ПРОСЛУШИВАНИЕ ЧАТОВ ==========
+// ========== ПРОСЛУШИВАНИЕ ЧАТОВ (БЕЗ N+1 ЗАПРОСОВ) ==========
 function listenForChats() {
   if (!currentUser) return;
 
-  // 1. ЧТЕНИЕ ИЗ КЭША (Stale-While-Revalidate)
   const cacheKeyChats = `cachedChats_${currentUser.uid}`;
   const cacheKeyUnreads = `cachedUnreads_${currentUser.uid}`;
   
@@ -306,7 +317,6 @@ function listenForChats() {
 
   if (unsubscribeChats) unsubscribeChats();
 
-  // 2. ФОНОВОЕ ОБНОВЛЕНИЕ ИЗ FIREBASE
   unsubscribeChats = db.collection('chats')
     .where('participants', 'array-contains', currentUser.uid)
     .onSnapshot(snapshot => {
@@ -330,6 +340,10 @@ function listenForChats() {
 
       snapshot.forEach(doc => {
         const chat = doc.data();
+        
+        // Скрываем личные чаты, в которых ещё нет ни одного сообщения
+        if (!chat.isGroup && !chat.lastMessage) return;
+
         const promise = (async () => {
           let chatName = '';
           let chatAvatar = '';
@@ -348,58 +362,10 @@ function listenForChats() {
             chatImage = otherUser ? (otherUser.avatar || otherUser.bitmap || otherUser.photo || otherUser.profileImage || null) : null;
           }
 
-          const lastMsgQuery = await db.collection('chats').doc(doc.id)
-            .collection('messages')
-            .orderBy('timestamp', 'desc')
-            .limit(5)
-            .get();
-
-          let lastMessage = null;
-          let lastMessageTime = chat.lastMessageTime ? chat.lastMessageTime.toDate?.() || new Date(chat.lastMessageTime) : null;
-          let hasAnyMessage = false;
-
-          for (const msgDoc of lastMsgQuery.docs) {
-            const msg = msgDoc.data();
-            hasAnyMessage = true;
-            if (!msg.deletedFor || (!msg.deletedFor.includes('everyone') && !msg.deletedFor.includes(currentUser.uid))) {
-              lastMessage = msg.text;
-              lastMessageTime = msg.timestamp ? msg.timestamp.toDate?.() || new Date(msg.timestamp) : lastMessageTime;
-              break;
-            }
-          }
-
-          if (!chat.isGroup && !hasAnyMessage) return;
-
-          if (!lastMessageTime) {
-            lastMessageTime = createdAt;
-          }
-
-          let unreadCount = 0;
-          if (chat.isGroup) {
-            const messagesSnapshot = await db.collection('chats').doc(doc.id)
-              .collection('messages')
-              .orderBy('timestamp', 'desc')
-              .limit(50)
-              .get();
-            messagesSnapshot.forEach(msgDoc => {
-              const msg = msgDoc.data();
-              if (msg.deletedFor && (msg.deletedFor.includes('everyone') || msg.deletedFor.includes(currentUser.uid))) return;
-              if (msg.isSystem) return;
-              if (msg.senderId !== currentUser.uid && (!msg.readBy || !msg.readBy.includes(currentUser.uid))) {
-                unreadCount++;
-              }
-            });
-          } else {
-            const unreadQuery = await db.collection('chats').doc(doc.id)
-              .collection('messages')
-              .where('read', '==', false)
-              .get();
-            unreadQuery.forEach(msgDoc => {
-              const msg = msgDoc.data();
-              if (msg.deletedFor && (msg.deletedFor.includes('everyone') || msg.deletedFor.includes(currentUser.uid))) return;
-              if (msg.receiverId === currentUser.uid) unreadCount++;
-            });
-          }
+          // Мгновенно берем готовые метаданные (без подзапросов к коллекции messages)
+          let lastMessage = chat.lastMessage || null;
+          let lastMessageTime = chat.lastMessageTime ? chat.lastMessageTime.toDate?.() || new Date(chat.lastMessageTime) : createdAt;
+          let unreadCount = chat.unreadCounts?.[currentUser.uid] || 0;
 
           newUnreadCounts[doc.id] = unreadCount;
 
@@ -421,6 +387,7 @@ function listenForChats() {
         const filteredChats = chats.filter(chat => chat !== undefined);
         unreadCounts = newUnreadCounts;
         allChats = filteredChats;
+        
         allChats.sort((a, b) => {
           const unreadA = unreadCounts[a.id] || 0;
           const unreadB = unreadCounts[b.id] || 0;
@@ -430,7 +397,6 @@ function listenForChats() {
           return timeB - timeA;
         });
 
-        // 3. ОБНОВЛЕНИЕ КЭША НОВЫМИ ДАННЫМИ ИЗ БАЗЫ
         try {
           localStorage.setItem(cacheKeyChats, JSON.stringify(allChats));
           localStorage.setItem(cacheKeyUnreads, JSON.stringify(unreadCounts));
@@ -580,7 +546,7 @@ function searchUsersToAdd() {
   addList.innerHTML = html;
 }
 
-// ========== СОЗДАНИЕ ЛИЧНОГО ЧАТА (ТОЛЬКО ПОИСК) ==========
+// ========== СОЗДАНИЕ ЛИЧНОГО ЧАТА ==========
 async function createPrivateChat(userId, nickname, tag) {
   try {
     const userDoc = await getUserById(userId);
@@ -672,7 +638,6 @@ function updateChatHeader(chat) {
     avatarContent = chat.isGroup ? '👥 ' + (chat.displayName ? chat.displayName.charAt(0).toUpperCase() : '?') : (chat.displayName ? chat.displayName.charAt(0).toUpperCase() : '?');
   }
 
-  // Общий SVG-код стрелки "Назад" для мобильных и десктопов
   const backIconSvg = `<svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>`;
 
   if (chat.isGroup) {
@@ -703,26 +668,35 @@ function updateChatHeader(chat) {
   chatHeader.innerHTML = headerContent;
 }
 
-// ========== ОТМЕТКА ПРОЧИТАННЫХ (ТОЛЬКО ЛИЧНЫЕ) ==========
+// ========== ОТМЕТКА ПРОЧИТАННЫХ (ОБНОВЛЕНО ПОД BATCH) ==========
 async function markMessagesAsRead(chatId) {
-  if (selectedChat && selectedChat.isGroup) return;
   try {
-    const unreadSnapshot = await db.collection('chats').doc(chatId)
-      .collection('messages')
-      .where('read', '==', false)
-      .get();
-    if (unreadSnapshot.empty) return;
     const batch = db.batch();
-    unreadSnapshot.forEach(doc => {
-      const msg = doc.data();
-      if (msg.receiverId === currentUser.uid) {
-        batch.update(doc.ref, { read: true });
-      }
+    
+    // Сброс счетчика на уровне документа чата
+    batch.update(db.collection('chats').doc(chatId), {
+       [`unreadCounts.${currentUser.uid}`]: 0
     });
+
+    if (!selectedChat.isGroup) {
+      const unreadSnapshot = await db.collection('chats').doc(chatId)
+        .collection('messages')
+        .where('read', '==', false)
+        .get();
+
+      if (!unreadSnapshot.empty) {
+        unreadSnapshot.forEach(doc => {
+          const msg = doc.data();
+          if (msg.receiverId === currentUser.uid) {
+            batch.update(doc.ref, { read: true });
+          }
+        });
+      }
+    }
+
     await batch.commit();
     unreadCounts[chatId] = 0;
     
-    // ИСПРАВЛЕНИЕ: Обновляем кэш непрочитанных сразу после прочтения
     try {
       localStorage.setItem(`cachedUnreads_${currentUser.uid}`, JSON.stringify(unreadCounts));
     } catch (e) { console.warn('Ошибка записи кэша', e); }
@@ -741,7 +715,7 @@ async function markMessagesAsRead(chatId) {
   }
 }
 
-// ========== ЗАГРУЗКА СООБЩЕНИЙ (БЕЗ МИГАНИЯ) ==========
+// ========== ЗАГРУЗКА СООБЩЕНИЙ ==========
 async function loadMessages(showLoading = false) {
   if (!currentChatId || !selectedChat) return;
   const messagesContainer = document.getElementById('messagesContainer');
@@ -752,6 +726,15 @@ async function loadMessages(showLoading = false) {
 
   if (showLoading) {
     messagesContainer.innerHTML = '<div class="loading">Загрузка сообщений...</div>';
+  }
+  
+  // Всегда очищаем счётчик чата при его открытии
+  if (unreadCounts[currentChatId] > 0) {
+     db.collection('chats').doc(currentChatId).update({
+        [`unreadCounts.${currentUser.uid}`]: 0
+     }).catch(console.error);
+     unreadCounts[currentChatId] = 0;
+     try { localStorage.setItem(`cachedUnreads_${currentUser.uid}`, JSON.stringify(unreadCounts)); } catch(e){}
   }
 
   try {
@@ -786,9 +769,9 @@ async function loadMessages(showLoading = false) {
     if (senderIds.size > 0) {
       const userIds = Array.from(senderIds);
       for (let i = 0; i < userIds.length; i += 10) {
-        const batch = userIds.slice(i, i + 10);
+        const batchIds = userIds.slice(i, i + 10);
         const usersSnapshot = await db.collection('users')
-          .where('__name__', 'in', batch)
+          .where('__name__', 'in', batchIds)
           .get();
         usersSnapshot.forEach(doc => {
           senderCache[doc.id] = doc.data();
@@ -815,15 +798,10 @@ async function loadMessages(showLoading = false) {
         }
       }
     });
+    
     if (hasUnread) {
       await batch.commit();
-      unreadCounts[currentChatId] = 0;
       
-      // ИСПРАВЛЕНИЕ: Обновляем кэш непрочитанных при групповом прочтении
-      try {
-        localStorage.setItem(`cachedUnreads_${currentUser.uid}`, JSON.stringify(unreadCounts));
-      } catch (e) { console.warn('Ошибка записи кэша', e); }
-
       const chatElement = document.querySelector(`.chat-item[onclick*='${currentChatId}']`);
       if (chatElement) {
         chatElement.classList.remove('has-unread');
@@ -893,7 +871,7 @@ async function loadMessages(showLoading = false) {
   }
 }
 
-// ========== СЛУШАТЕЛЬ НОВЫХ И ИЗМЕНЕННЫХ СООБЩЕНИЙ ==========
+// ========== СЛУШАТЕЛЬ НОВЫХ СООБЩЕНИЙ ==========
 function listenForNewMessages() {
   if (!currentChatId) return;
   if (unsubscribeMessages) {
@@ -916,11 +894,13 @@ function listenForNewMessages() {
             if (msg.senderId !== currentUser.uid && !msg.isSystem) {
               if (!msg.readBy || !msg.readBy.includes(currentUser.uid)) {
                 await change.doc.ref.update({ readBy: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) });
+                db.collection('chats').doc(currentChatId).update({ [`unreadCounts.${currentUser.uid}`]: 0 });
               }
             }
           } else {
             if (msg.receiverId === currentUser.uid && !msg.read) {
               await change.doc.ref.update({ read: true });
+              db.collection('chats').doc(currentChatId).update({ [`unreadCounts.${currentUser.uid}`]: 0 });
             }
           }
 
@@ -987,65 +967,84 @@ function listenForNewMessages() {
     }, error => console.error('Ошибка слушателя новых сообщений:', error));
 }
 
-// ========== ОТПРАВКА СООБЩЕНИЯ ==========
+// ========== ОТПРАВКА СООБЩЕНИЯ (ЧЕРЕЗ BATCH) ==========
 async function sendMessage() {
   const input = document.getElementById('messageInput');
   const text = input.value.trim();
   if (!text || !selectedChat) return;
   input.value = '';
 
+  const batch = db.batch();
+
   try {
     if (selectedChat.isNew) {
       const otherUserId = selectedChat.participants.find(id => id !== currentUser.uid);
-      const newChatRef = await db.collection('chats').add({
+      const newChatRef = db.collection('chats').doc(); 
+      const chatId = newChatRef.id;
+      
+      const chatData = {
         participants: [currentUser.uid, otherUserId],
         isGroup: false,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        lastMessage: null,
-        lastMessageTime: null
-      });
-      const chatId = newChatRef.id;
-      selectedChat.id = chatId;
-      selectedChat.isNew = false;
-      currentChatId = chatId;
-      isNewChatPending = false;
+        lastMessage: text,
+        lastMessageTime: firebase.firestore.FieldValue.serverTimestamp(),
+        unreadCounts: {
+          [otherUserId]: 1
+        }
+      };
+      batch.set(newChatRef, chatData);
 
-      const messageData = {
+      const messageRef = newChatRef.collection('messages').doc();
+      batch.set(messageRef, {
         text: text,
         senderId: currentUser.uid,
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         receiverId: otherUserId,
         read: false
-      };
-      await db.collection('chats').doc(chatId).collection('messages').add(messageData);
-      await db.collection('chats').doc(chatId).update({
-        lastMessage: text,
-        lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
       });
 
+      await batch.commit();
+
+      selectedChat.id = chatId;
+      selectedChat.isNew = false;
+      currentChatId = chatId;
+      isNewChatPending = false;
+      
       await loadMessages(false);
       updateChatHeader(selectedChat);
       return;
     }
 
+    const messageRef = db.collection('chats').doc(currentChatId).collection('messages').doc();
     const messageData = {
       text: text,
       senderId: currentUser.uid,
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
+    
+    const chatUpdate = {
+      lastMessage: text,
+      lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
     if (selectedChat.isGroup) {
       messageData.readBy = [currentUser.uid];
+      selectedChat.participants.forEach(pId => {
+        if (pId !== currentUser.uid) {
+          chatUpdate[`unreadCounts.${pId}`] = firebase.firestore.FieldValue.increment(1);
+        }
+      });
     } else {
       const otherUserId = selectedChat.participants.find(id => id !== currentUser.uid);
       messageData.receiverId = otherUserId;
       messageData.read = false;
+      chatUpdate[`unreadCounts.${otherUserId}`] = firebase.firestore.FieldValue.increment(1);
     }
 
-    await db.collection('chats').doc(currentChatId).collection('messages').add(messageData);
-    await db.collection('chats').doc(currentChatId).update({
-      lastMessage: text,
-      lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    batch.set(messageRef, messageData);
+    batch.update(db.collection('chats').doc(currentChatId), chatUpdate);
+    
+    await batch.commit();
 
   } catch (error) {
     console.error('Ошибка отправки:', error);
@@ -1083,7 +1082,8 @@ async function createGroupChat() {
       createdBy: currentUser.uid,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       lastMessage: null,
-      lastMessageTime: null
+      lastMessageTime: null,
+      unreadCounts: {}
     });
     document.getElementById('groupName').value = '';
   } catch (error) {
@@ -1286,7 +1286,6 @@ function hideMessageOptions() {
   selectedMessageId = null;
 }
 
-// ========== ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ ОБНОВЛЕНИЯ ПРЕВЬЮ ЧАТА ==========
 async function updateChatPreviewAfterDelete(chatId, isForEveryone = false) {
   const snapshot = await db.collection('chats').doc(chatId)
     .collection('messages')
@@ -1325,17 +1324,10 @@ async function updateChatPreviewAfterDelete(chatId, isForEveryone = false) {
   }
 }
 
-// ========== ОБНОВЛЁННЫЕ ФУНКЦИИ УДАЛЕНИЯ (без мигания) ==========
 async function deleteMessageForMe() {
   if (!selectedMessageId || !currentChatId) return;
-  
-  // 1. Сохраняем ID перед очисткой переменной
   const messageIdToDelete = selectedMessageId;
-
-  // 2. Моментально закрываем окошко действий
   hideMessageOptions();
-
-  // 3. Выполняем удаление в фоне
   try {
     await db.collection('chats').doc(currentChatId)
       .collection('messages')
@@ -1346,21 +1338,14 @@ async function deleteMessageForMe() {
     await updateChatPreviewAfterDelete(currentChatId, false);
   } catch (error) {
     console.error('Ошибка удаления сообщения:', error);
-    // Опционально: здесь можно добавить всплывающее уведомление (toast) об ошибке
-    // вместо alert, так как окно опций уже закрыто
     alert('Ошибка при удалении сообщения');
   }
 }
 
 async function deleteMessageForEveryone() {
   if (!selectedMessageId || !currentChatId) return;
-  
-  // Сохраняем ID перед очисткой
   const messageIdToDelete = selectedMessageId;
-
-  // Моментально закрываем окошко действий, не дожидаясь ответа сервера
   hideMessageOptions();
-
   try {
     await db.collection('chats').doc(currentChatId)
       .collection('messages')
@@ -1448,7 +1433,6 @@ onAuthStateChanged(async (user) => {
   listenForChats();
 });
 
-// Функция обновления карточки пользователя в боковой панели
 function updateSidebarUser(userData) {
   const nameEl = document.getElementById('sidebarUserName');
   const tagEl = document.getElementById('sidebarUserTag');
