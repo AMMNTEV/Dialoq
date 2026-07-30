@@ -9,37 +9,61 @@ onAuthStateChanged(async (user) => {
     return;
   }
   currentUser = user;
+  
+  // ВЕТВЬ 1: Если пользователь есть в кэше
   if (userCache.has(user.uid)) {
     currentUserData = userCache.get(user.uid);
-    loadProfileInfo();
-    listenForNewPosts();
+    
+    // ИСПРАВЛЕНИЕ: Обязательно обновляем сайдбар из кэша
+    updateSidebarUser(currentUserData); 
+    
+    // ИСПРАВЛЕНИЕ: Защищаем от ошибки, проверяя существование элементов
+    if (document.getElementById('profileInfo')) loadProfileInfo();
+    if (document.getElementById('postsContainer')) listenForNewPosts();
     return;
   }
+  
+  // ВЕТВЬ 2: Если загружаем пользователя из базы
   try {
     const doc = await db.collection('users').doc(user.uid).get();
     if (!doc.exists) {
-      // Если документа нет – создаём его (для обратной совместимости)
+      // Если документа нет – создаём его
       await db.collection('users').doc(user.uid).set({
         nickname: user.displayName ? user.displayName.split('|')[0] : 'Пользователь',
         tag: user.displayName ? '@' + user.displayName.split('|')[1] : '@user',
         email: user.email,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-      // После создания перезагружаем страницу, чтобы данные подтянулись
       window.location.reload();
       return;
     }
     currentUserData = doc.data();
     userCache.set(user.uid, currentUserData);
-    document.getElementById('profileAvatar').innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
-    loadProfileInfo();
-    listenForNewPosts();
+    
+    // Обновляем боковую панель актуальными данными
+    updateSidebarUser(currentUserData);
+    
+    // ИСПРАВЛЕНИЕ: Безопасное обращение к элементам профиля (защита от краша в мессенджере)
+    const profileAvatarEl = document.getElementById('profileAvatar');
+    if (profileAvatarEl) {
+      if (currentUserData.avatar) {
+        profileAvatarEl.innerHTML = `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
+      } else {
+        profileAvatarEl.innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
+      }
+    }
+    
+    if (document.getElementById('profileInfo')) loadProfileInfo();
+    if (document.getElementById('postsContainer')) listenForNewPosts();
+    
   } catch (error) {
     console.error('Ошибка загрузки профиля:', error);
-    document.getElementById('profileInfo').innerHTML = '<div class="error">Ошибка загрузки профиля</div>';
+    const profileInfoEl = document.getElementById('profileInfo');
+    if (profileInfoEl) {
+        profileInfoEl.innerHTML = '<div class="error">Ошибка загрузки профиля</div>';
+    }
   }
 });
-
 function loadProfileInfo() {
   const profileInfo = document.getElementById('profileInfo');
   profileInfo.innerHTML = `
@@ -252,8 +276,37 @@ async function getUserById(userId) {
 // ========== ПРОСЛУШИВАНИЕ ЧАТОВ ==========
 function listenForChats() {
   if (!currentUser) return;
+
+  // 1. ЧТЕНИЕ ИЗ КЭША (Stale-While-Revalidate)
+  const cacheKeyChats = `cachedChats_${currentUser.uid}`;
+  const cacheKeyUnreads = `cachedUnreads_${currentUser.uid}`;
+  
+  try {
+    const cachedChatsStr = localStorage.getItem(cacheKeyChats);
+    const cachedUnreadsStr = localStorage.getItem(cacheKeyUnreads);
+    
+    if (cachedChatsStr) {
+      allChats = JSON.parse(cachedChatsStr).map(chat => ({
+        ...chat,
+        lastMessageTime: chat.lastMessageTime ? new Date(chat.lastMessageTime) : null,
+        createdAt: chat.createdAt ? new Date(chat.createdAt) : null
+      }));
+      
+      if (cachedUnreadsStr) {
+        unreadCounts = JSON.parse(cachedUnreadsStr);
+      }
+      
+      if (!isNewChatPending && allChats.length > 0) {
+        displayChats(allChats);
+      }
+    }
+  } catch (error) {
+    console.error('Ошибка чтения кэша чатов:', error);
+  }
+
   if (unsubscribeChats) unsubscribeChats();
 
+  // 2. ФОНОВОЕ ОБНОВЛЕНИЕ ИЗ FIREBASE
   unsubscribeChats = db.collection('chats')
     .where('participants', 'array-contains', currentUser.uid)
     .onSnapshot(snapshot => {
@@ -263,6 +316,8 @@ function listenForChats() {
       if (snapshot.empty) {
         chatsList.innerHTML = '<div class="no-chats">У вас пока нет чатов. Найдите пользователя через поиск.</div>';
         allChats = [];
+        localStorage.removeItem(cacheKeyChats);
+        localStorage.removeItem(cacheKeyUnreads);
         if (!isNewChatPending) {
           displayChats(allChats);
         }
@@ -374,6 +429,15 @@ function listenForChats() {
           const timeB = b.lastMessageTime || b.createdAt || new Date(0);
           return timeB - timeA;
         });
+
+        // 3. ОБНОВЛЕНИЕ КЭША НОВЫМИ ДАННЫМИ ИЗ БАЗЫ
+        try {
+          localStorage.setItem(cacheKeyChats, JSON.stringify(allChats));
+          localStorage.setItem(cacheKeyUnreads, JSON.stringify(unreadCounts));
+        } catch (e) {
+          console.warn('Не удалось сохранить чаты в localStorage:', e);
+        }
+
         if (!isNewChatPending) {
           displayChats(allChats);
         } else {
@@ -608,11 +672,14 @@ function updateChatHeader(chat) {
     avatarContent = chat.isGroup ? '👥 ' + (chat.displayName ? chat.displayName.charAt(0).toUpperCase() : '?') : (chat.displayName ? chat.displayName.charAt(0).toUpperCase() : '?');
   }
 
+  // Общий SVG-код стрелки "Назад" для мобильных и десктопов
+  const backIconSvg = `<svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>`;
+
   if (chat.isGroup) {
     const participantsCount = chat.participants ? chat.participants.length : 2;
     headerContent = `
       <div class="selected-chat" onclick="openChatInfo('${chat.id}')">
-        <button class="mobile-back-btn" onclick="event.stopPropagation(); exitChatMode()"><</button>
+        <button class="mobile-back-btn" onclick="event.stopPropagation(); exitChatMode()">${backIconSvg}</button>
         <div class="chat-avatar-placeholder large" style="overflow:hidden; display:flex; align-items:center; justify-content:center; padding:0;">${avatarContent}</div>
         <div class="chat-info">
           <h3>${chat.displayName}</h3>
@@ -624,7 +691,7 @@ function updateChatHeader(chat) {
     const otherUserId = chat.participants.find(id => id !== currentUser.uid);
     headerContent = `
       <div class="selected-chat" onclick="openUserProfile('${otherUserId}')">
-        <button class="mobile-back-btn" onclick="event.stopPropagation(); exitChatMode()"><</button>
+        <button class="mobile-back-btn" onclick="event.stopPropagation(); exitChatMode()">${backIconSvg}</button>
         <div class="chat-avatar-placeholder large" style="overflow:hidden; display:flex; align-items:center; justify-content:center; padding:0;">${avatarContent}</div>
         <div class="chat-info">
           <h3>${chat.displayName}</h3>
@@ -654,6 +721,12 @@ async function markMessagesAsRead(chatId) {
     });
     await batch.commit();
     unreadCounts[chatId] = 0;
+    
+    // ИСПРАВЛЕНИЕ: Обновляем кэш непрочитанных сразу после прочтения
+    try {
+      localStorage.setItem(`cachedUnreads_${currentUser.uid}`, JSON.stringify(unreadCounts));
+    } catch (e) { console.warn('Ошибка записи кэша', e); }
+
     const chatElement = document.querySelector(`.chat-item[onclick*='${chatId}']`);
     if (chatElement) {
       chatElement.classList.remove('has-unread');
@@ -698,7 +771,6 @@ async function loadMessages(showLoading = false) {
 
     if (visibleMessages.length === 0) {
       messagesContainer.innerHTML = '<div class="no-messages">Нет сообщений. Напишите что-нибудь!</div>';
-      // Мы все равно запускаем слушатель, чтобы перехватывать новые сообщения!
       listenForNewMessages();
       return;
     }
@@ -746,6 +818,12 @@ async function loadMessages(showLoading = false) {
     if (hasUnread) {
       await batch.commit();
       unreadCounts[currentChatId] = 0;
+      
+      // ИСПРАВЛЕНИЕ: Обновляем кэш непрочитанных при групповом прочтении
+      try {
+        localStorage.setItem(`cachedUnreads_${currentUser.uid}`, JSON.stringify(unreadCounts));
+      } catch (e) { console.warn('Ошибка записи кэша', e); }
+
       const chatElement = document.querySelector(`.chat-item[onclick*='${currentChatId}']`);
       if (chatElement) {
         chatElement.classList.remove('has-unread');
@@ -822,8 +900,6 @@ function listenForNewMessages() {
     unsubscribeMessages();
   }
 
-  // Убрана фильтрация по времени. Теперь слушаем всю коллекцию, 
-  // чтобы отлавливать изменения (modified) старых сообщений.
   unsubscribeMessages = db.collection('chats').doc(currentChatId)
     .collection('messages')
     .orderBy('timestamp', 'asc')
@@ -833,10 +909,7 @@ function listenForNewMessages() {
         const msgId = change.doc.id;
 
         if (change.type === 'added') {
-          // Если сообщение уже отрендерено функцией loadMessages, пропускаем
           if (document.getElementById(`msg-${msgId}`)) return;
-
-          // Если сообщение было удалено до того, как мы его загрузили
           if (msg.deletedFor && (msg.deletedFor.includes('everyone') || msg.deletedFor.includes(currentUser.uid))) return;
 
           if (selectedChat.isGroup) {
@@ -853,7 +926,6 @@ function listenForNewMessages() {
 
           const messagesContainer = document.getElementById('messagesContainer');
           
-          // Удаляем плейсхолдер "Нет сообщений", если он есть
           const noMessages = messagesContainer.querySelector('.no-messages');
           if (noMessages) {
             noMessages.remove();
@@ -896,7 +968,6 @@ function listenForNewMessages() {
           messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        // Если документ обновился (например, кто-то его удалил)
         if (change.type === 'modified') {
           if (msg.deletedFor && (msg.deletedFor.includes('everyone') || msg.deletedFor.includes(currentUser.uid))) {
             const msgElement = document.getElementById(`msg-${msgId}`);
@@ -906,7 +977,6 @@ function listenForNewMessages() {
           }
         }
 
-        // Если документ полностью физически удалили из базы
         if (change.type === 'removed') {
           const msgElement = document.getElementById(`msg-${msgId}`);
           if (msgElement) {
@@ -1265,7 +1335,6 @@ async function deleteMessageForMe() {
       .update({
         deletedFor: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
       });
-    // loadMessages(false) убран, так как onSnapshot в listenForNewMessages сам скроет сообщение
     await updateChatPreviewAfterDelete(currentChatId, false);
     hideMessageOptions();
   } catch (error) {
@@ -1284,7 +1353,6 @@ async function deleteMessageForEveryone() {
       .update({
         deletedFor: ['everyone']
       });
-    // loadMessages(false) убран, так как onSnapshot в listenForNewMessages сам скроет сообщение
     await updateChatPreviewAfterDelete(currentChatId, true);
     hideMessageOptions();
   } catch (error) {
@@ -1355,7 +1423,6 @@ window.addEventListener('resize', function() {
   }
 });
 
-// Запускаем прослушивание чатов после загрузки данных
 onAuthStateChanged(async (user) => {
   if (!user || !user.emailVerified) {
     window.location.href = 'index.html';
@@ -1366,3 +1433,24 @@ onAuthStateChanged(async (user) => {
   await loadAllUsersForModal();
   listenForChats();
 });
+
+// Функция обновления карточки пользователя в боковой панели
+function updateSidebarUser(userData) {
+  const nameEl = document.getElementById('sidebarUserName');
+  const tagEl = document.getElementById('sidebarUserTag');
+  const avatarEl = document.getElementById('sidebarUserAvatar');
+  
+  if (nameEl) nameEl.textContent = userData.nickname || 'Пользователь';
+  if (tagEl) tagEl.textContent = userData.tag || '@user';
+  
+  if (avatarEl) {
+    if (userData.avatar) {
+      avatarEl.innerHTML = `<img src="${userData.avatar}" alt="Аватар" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block;">`;
+      avatarEl.style.background = 'transparent';
+    } else {
+      avatarEl.innerHTML = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
+      avatarEl.style.background = '#1a1a1a';
+      avatarEl.style.color = 'white';
+    }
+  }
+}

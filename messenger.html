@@ -10,53 +10,51 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-  <style>
-    /* Дополнительные мобильные фиксы (оставляем минимум) */
-    @media (max-width: 768px) {
-      .messenger-container {
-        height: 100vh;
-        height: -webkit-fill-available;
-        height: 100dvh;
-        overflow: hidden;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-      }
-      .chats-sidebar {
-        height: 100%;
-        padding-bottom: env(safe-area-inset-bottom, 20px);
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-      }
-      .chat-area {
-        height: 100%;
-        padding-bottom: env(safe-area-inset-bottom, 0);
-      }
-      .messages-container {
-        height: calc(100% - 130px);
-        padding-bottom: env(safe-area-inset-bottom, 10px);
-      }
-      .message-input-area {
-        padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
-      }
-    }
-  </style>
 </head>
 <body>
   <div class="messenger-container">
     <div class="nav-sidebar">
-      <h2>Меню</h2>
-      <div class="nav-buttons">
-        <a href="profile.html" class="nav-button profile">Мой профиль</a>
-        <button onclick="showCreateGroupModal()" class="nav-button create-group">+ Беседа</button>
-        <button onclick="logout()" class="nav-button logout">Выйти</button>
+      <!-- Блок с информацией о пользователе -->
+      <div class="nav-user-box">
+        <div class="nav-user-info">
+          <div class="nav-user-name" id="sidebarUserName">Загрузка...</div>
+          <div class="nav-user-tag" id="sidebarUserTag">@загрузка</div>
+        </div>
+        <div class="nav-user-avatar" id="sidebarUserAvatar"></div>
       </div>
+
+      <!-- Основное меню -->
+      <div class="nav-buttons">
+        <a href="profile.html" class="nav-button">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Профиль
+        </a>
+        <a href="messenger.html" class="nav-button">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Мессенджер
+        </a>
+        <a href="settings.html" class="nav-button">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Настройки
+        </a>
+      </div>
+
+      <div class="nav-divider"></div>
+
+      <button onclick="showCreateGroupModal()" class="nav-button">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Создать беседу
+      </button>
+
+      <div class="nav-divider"></div>
+
+      <button onclick="logout()" class="nav-button logout-btn">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Выход
+      </button>
     </div>
 
     <div class="chats-sidebar" id="chatsSidebar">
-      <div class="chats-header"><h2>Чаты</h2></div>
       <div class="search-box">
         <input type="text" id="searchInput" placeholder="Поиск пользователей и бесед..." onkeyup="searchAll()">
       </div>
@@ -70,9 +68,16 @@
         <div class="no-chat-selected" id="noChatMessage">Выберите чат для начала общения</div>
       </div>
       <div class="messages-container" id="messagesContainer"></div>
-      <div class="message-input-area" id="messageInputArea" style="display: none;">
+      
+      <!-- Поле ввода с иконкой самолетика для отправки -->
+      <div class="message-input-area" id="messageInputArea">
         <input type="text" id="messageInput" placeholder="Введите сообщение..." onkeypress="if(event.key==='Enter') sendMessage()">
-        <button onclick="sendMessage()" id="sendButton">→</button>
+        <button onclick="sendMessage()" id="sendButton" title="Отправить">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 2L11 13"/>
+            <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
+          </svg>
+        </button>
       </div>
     </div>
   </div>
@@ -121,7 +126,12 @@
         <div class="group-info-section">
           <h4>Участники:</h4>
           <div id="groupParticipants" class="group-participants-list"></div>
-          <button onclick="leaveCurrentGroup()" id="leaveGroupBtn" class="modal-leave-btn" style="margin-top: 10px; width: 100%;">Покинуть беседу</button>
+          
+          <!-- Кнопка выхода из беседы с иконкой стрелки влево -->
+          <button onclick="leaveCurrentGroup()" id="leaveGroupBtn" class="modal-leave-btn" style="display: inline-flex; align-items: center; gap: 8px;">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            Покинуть беседу
+          </button>
         </div>
         <div class="group-info-section">
           <h4>Добавить участников:</h4>
@@ -129,7 +139,7 @@
           <div id="addParticipantsList" class="users-checkbox-list">
             <div class="no-users">Начните вводить имя для поиска</div>
           </div>
-          <button onclick="addSelectedParticipants()" class="modal-save-btn" style="margin-top: 10px; width: 100%;">Добавить выбранных</button>
+          <button onclick="addSelectedParticipants()" class="modal-save-btn">Добавить выбранных</button>
         </div>
       </div>
       <div class="modal-footer">
