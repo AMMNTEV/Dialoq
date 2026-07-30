@@ -842,3 +842,53 @@
     display: none !important;
   }
 }
+
+/* ==========================================
+   СТИЛИ ДЛЯ МОБИЛЬНОЙ НИЖНЕЙ ПАНЕЛИ
+   ========================================== */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: #ffffff;
+  border-top: 1px solid #eef2f6;
+  display: none; /* Базово скрыта, JS будет менять на flex */
+  justify-content: space-around;
+  align-items: center;
+  z-index: 1005; /* Выше, чем messenger-container */
+  padding-bottom: env(safe-area-inset-bottom, 0); /* Для айфонов с челкой/вырезом */
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.mobile-bottom-nav .nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.2s, background 0.2s;
+}
+
+.mobile-bottom-nav .nav-item:hover {
+  background: #f8fafc;
+}
+
+.mobile-bottom-nav .nav-item.active {
+  color: #3b82f6;
+}
+
+/* Настройки для мобильных экранов */
+@media (max-width: 768px) {
+  /* Чтобы панель не перекрывала самые нижние чаты в списке, увеличим отступ */
+  .chats-sidebar {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom, 20px));
+  }
+}
