@@ -916,7 +916,14 @@
 /* Отступ списка чатов */
 @media (max-width: 768px) {
   .chats-sidebar {
-    /* Уменьшили отступ, чтобы под панелью был виден контент, а не белая пустота */
-    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+    /* Убираем отступ у фона: теперь блок идет до самого низа экрана */
+    padding-bottom: 0 !important; 
+  }
+  
+  .chats-list {
+    /* Добавляем внутренний отступ самому скроллу. 
+       Теперь чаты прокручиваются прямо ПОД парящей панелью, 
+       а самый последний чат можно доскроллить так, чтобы он встал НАД ней */
+    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
