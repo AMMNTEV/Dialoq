@@ -1328,33 +1328,47 @@ async function updateChatPreviewAfterDelete(chatId, isForEveryone = false) {
 // ========== ОБНОВЛЁННЫЕ ФУНКЦИИ УДАЛЕНИЯ (без мигания) ==========
 async function deleteMessageForMe() {
   if (!selectedMessageId || !currentChatId) return;
+  
+  // 1. Сохраняем ID перед очисткой переменной
+  const messageIdToDelete = selectedMessageId;
+
+  // 2. Моментально закрываем окошко действий
+  hideMessageOptions();
+
+  // 3. Выполняем удаление в фоне
   try {
     await db.collection('chats').doc(currentChatId)
       .collection('messages')
-      .doc(selectedMessageId)
+      .doc(messageIdToDelete)
       .update({
         deletedFor: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
       });
     await updateChatPreviewAfterDelete(currentChatId, false);
-    hideMessageOptions();
   } catch (error) {
     console.error('Ошибка удаления сообщения:', error);
+    // Опционально: здесь можно добавить всплывающее уведомление (toast) об ошибке
+    // вместо alert, так как окно опций уже закрыто
     alert('Ошибка при удалении сообщения');
   }
 }
 
 async function deleteMessageForEveryone() {
   if (!selectedMessageId || !currentChatId) return;
-  if (!confirm('Удалить это сообщение у всех участников?')) return;
+  
+  // Сохраняем ID перед очисткой
+  const messageIdToDelete = selectedMessageId;
+
+  // Моментально закрываем окошко действий, не дожидаясь ответа сервера
+  hideMessageOptions();
+
   try {
     await db.collection('chats').doc(currentChatId)
       .collection('messages')
-      .doc(selectedMessageId)
+      .doc(messageIdToDelete)
       .update({
         deletedFor: ['everyone']
       });
     await updateChatPreviewAfterDelete(currentChatId, true);
-    hideMessageOptions();
   } catch (error) {
     console.error('Ошибка удаления сообщения:', error);
     alert('Ошибка при удалении сообщения');
