@@ -99,3 +99,4 @@ function preventAtSymbolDeletion(event, input) {
     event.preventDefault();
   }
 }
+
