@@ -70,6 +70,16 @@ async function sendVerificationEmail() {
 }
 
 async function logout() {
+  const uid = localStorage.getItem('lastUid');
+  
+  // Очищаем локальный кэш пользователя перед выходом
+  if (uid) {
+    localStorage.removeItem(`cachedCurrentUser_${uid}`);
+    localStorage.removeItem(`cachedChats_${uid}`);
+    localStorage.removeItem(`cachedUnreads_${uid}`);
+    localStorage.removeItem('lastUid');
+  }
+  
   await auth.signOut();
   window.location.href = 'index.html';
 }
@@ -100,3 +110,14 @@ function preventAtSymbolDeletion(event, input) {
   }
 }
 
+// ========== МГНОВЕННЫЙ ВХОД ==========
+document.addEventListener("DOMContentLoaded", () => {
+  const lastUid = localStorage.getItem('lastUid');
+  
+  // Если в кэше остался lastUid, значит пользователь выходил не через кнопку "Выйти" 
+  // и его сессия, скорее всего, всё ещё жива.
+  if (lastUid) {
+    // Моментально перекидываем его внутрь приложения, не дожидаясь ответа от Firebase
+    window.location.href = 'messenger.html'; // или profile.html
+  }
+});

@@ -47,6 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 onAuthStateChanged(async (user) => {
   if (!user || !user.emailVerified) {
+    localStorage.removeItem('lastUid');
     window.location.href = 'index.html';
     return;
   }

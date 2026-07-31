@@ -1477,10 +1477,12 @@ window.addEventListener('resize', function() {
 
 onAuthStateChanged(async (user) => {
   if (!user || !user.emailVerified) {
+    localStorage.removeItem('lastUid');
     window.location.href = 'index.html';
     return;
   }
   currentUser = user;
+  localStorage.setItem('lastUid', user.uid);
   await loadAllUsers();
   await loadAllUsersForModal();
   listenForChats();
