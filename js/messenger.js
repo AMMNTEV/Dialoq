@@ -10,24 +10,32 @@ onAuthStateChanged(async (user) => {
   }
   currentUser = user;
   
-  // ВЕТВЬ 1: Если пользователь есть в кэше
-  if (userCache.has(user.uid)) {
-    currentUserData = userCache.get(user.uid);
-    
-    // ИСПРАВЛЕНИЕ: Обязательно обновляем сайдбар из кэша
-    updateSidebarUser(currentUserData); 
-    
-    // ИСПРАВЛЕНИЕ: Защищаем от ошибки, проверяя существование элементов
-    if (document.getElementById('profileInfo')) loadProfileInfo();
-    if (document.getElementById('postsContainer')) listenForNewPosts();
-    return;
-  }
+  // 1. СНАЧАЛА ЧИТАЕМ ИЗ LOCALSTORAGE (Мгновенное отображение)
+  const cacheKey = `cachedCurrentUser_${user.uid}`;
+  const cachedDataStr = localStorage.getItem(cacheKey);
   
-  // ВЕТВЬ 2: Если загружаем пользователя из базы
+  if (cachedDataStr) {
+    currentUserData = JSON.parse(cachedDataStr);
+    updateSidebarUser(currentUserData); // Мгновенно обновляем левую панель
+    
+    // Если мы на странице профиля, тоже сразу отрисовываем данные
+    if (document.getElementById('profileInfo')) loadProfileInfo();
+    const profileAvatarEl = document.getElementById('profileAvatar');
+    if (profileAvatarEl && typeof renderAvatar === 'function') {
+        renderAvatar(currentUserData.avatar);
+    } else if (profileAvatarEl) {
+        // Запасной вариант для messenger.js
+        profileAvatarEl.innerHTML = currentUserData.avatar 
+          ? `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">` 
+          : (currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?');
+    }
+  }
+
+  // 2. ЗАТЕМ ИДЕМ В БАЗУ ДАННЫХ (Фоновое обновление)
   try {
     const doc = await db.collection('users').doc(user.uid).get();
     if (!doc.exists) {
-      // Если документа нет – создаём его
+      // Создаем пользователя, если его нет
       await db.collection('users').doc(user.uid).set({
         nickname: user.displayName ? user.displayName.split('|')[0] : 'Пользователь',
         tag: user.displayName ? '@' + user.displayName.split('|')[1] : '@user',
@@ -37,33 +45,23 @@ onAuthStateChanged(async (user) => {
       window.location.reload();
       return;
     }
+    
     currentUserData = doc.data();
-    userCache.set(user.uid, currentUserData);
     
-    // Обновляем боковую панель актуальными данными
+    // Обновляем кэш в localStorage свежими данными из базы
+    localStorage.setItem(cacheKey, JSON.stringify(currentUserData));
+    userCache.set(user.uid, currentUserData); 
+    
+    // Перерисовываем интерфейс актуальными данными (если они изменились)
     updateSidebarUser(currentUserData);
-    
-    // ИСПРАВЛЕНИЕ: Безопасное обращение к элементам профиля (защита от краша в мессенджере)
-    const profileAvatarEl = document.getElementById('profileAvatar');
-    if (profileAvatarEl) {
-      if (currentUserData.avatar) {
-        profileAvatarEl.innerHTML = `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
-      } else {
-        profileAvatarEl.innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
-      }
-    }
-    
     if (document.getElementById('profileInfo')) loadProfileInfo();
-    if (document.getElementById('postsContainer')) listenForNewPosts();
+    if (document.getElementById('postsContainer') && typeof listenForNewPosts === 'function') listenForNewPosts();
     
   } catch (error) {
     console.error('Ошибка загрузки профиля:', error);
-    const profileInfoEl = document.getElementById('profileInfo');
-    if (profileInfoEl) {
-        profileInfoEl.innerHTML = '<div class="error">Ошибка загрузки профиля</div>';
-    }
   }
 });
+
 function loadProfileInfo() {
   const profileInfo = document.getElementById('profileInfo');
   profileInfo.innerHTML = `
@@ -722,7 +720,7 @@ async function markMessagesAsRead(chatId) {
     await batch.commit();
     unreadCounts[chatId] = 0;
     
-    // ИСПРАВЛЕНИЕ: Обновляем кэш непрочитанных сразу после прочтения
+    // Обновляем кэш непрочитанных сразу после прочтения
     try {
       localStorage.setItem(`cachedUnreads_${currentUser.uid}`, JSON.stringify(unreadCounts));
     } catch (e) { console.warn('Ошибка записи кэша', e); }
@@ -819,7 +817,7 @@ async function loadMessages(showLoading = false) {
       await batch.commit();
       unreadCounts[currentChatId] = 0;
       
-      // ИСПРАВЛЕНИЕ: Обновляем кэш непрочитанных при групповом прочтении
+      // Обновляем кэш непрочитанных при групповом прочтении
       try {
         localStorage.setItem(`cachedUnreads_${currentUser.uid}`, JSON.stringify(unreadCounts));
       } catch (e) { console.warn('Ошибка записи кэша', e); }
@@ -1329,13 +1327,9 @@ async function updateChatPreviewAfterDelete(chatId, isForEveryone = false) {
 async function deleteMessageForMe() {
   if (!selectedMessageId || !currentChatId) return;
   
-  // 1. Сохраняем ID перед очисткой переменной
   const messageIdToDelete = selectedMessageId;
-
-  // 2. Моментально закрываем окошко действий
   hideMessageOptions();
 
-  // 3. Выполняем удаление в фоне
   try {
     await db.collection('chats').doc(currentChatId)
       .collection('messages')
@@ -1346,8 +1340,6 @@ async function deleteMessageForMe() {
     await updateChatPreviewAfterDelete(currentChatId, false);
   } catch (error) {
     console.error('Ошибка удаления сообщения:', error);
-    // Опционально: здесь можно добавить всплывающее уведомление (toast) об ошибке
-    // вместо alert, так как окно опций уже закрыто
     alert('Ошибка при удалении сообщения');
   }
 }
@@ -1355,10 +1347,7 @@ async function deleteMessageForMe() {
 async function deleteMessageForEveryone() {
   if (!selectedMessageId || !currentChatId) return;
   
-  // Сохраняем ID перед очисткой
   const messageIdToDelete = selectedMessageId;
-
-  // Моментально закрываем окошко действий, не дожидаясь ответа сервера
   hideMessageOptions();
 
   try {
@@ -1379,15 +1368,26 @@ async function deleteMessageForEveryone() {
 function enterChatMode() {
   isChatMode = true;
   document.body.classList.add('chat-mode');
-  document.getElementById('mobileMenuBtn').style.display = 'none';
+  
+  // Скрываем нижнюю панель навигации при входе в диалог
+  const bottomNav = document.getElementById('mobileBottomNav');
+  if (bottomNav) bottomNav.style.display = 'none';
+
   const chatsSidebar = document.getElementById('chatsSidebar');
   if (chatsSidebar) chatsSidebar.style.display = 'none';
   history.pushState({ chatMode: true }, '', window.location.href);
 }
+
 function exitChatMode() {
   isChatMode = false;
   document.body.classList.remove('chat-mode');
-  document.getElementById('mobileMenuBtn').style.display = 'flex';
+
+  // Возвращаем нижнюю панель ТОЛЬКО если это мобильное устройство (<= 768px)
+  const bottomNav = document.getElementById('mobileBottomNav');
+  if (bottomNav) {
+    bottomNav.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+  }
+
   const chatsSidebar = document.getElementById('chatsSidebar');
   if (chatsSidebar) chatsSidebar.style.display = 'flex';
   if (unsubscribeMessages) { unsubscribeMessages(); unsubscribeMessages = null; }
@@ -1407,31 +1407,27 @@ function openUserProfile(userId) {
   window.location.href = `user.html?id=${userId}`;
 }
 
-function toggleMobileMenu() {
-  const menu = document.getElementById('mobilePopupMenu');
-  const overlay = document.getElementById('mobileMenuOverlay');
-  menu.classList.toggle('active');
-  overlay.classList.toggle('active');
-}
-
-// ========== ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ ==========
+// ========== ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ И РЕСАЙЗЕ ==========
 window.addEventListener('load', function() {
   if (window.innerWidth <= 768) {
     document.body.classList.remove('chat-mode');
-    document.getElementById('mobileMenuBtn').style.display = 'flex';
+    const bottomNav = document.getElementById('mobileBottomNav');
+    if (bottomNav) bottomNav.style.display = 'flex';
     document.getElementById('messageInputArea').style.display = 'none';
     const chatsSidebar = document.getElementById('chatsSidebar');
     if (chatsSidebar) chatsSidebar.style.display = 'flex';
   }
 });
+
 window.addEventListener('resize', function() {
+  const bottomNav = document.getElementById('mobileBottomNav');
   if (window.innerWidth > 768) {
     document.body.classList.remove('chat-mode');
-    document.getElementById('mobileMenuBtn').style.display = 'none';
+    if (bottomNav) bottomNav.style.display = 'none';
     const chatsSidebar = document.getElementById('chatsSidebar');
     if (chatsSidebar) chatsSidebar.style.display = 'flex';
   } else {
-    document.getElementById('mobileMenuBtn').style.display = isChatMode ? 'none' : 'flex';
+    if (bottomNav) bottomNav.style.display = isChatMode ? 'none' : 'flex';
     const chatsSidebar = document.getElementById('chatsSidebar');
     if (chatsSidebar) chatsSidebar.style.display = isChatMode ? 'none' : 'flex';
   }
