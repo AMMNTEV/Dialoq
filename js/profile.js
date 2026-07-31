@@ -337,20 +337,29 @@ function cancelEditing() {
 function validateProfileTag(value) {
   const statusDiv = document.getElementById('tagStatus');
   
-  // Сбрасываем таймер при каждом новом вводе
   if (tagCheckTimeout) clearTimeout(tagCheckTimeout);
   
+  const trimmedValue = value.trim();
+
   // 1. Проверка на пустоту
-  if (!value.trim()) {
+  if (!trimmedValue) {
     statusDiv.textContent = 'Тег не может быть пустым';
     statusDiv.style.color = '#dc2626'; // Красный
     isTagValid = false;
     return;
   }
 
-  const fullTag = '@' + value.trim();
+  // 2. Проверка на минимальную длину
+  if (trimmedValue.length < 3) {
+    statusDiv.textContent = 'Минимальная длина тега — 3 символа';
+    statusDiv.style.color = '#dc2626'; // Красный
+    isTagValid = false;
+    return;
+  }
+
+  const fullTag = '@' + trimmedValue;
   
-  // 2. Проверка, не является ли это текущим тегом пользователя
+  // 3. Проверка, не является ли это текущим тегом пользователя
   if (fullTag === currentUserData.tag) {
     statusDiv.textContent = 'Это ваш текущий тег';
     statusDiv.style.color = '#16a34a'; // Зеленый
@@ -360,12 +369,13 @@ function validateProfileTag(value) {
 
   // Индикация загрузки
   statusDiv.textContent = 'Проверка...';
-  statusDiv.style.color = '#666'; // Серый
-  isTagValid = false; // Блокируем сохранение на время проверки
+  statusDiv.style.color = '#666'; 
+  isTagValid = false; 
 
-  // 3. Отложенный запрос в базу (чтобы не отправлять запрос на каждую букву)
+  // 4. Отложенный запрос в базу
   tagCheckTimeout = setTimeout(async () => {
-    const isUnique = await checkTagUnique(value.trim());
+    // В базу летим только если тег прошел локальные проверки на длину
+    const isUnique = await checkTagUnique(trimmedValue);
     if (isUnique) {
       statusDiv.textContent = 'Тег свободен';
       statusDiv.style.color = '#16a34a'; // Зеленый
@@ -375,5 +385,5 @@ function validateProfileTag(value) {
       statusDiv.style.color = '#dc2626'; // Красный
       isTagValid = false;
     }
-  }, 500); // Ждем 500мс после того как пользователь перестал печатать
+  }, 500);
 }
