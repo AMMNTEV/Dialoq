@@ -33,6 +33,7 @@ onAuthStateChanged(async (user) => {
     }
     currentUserData = doc.data();
     userCache.set(user.uid, currentUserData);
+    updateSidebarUser(currentUserData);
     renderAvatar(currentUserData.avatar);
     loadProfileInfo();
     listenForNewPosts();
@@ -152,6 +153,7 @@ async function saveChanges() {
   } finally {
     isSubmitting = false;
   }
+  updateSidebarUser(currentUserData);
 }
 
 function showCreatePostModal() {
@@ -280,6 +282,7 @@ async function saveAvatarToFirebase(base64String) {
     // Обновляем локальный кэш
     currentUserData.avatar = base64String;
     userCache.set(user.uid, currentUserData);
+    updateSidebarUser(currentUserData);
     
     // Сразу показываем на экране
     renderAvatar(base64String);
@@ -387,4 +390,24 @@ function validateProfileTag(value) {
       isTagValid = false;
     }
   }, 500);
+}
+
+function updateSidebarUser(userData) {
+  const nameEl = document.getElementById('sidebarUserName');
+  const tagEl = document.getElementById('sidebarUserTag');
+  const avatarEl = document.getElementById('sidebarUserAvatar');
+  
+  if (nameEl) nameEl.textContent = userData.nickname || 'Пользователь';
+  if (tagEl) tagEl.textContent = userData.tag || '@user';
+  
+  if (avatarEl) {
+    if (userData.avatar) {
+      avatarEl.innerHTML = `<img src="${userData.avatar}" alt="Аватар" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block;">`;
+      avatarEl.style.background = 'transparent';
+    } else {
+      avatarEl.innerHTML = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
+      avatarEl.style.background = '#1a1a1a';
+      avatarEl.style.color = 'white';
+    }
+  }
 }
