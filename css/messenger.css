@@ -146,14 +146,16 @@
 
 .search-box {
   position: absolute;
-  top: 12px;
+  top: 14px; /* Такой же верхний отступ, как у левой панели */
   left: 0;
   right: 0;
-  height: auto;
+  height: 70px; /* Задаем ту же высоту, что и у карточки профиля */
+  display: flex; /* Центрируем поле ввода внутри этих 70px */
+  align-items: center;
   padding: 0 16px;
   z-index: 10;
   background: transparent !important;
-  pointer-events: none; /* Чтобы прозрачные отступы не блокировали клики по чатам */
+  pointer-events: none;
 }
 
 .search-box input {
@@ -189,7 +191,10 @@
 }
 
 .chats-list {
-  padding-top: 76px !important; 
+  padding-top: 98px !important; 
+  padding-left: 16px !important; /* Отступ слева */
+  padding-right: 16px !important; /* Отступ справа */
+  padding-bottom: 20px !important; /* Небольшой отступ в самом низу страницы */
   height: 100%;
   overflow-y: auto;
 }
