@@ -62,57 +62,96 @@ function loadProfileInfo() {
 
 function editNickname() {
   const span = document.getElementById('nickname');
-  const current = span.textContent;
+  const current = currentUserData.nickname || '';
   span.innerHTML = `<input type="text" id="editNickname" value="${current}" class="edit-input">`;
   changes.nickname = true;
-  if (!document.getElementById('saveProfileBtn')) {
-    const saveBtn = document.createElement('button');
-    saveBtn.id = 'saveProfileBtn';
-    saveBtn.className = 'save-btn';
-    saveBtn.textContent = 'Сохранить изменения';
-    saveBtn.onclick = saveChanges;
-    document.querySelector('.profile-info').appendChild(saveBtn);
-  }
+  showActionButtons();
 }
 
 function editTag() {
   const span = document.getElementById('tag');
-  const current = span.textContent;
-  span.innerHTML = `<input type="text" id="editTag" value="${current}" placeholder="@tag" class="edit-input">`;
+  // Убираем @ для редактирования, так как handleTagInput из auth.js её удаляет
+  const current = (currentUserData.tag || '').replace('@', '');
+  
+  // Добавляем oninput="handleTagInput(this)" для запрета ввода спецсимволов и кириллицы
+  span.innerHTML = `
+    <div style="display: flex; align-items: center; width: 100%;">
+      <span style="color: #666; font-weight: 600; padding-right: 4px;">@</span>
+      <input type="text" id="editTag" value="${current}" oninput="handleTagInput(this)" placeholder="tag" class="edit-input">
+    </div>
+  `;
   changes.tag = true;
-  if (!document.getElementById('saveProfileBtn')) {
-    const saveBtn = document.createElement('button');
-    saveBtn.id = 'saveProfileBtn';
-    saveBtn.className = 'save-btn';
-    saveBtn.textContent = 'Сохранить изменения';
-    saveBtn.onclick = saveChanges;
-    document.querySelector('.profile-info').appendChild(saveBtn);
-  }
+  showActionButtons();
 }
 
 async function saveChanges() {
+  if (isSubmitting) return; // Защита от двойного клика
+  
+  let newNickname = currentUserData.nickname;
+  let newTag = currentUserData.tag;
+
+  // 1. Валидация никнейма (проверка на пустоту)
+  if (changes.nickname) {
+    newNickname = document.getElementById('editNickname').value.trim();
+    if (!newNickname) {
+      alert('Никнейм не может быть пустым');
+      return;
+    }
+  }
+
+  // 2. Валидация тега (проверка на пустоту и уникальность)
+  if (changes.tag) {
+    const tagInput = document.getElementById('editTag').value.trim();
+    if (!tagInput) {
+      alert('Тег не может быть пустым');
+      return;
+    }
+    
+    const fullTag = '@' + tagInput;
+    
+    // Проверяем уникальность, только если тег действительно изменился
+    if (fullTag !== currentUserData.tag) {
+      const isUnique = await checkTagUnique(tagInput);
+      if (!isUnique) {
+        alert('Этот тег уже занят. Пожалуйста, выберите другой.');
+        return;
+      }
+    }
+    newTag = fullTag;
+  }
+
+  // 3. Сохранение данных
+  isSubmitting = true;
   const user = auth.currentUser;
   const messageDiv = document.createElement('div');
   messageDiv.className = 'message';
   const updates = {};
-  if (changes.nickname) updates.nickname = document.getElementById('editNickname').value;
-  if (changes.tag) updates.tag = document.getElementById('editTag').value;
+  
+  if (changes.nickname) updates.nickname = newNickname;
+  if (changes.tag) updates.tag = newTag;
+
   try {
     await db.collection('users').doc(user.uid).update(updates);
-    const newDisplayName = `${updates.nickname || currentUserData.nickname}|${updates.tag || currentUserData.tag}`;
+    const newDisplayName = `${newNickname}|${newTag}`;
     await user.updateProfile({ displayName: newDisplayName });
+    
+    // Обновляем локальные данные
     currentUserData = { ...currentUserData, ...updates };
     userCache.set(user.uid, currentUserData);
+    
     messageDiv.innerHTML = '<div class="success">Изменения сохранены!</div>';
     document.querySelector('.profile-left').appendChild(messageDiv);
-    document.getElementById('saveProfileBtn')?.remove();
-    changes = {};
+    
+    cancelEditing(); // Возвращаем интерфейс в режим просмотра
+    
     setTimeout(() => messageDiv.remove(), 2000);
   } catch (error) {
     console.error('Ошибка сохранения:', error);
     messageDiv.innerHTML = '<div class="error">Ошибка при сохранении</div>';
     document.querySelector('.profile-left').appendChild(messageDiv);
     setTimeout(() => messageDiv.remove(), 2000);
+  } finally {
+    isSubmitting = false; // Снимаем блокировку кнопки
   }
 }
 
@@ -259,4 +298,40 @@ function renderAvatar(avatarData) {
   } else {
     avatarDiv.innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
   }
+}
+
+// Вспомогательная функция для отображения кнопок "Сохранить" и "Отмена"
+function showActionButtons() {
+  if (!document.getElementById('profileActionButtons')) {
+    const container = document.createElement('div');
+    container.id = 'profileActionButtons';
+    container.style.display = 'flex';
+    container.style.gap = '10px';
+    container.style.marginTop = '16px';
+
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'save-btn';
+    saveBtn.style.marginTop = '0'; 
+    saveBtn.textContent = 'Сохранить';
+    saveBtn.onclick = saveChanges;
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'save-btn';
+    cancelBtn.style.marginTop = '0';
+    cancelBtn.style.background = '#94a3b8'; // Серый цвет для отмены
+    cancelBtn.textContent = 'Отмена';
+    cancelBtn.onclick = cancelEditing;
+
+    container.appendChild(saveBtn);
+    container.appendChild(cancelBtn);
+    document.querySelector('.profile-info').appendChild(container);
+  }
+}
+
+// Функция отмены редактирования
+function cancelEditing() {
+  changes = {};
+  const buttons = document.getElementById('profileActionButtons');
+  if (buttons) buttons.remove();
+  loadProfileInfo(); // Перерисовываем информацию из кэша (возвращаем span)
 }
