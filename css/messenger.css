@@ -865,11 +865,9 @@
 .mobile-bottom-nav {
   position: fixed;
   bottom: calc(12px + env(safe-area-inset-bottom, 0px)); 
-  left: 50%;
-  transform: translateX(-50%);
+  left: 16px;  /* Отступ слева ровно 16px, как у поиска */
+  right: 16px; /* Отступ справа ровно 16px, как у поиска */
   height: 56px;
-  width: calc(100% - 32px);
-  max-width: 400px;
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
