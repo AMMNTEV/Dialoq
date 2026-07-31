@@ -1,3 +1,16 @@
+// ========== МГНОВЕННАЯ ОТРИСОВКА САЙДБАРА (ДО ЗАПУСКА FIREBASE) ==========
+document.addEventListener("DOMContentLoaded", () => {
+  const lastUid = localStorage.getItem('lastUid');
+  if (lastUid) {
+    const cachedUserStr = localStorage.getItem(`cachedCurrentUser_${lastUid}`);
+    if (cachedUserStr) {
+      if (typeof updateSidebarUser === 'function') {
+        updateSidebarUser(JSON.parse(cachedUserStr));
+      }
+    }
+  }
+});
+
 // ========== ПРОСМОТР ПРОФИЛЯ ДРУГОГО ПОЛЬЗОВАТЕЛЯ ==========
 const urlParams = new URLSearchParams(window.location.search);
 const userId = urlParams.get('id');
