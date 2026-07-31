@@ -114,10 +114,11 @@ function preventAtSymbolDeletion(event, input) {
 document.addEventListener("DOMContentLoaded", () => {
   const lastUid = localStorage.getItem('lastUid');
   
-  // Если в кэше остался lastUid, значит пользователь выходил не через кнопку "Выйти" 
-  // и его сессия, скорее всего, всё ещё жива.
-  if (lastUid) {
-    // Моментально перекидываем его внутрь приложения, не дожидаясь ответа от Firebase
-    window.location.href = 'messenger.html'; // или profile.html
+  // Проверяем текущий путь, чтобы не перенаправлять пользователя, если он уже в мессенджере
+  const isAlreadyOnMessenger = window.location.pathname.includes('messenger.html') || window.location.pathname.includes('profile.html');
+  
+  // Если в кэше остался lastUid и мы НЕ на странице мессенджера/профиля, перекидываем внутрь
+  if (lastUid && !isAlreadyOnMessenger) {
+    window.location.href = 'messenger.html'; 
   }
 });
