@@ -3,12 +3,54 @@ let unsubscribePosts = null;
 let isSubmitting = false;
 let changes = {};
 
+// ========== МГНОВЕННАЯ ОТРИСОВКА (ДО ЗАПУСКА FIREBASE) ==========
+document.addEventListener("DOMContentLoaded", () => {
+  // Смотрим, кто был авторизован при последнем открытии приложения
+  const lastUid = localStorage.getItem('lastUid');
+  
+  if (lastUid) {
+    // 1. Мгновенно загружаем данные пользователя
+    const cachedUserStr = localStorage.getItem(`cachedCurrentUser_${lastUid}`);
+    if (cachedUserStr) {
+      currentUserData = JSON.parse(cachedUserStr);
+      
+      // Отрисовываем левую панель и аватарку за 0 миллисекунд
+      if (typeof updateSidebarUser === 'function') updateSidebarUser(currentUserData);
+      
+      // Если мы на странице профиля — мгновенно рисуем инфу профиля
+      if (document.getElementById('profileInfo') && typeof loadProfileInfo === 'function') {
+        loadProfileInfo();
+        const avatarDiv = document.getElementById('profileAvatar');
+        if (avatarDiv) {
+          avatarDiv.innerHTML = currentUserData.avatar 
+            ? `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">` 
+            : (currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?');
+        }
+      }
+    }
+    
+    // 2. Мгновенно загружаем список чатов (если мы в мессенджере)
+    if (document.getElementById('chatsList')) {
+      const cachedChats = localStorage.getItem(`cachedChats_${lastUid}`);
+      const cachedUnreads = localStorage.getItem(`cachedUnreads_${lastUid}`);
+      if (cachedChats) {
+        allChats = JSON.parse(cachedChats);
+        if (cachedUnreads) unreadCounts = JSON.parse(cachedUnreads);
+        // Сразу выводим чаты на экран
+        if (typeof displayChats === 'function') displayChats(allChats);
+      }
+    }
+  }
+});
+
 onAuthStateChanged(async (user) => {
   if (!user || !user.emailVerified) {
     window.location.href = 'index.html';
     return;
   }
   currentUser = user;
+
+  localStorage.setItem('lastUid', user.uid);
   
   // 1. СНАЧАЛА ЧИТАЕМ ИЗ LOCALSTORAGE (Мгновенное отображение)
   const cacheKey = `cachedCurrentUser_${user.uid}`;
