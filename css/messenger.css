@@ -191,7 +191,7 @@
 }
 
 .chats-list {
-  padding-top: 98px !important; 
+  padding-top: 90px !important; 
   padding-left: 16px !important; /* Отступ слева */
   padding-right: 16px !important; /* Отступ справа */
   padding-bottom: 20px !important; /* Небольшой отступ в самом низу страницы */
@@ -868,6 +868,7 @@
   left: 16px;  /* Отступ слева ровно 16px, как у поиска */
   right: 16px; /* Отступ справа ровно 16px, как у поиска */
   height: 56px;
+  width: flex;
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
