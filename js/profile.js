@@ -80,11 +80,12 @@ function editTag() {
         <span style="color: #666; font-weight: 600; padding-right: 4px;">@</span>
         <input type="text" id="editTag" value="${current}" oninput="handleTagInput(this); validateProfileTag(this.value)" placeholder="tag" class="edit-input">
       </div>
-      <div id="tagStatus" style="font-size: 0.8rem; margin-top: 4px; height: 14px; font-weight: 500;"></div>
+      <!-- Заменили height: 14px на min-height: 16px и добавили line-height: 1.2 -->
+      <div id="tagStatus" style="font-size: 0.8rem; margin-top: 4px; min-height: 16px; line-height: 1.2; font-weight: 500;"></div>
     </div>
   `;
   changes.tag = true;
-  isTagValid = true; // При открытии редактирования текущий тег валиден
+  isTagValid = true; 
   showActionButtons();
 }
 
