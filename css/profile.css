@@ -58,12 +58,15 @@
   padding: 20px;
   margin: 20px 0;
 }
+/* Обновляем строку с информацией */
 .info-row {
   display: flex;
   align-items: center;
   padding: 12px 0;
   border-bottom: 1px solid #f0f0f0;
+  gap: 10px; /* Добавляем небольшой отступ между элементами для надежности */
 }
+
 .info-row:last-child {
   border-bottom: none;
 }
@@ -73,12 +76,31 @@
   font-weight: 600;
   color: #666;
   text-transform: uppercase;
+  flex-shrink: 0; /* ЗАПРЕЩАЕМ сужаться, чтобы начало текста всегда было на одном уровне */
 }
+
+/* Настраиваем контейнер с самим текстом */
 .info-row span {
   flex: 1;
   color: #1a1a1a;
   font-weight: 500;
+  
+  /* Новые правила для горизонтальной прокрутки: */
+  white-space: nowrap;       /* Запрещаем перенос текста на новую строку */
+  overflow-x: auto;          /* Включаем прокрутку, если текст не влезает */
+  min-width: 0;              /* КРИТИЧЕСКИ ВАЖНО: позволяет флекс-элементу сжиматься, активируя прокрутку */
+  
+  /* Прячем визуальный ползунок скроллбара, чтобы выглядело аккуратно, но свайп/прокрутка будут работать */
+  scrollbar-width: none;     /* Для Firefox */
+  -ms-overflow-style: none;  /* Для IE и Edge */
 }
+
+/* Прячем ползунок для Chrome, Safari, Opera */
+.info-row span::-webkit-scrollbar {
+  display: none;
+}
+
+/* Фиксируем кнопку редактирования, чтобы ее не выдавило за экран */
 .edit-btn {
   background: none;
   border: none;
@@ -88,7 +110,9 @@
   padding: 4px 8px;
   border-radius: 8px;
   width: auto;
+  flex-shrink: 0; /* Запрещаем кнопке сужаться или исчезать */
 }
+
 .edit-btn:hover {
   color: #3b82f6;
   background: #f0f0f0;
