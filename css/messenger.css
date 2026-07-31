@@ -127,14 +127,8 @@
    2. СРЕДНЯЯ ПАНЕЛЬ (Список чатов и поиск)
    ========================================== */
 .chats-sidebar {
-  width: 320px;
-  background: #ffffff;
-  border-right: 1px solid #eef2f6;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  padding-top: 14px;
-  box-sizing: border-box;
+  position: relative; /* Необходимо для парящего поиска */
+  padding-top: 0 !important; 
 }
 
 .chats-header {
@@ -151,34 +145,52 @@
 }
 
 .search-box {
-  display: flex;
-  align-items: center;
-  height: 70px;
+  position: absolute;
+  top: 12px;
+  left: 0;
+  right: 0;
+  height: auto;
   padding: 0 16px;
-  box-sizing: border-box;
-  flex-shrink: 0;
+  z-index: 10;
+  background: transparent !important;
+  pointer-events: none; /* Чтобы прозрачные отступы не блокировали клики по чатам */
 }
 
 .search-box input {
   width: 100%;
   margin: 0;
-  padding: 12px 18px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 30px;
+  padding: 14px 20px;
+  pointer-events: auto; /* Включаем кликабельность обратно для самого поля */
+  
+  /* Эффект прозрачности и размытия (как у мобильной панели) */
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  
+  /* Тень и границы */
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 28px;
+  box-shadow: 
+    0 12px 28px rgba(0, 0, 0, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.04);
+    
   font-size: 0.95rem;
+  color: #1a1a1a;
+  transition: all 0.2s ease;
 }
 
 .search-box input:focus {
   outline: none;
   border-color: #3b82f6;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 
+    0 12px 28px rgba(59, 130, 246, 0.15),
+    0 4px 12px rgba(59, 130, 246, 0.1);
 }
 
 .chats-list {
-  flex: 1;
-  padding: 14px 16px 16px 16px;
-  min-height: 0;
+  padding-top: 76px !important; 
+  height: 100%;
   overflow-y: auto;
 }
 
@@ -907,8 +919,10 @@
 /* Отступ списка чатов */
 @media (max-width: 768px) {
   .chats-sidebar {
-    /* Убираем отступ у фона: теперь блок идет до самого низа экрана */
-    padding-bottom: 0 !important; 
+    overflow-y: hidden !important;
+  }
+  .search-box {
+    padding: 0 16px !important; 
   }
   
   .chats-list {
