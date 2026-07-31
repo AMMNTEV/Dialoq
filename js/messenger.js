@@ -1424,7 +1424,7 @@ function exitChatMode() {
   isChatMode = false;
   document.body.classList.remove('chat-mode');
 
-  // Возвращаем нижнюю панель ТОЛЬКО если это мобильное устройство (<= 768px)
+  // Возвращаем нижнюю панель ТОЛЬКО на мобильных устройствах и в неактивном режиме чата
   const bottomNav = document.getElementById('mobileBottomNav');
   if (bottomNav) {
     bottomNav.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
