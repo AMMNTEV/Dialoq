@@ -843,37 +843,28 @@
   }
 }
 
-/* ==========================================
-   ПАРЯЩАЯ ЗАКТРУГЛЕННАЯ ПАНЕЛЬ (СВЕТЛАЯ ТЕМА)
-   ========================================== */
+/* ========== ПАРЯЩАЯ ЗАКТРУГЛЕННАЯ ПАНЕЛЬ (СВЕТЛАЯ ТЕМА) ========== */
 .mobile-bottom-nav {
   position: fixed;
-  /* Уменьшен отступ от низа экрана */
   bottom: calc(12px + env(safe-area-inset-bottom, 0px)); 
   left: 50%;
   transform: translateX(-50%);
-  
-  /* Делаем панель тоньше: высота 56px вместо 64px */
   height: 56px;
   width: calc(100% - 32px);
   max-width: 400px;
-  
-  /* Светлый полупрозрачный фон с размытием (инверсия референса) */
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  /* Тонкая граница, чтобы панель не сливалась с белым фоном чатов */
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 28px; 
   
-  /* Позиционирование элементов */
-  display: none; /* Управляется через JS */
+  /* Скрываем на десктопе по умолчанию */
+  display: none; 
+  
   justify-content: space-around;
   align-items: center;
   padding: 0 8px;
   z-index: 1005;
-  
-  /* Мягкая парящая тень, адаптированная для светлого фона */
   box-shadow: 
     0 12px 28px rgba(0, 0, 0, 0.08),
     0 4px 12px rgba(0, 0, 0, 0.04);
@@ -925,5 +916,8 @@
        Теперь чаты прокручиваются прямо ПОД парящей панелью, 
        а самый последний чат можно доскроллить так, чтобы он встал НАД ней */
     padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  .mobile-bottom-nav {
+    display: flex;
   }
 }
