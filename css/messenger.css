@@ -197,6 +197,7 @@
   padding-bottom: 20px !important; /* Небольшой отступ в самом низу страницы */
   height: 100%;
   overflow-y: auto;
+  width: 100%;
 }
 
 .chat-item,
@@ -925,6 +926,7 @@
 @media (max-width: 768px) {
   .chats-sidebar {
     overflow-y: hidden !important;
+    flex-direction: column;
   }
   .search-box {
     padding: 0 16px !important; 
