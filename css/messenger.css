@@ -451,10 +451,10 @@
 }
 
 .message-input-area {
+  display: none;
   padding: 20px 24px;
   border-top: 1px solid #eef2f6;
   background: #ffffff;
-  display: flex;
   gap: 12px;
   flex-shrink: 0;
 }
