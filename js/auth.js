@@ -114,10 +114,14 @@ function preventAtSymbolDeletion(event, input) {
 document.addEventListener("DOMContentLoaded", () => {
   const lastUid = localStorage.getItem('lastUid');
   
-  // Проверяем текущий путь, чтобы не перенаправлять пользователя, если он уже в мессенджере
-  const isAlreadyOnMessenger = window.location.pathname.includes('messenger.html') || window.location.pathname.includes('profile.html');
+  // Добавляем страницы settings.html и user.html в список исключений для редиректа
+  const isAlreadyOnMessenger = 
+    window.location.pathname.includes('messenger.html') || 
+    window.location.pathname.includes('profile.html') ||
+    window.location.pathname.includes('settings.html') ||
+    window.location.pathname.includes('user.html');
   
-  // Если в кэше остался lastUid и мы НЕ на странице мессенджера/профиля, перекидываем внутрь
+  // Если в кэше остался lastUid и мы НЕ на одной из внутренних страниц, перекидываем в мессенджер
   if (lastUid && !isAlreadyOnMessenger) {
     window.location.href = 'messenger.html'; 
   }
