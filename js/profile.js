@@ -11,35 +11,56 @@ onAuthStateChanged(async (user) => {
     return;
   }
   currentUser = user;
-  if (userCache.has(user.uid)) {
-    currentUserData = userCache.get(user.uid);
-    loadProfileInfo();
-    listenForNewPosts();
-    return;
+  
+  // 1. СНАЧАЛА ЧИТАЕМ ИЗ LOCALSTORAGE (Мгновенное отображение)
+  const cacheKey = `cachedCurrentUser_${user.uid}`;
+  const cachedDataStr = localStorage.getItem(cacheKey);
+  
+  if (cachedDataStr) {
+    currentUserData = JSON.parse(cachedDataStr);
+    updateSidebarUser(currentUserData); // Мгновенно обновляем левую панель
+    
+    // Если мы на странице профиля, тоже сразу отрисовываем данные
+    if (document.getElementById('profileInfo')) loadProfileInfo();
+    const profileAvatarEl = document.getElementById('profileAvatar');
+    if (profileAvatarEl && typeof renderAvatar === 'function') {
+        renderAvatar(currentUserData.avatar);
+    } else if (profileAvatarEl) {
+        // Запасной вариант для messenger.js
+        profileAvatarEl.innerHTML = currentUserData.avatar 
+          ? `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">` 
+          : (currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?');
+    }
   }
+
+  // 2. ЗАТЕМ ИДЕМ В БАЗУ ДАННЫХ (Фоновое обновление)
   try {
     const doc = await db.collection('users').doc(user.uid).get();
     if (!doc.exists) {
-      // Если документа нет – создаём его (для обратной совместимости)
+      // Создаем пользователя, если его нет
       await db.collection('users').doc(user.uid).set({
         nickname: user.displayName ? user.displayName.split('|')[0] : 'Пользователь',
         tag: user.displayName ? '@' + user.displayName.split('|')[1] : '@user',
         email: user.email,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-      // После создания перезагружаем страницу, чтобы данные подтянулись
       window.location.reload();
       return;
     }
+    
     currentUserData = doc.data();
-    userCache.set(user.uid, currentUserData);
+    
+    // Обновляем кэш в localStorage свежими данными из базы
+    localStorage.setItem(cacheKey, JSON.stringify(currentUserData));
+    userCache.set(user.uid, currentUserData); 
+    
+    // Перерисовываем интерфейс актуальными данными (если они изменились)
     updateSidebarUser(currentUserData);
-    renderAvatar(currentUserData.avatar);
-    loadProfileInfo();
-    listenForNewPosts();
+    if (document.getElementById('profileInfo')) loadProfileInfo();
+    if (document.getElementById('postsContainer') && typeof listenForNewPosts === 'function') listenForNewPosts();
+    
   } catch (error) {
     console.error('Ошибка загрузки профиля:', error);
-    document.getElementById('profileInfo').innerHTML = '<div class="error">Ошибка загрузки профиля</div>';
   }
 });
 
@@ -138,6 +159,7 @@ async function saveChanges() {
     
     currentUserData = { ...currentUserData, ...updates };
     userCache.set(user.uid, currentUserData);
+    localStorage.setItem(`cachedCurrentUser_${user.uid}`, JSON.stringify(currentUserData));
     
     messageDiv.innerHTML = '<div class="success">Изменения сохранены!</div>';
     document.querySelector('.profile-left').appendChild(messageDiv);
@@ -282,6 +304,7 @@ async function saveAvatarToFirebase(base64String) {
     // Обновляем локальный кэш
     currentUserData.avatar = base64String;
     userCache.set(user.uid, currentUserData);
+    localStorage.setItem(`cachedCurrentUser_${user.uid}`, JSON.stringify(currentUserData));
     updateSidebarUser(currentUserData);
     
     // Сразу показываем на экране

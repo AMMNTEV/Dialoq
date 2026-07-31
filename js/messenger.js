@@ -10,24 +10,32 @@ onAuthStateChanged(async (user) => {
   }
   currentUser = user;
   
-  // ВЕТВЬ 1: Если пользователь есть в кэше
-  if (userCache.has(user.uid)) {
-    currentUserData = userCache.get(user.uid);
-    
-    // Обязательно обновляем сайдбар из кэша
-    updateSidebarUser(currentUserData); 
-    
-    // Защищаем от ошибки, проверяя существование элементов
-    if (document.getElementById('profileInfo')) loadProfileInfo();
-    if (document.getElementById('postsContainer')) listenForNewPosts();
-    return;
-  }
+  // 1. СНАЧАЛА ЧИТАЕМ ИЗ LOCALSTORAGE (Мгновенное отображение)
+  const cacheKey = `cachedCurrentUser_${user.uid}`;
+  const cachedDataStr = localStorage.getItem(cacheKey);
   
-  // ВЕТВЬ 2: Если загружаем пользователя из базы
+  if (cachedDataStr) {
+    currentUserData = JSON.parse(cachedDataStr);
+    updateSidebarUser(currentUserData); // Мгновенно обновляем левую панель
+    
+    // Если мы на странице профиля, тоже сразу отрисовываем данные
+    if (document.getElementById('profileInfo')) loadProfileInfo();
+    const profileAvatarEl = document.getElementById('profileAvatar');
+    if (profileAvatarEl && typeof renderAvatar === 'function') {
+        renderAvatar(currentUserData.avatar);
+    } else if (profileAvatarEl) {
+        // Запасной вариант для messenger.js
+        profileAvatarEl.innerHTML = currentUserData.avatar 
+          ? `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">` 
+          : (currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?');
+    }
+  }
+
+  // 2. ЗАТЕМ ИДЕМ В БАЗУ ДАННЫХ (Фоновое обновление)
   try {
     const doc = await db.collection('users').doc(user.uid).get();
     if (!doc.exists) {
-      // Если документа нет – создаём его
+      // Создаем пользователя, если его нет
       await db.collection('users').doc(user.uid).set({
         nickname: user.displayName ? user.displayName.split('|')[0] : 'Пользователь',
         tag: user.displayName ? '@' + user.displayName.split('|')[1] : '@user',
@@ -37,31 +45,20 @@ onAuthStateChanged(async (user) => {
       window.location.reload();
       return;
     }
+    
     currentUserData = doc.data();
-    userCache.set(user.uid, currentUserData);
     
-    // Обновляем боковую панель актуальными данными
+    // Обновляем кэш в localStorage свежими данными из базы
+    localStorage.setItem(cacheKey, JSON.stringify(currentUserData));
+    userCache.set(user.uid, currentUserData); 
+    
+    // Перерисовываем интерфейс актуальными данными (если они изменились)
     updateSidebarUser(currentUserData);
-    
-    // Безопасное обращение к элементам профиля (защита от краша в мессенджере)
-    const profileAvatarEl = document.getElementById('profileAvatar');
-    if (profileAvatarEl) {
-      if (currentUserData.avatar) {
-        profileAvatarEl.innerHTML = `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
-      } else {
-        profileAvatarEl.innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
-      }
-    }
-    
     if (document.getElementById('profileInfo')) loadProfileInfo();
-    if (document.getElementById('postsContainer')) listenForNewPosts();
+    if (document.getElementById('postsContainer') && typeof listenForNewPosts === 'function') listenForNewPosts();
     
   } catch (error) {
     console.error('Ошибка загрузки профиля:', error);
-    const profileInfoEl = document.getElementById('profileInfo');
-    if (profileInfoEl) {
-        profileInfoEl.innerHTML = '<div class="error">Ошибка загрузки профиля</div>';
-    }
   }
 });
 
