@@ -124,6 +124,46 @@
   font-size: 0.95rem;
   width: 100%;
 }
+
+/* Обертка, которая выглядит как поле ввода */
+.tag-input-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 4px 8px;
+  width: 100%;
+  background: white;
+  box-sizing: border-box; 
+  transition: all 0.2s ease;
+}
+
+/* Эффект фокуса переносим на обертку */
+.tag-input-wrapper:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59,130,246,0.1);
+}
+
+/* Неудаляемый символ @ */
+.tag-prefix {
+  color: #666;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-right: 2px;
+  user-select: none; /* Запрещаем выделять этот символ мышкой */
+}
+
+/* Сам инпут (делаем прозрачным и убираем рамки) */
+.edit-input-borderless {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.95rem;
+  width: 100%;
+  padding: 0;
+  color: #1a1a1a;
+}
+
 .save-btn {
   width: 100%;
   padding: 12px;
