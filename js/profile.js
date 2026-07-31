@@ -2,6 +2,8 @@
 let unsubscribePosts = null;
 let isSubmitting = false;
 let changes = {};
+let tagCheckTimeout = null;
+let isTagValid = true; // Флаг, разрешающий или запрещающий сохранение
 
 onAuthStateChanged(async (user) => {
   if (!user || !user.emailVerified) {
@@ -70,57 +72,54 @@ function editNickname() {
 
 function editTag() {
   const span = document.getElementById('tag');
-  // Убираем @ для редактирования, так как handleTagInput из auth.js её удаляет
   const current = (currentUserData.tag || '').replace('@', '');
   
-  // Добавляем oninput="handleTagInput(this)" для запрета ввода спецсимволов и кириллицы
   span.innerHTML = `
-    <div style="display: flex; align-items: center; width: 100%;">
-      <span style="color: #666; font-weight: 600; padding-right: 4px;">@</span>
-      <input type="text" id="editTag" value="${current}" oninput="handleTagInput(this)" placeholder="tag" class="edit-input">
+    <div style="display: flex; flex-direction: column; width: 100%;">
+      <div style="display: flex; align-items: center; width: 100%;">
+        <span style="color: #666; font-weight: 600; padding-right: 4px;">@</span>
+        <input type="text" id="editTag" value="${current}" oninput="handleTagInput(this); validateProfileTag(this.value)" placeholder="tag" class="edit-input">
+      </div>
+      <div id="tagStatus" style="font-size: 0.8rem; margin-top: 4px; height: 14px; font-weight: 500;"></div>
     </div>
   `;
   changes.tag = true;
+  isTagValid = true; // При открытии редактирования текущий тег валиден
   showActionButtons();
 }
 
 async function saveChanges() {
-  if (isSubmitting) return; // Защита от двойного клика
+  if (isSubmitting) return; 
   
   let newNickname = currentUserData.nickname;
   let newTag = currentUserData.tag;
 
-  // 1. Валидация никнейма (проверка на пустоту)
+  // 1. Валидация никнейма без алертов (подсветка рамки)
   if (changes.nickname) {
     newNickname = document.getElementById('editNickname').value.trim();
     if (!newNickname) {
-      alert('Никнейм не может быть пустым');
+      const nickInput = document.getElementById('editNickname');
+      nickInput.style.borderColor = '#dc2626'; // Красная рамка
+      setTimeout(() => nickInput.style.borderColor = '#e2e8f0', 2000);
       return;
     }
   }
 
-  // 2. Валидация тега (проверка на пустоту и уникальность)
+  // 2. Валидация тега (опираемся на результаты oninput проверки)
   if (changes.tag) {
-    const tagInput = document.getElementById('editTag').value.trim();
-    if (!tagInput) {
-      alert('Тег не может быть пустым');
+    if (!isTagValid) {
+      // Привлекаем внимание к тексту ошибки легкой анимацией жирности
+      const statusDiv = document.getElementById('tagStatus');
+      if (statusDiv) {
+        statusDiv.style.fontWeight = 'bold';
+        setTimeout(() => statusDiv.style.fontWeight = '500', 300);
+      }
       return;
     }
-    
-    const fullTag = '@' + tagInput;
-    
-    // Проверяем уникальность, только если тег действительно изменился
-    if (fullTag !== currentUserData.tag) {
-      const isUnique = await checkTagUnique(tagInput);
-      if (!isUnique) {
-        alert('Этот тег уже занят. Пожалуйста, выберите другой.');
-        return;
-      }
-    }
-    newTag = fullTag;
+    newTag = '@' + document.getElementById('editTag').value.trim();
   }
 
-  // 3. Сохранение данных
+  // 3. Сохранение
   isSubmitting = true;
   const user = auth.currentUser;
   const messageDiv = document.createElement('div');
@@ -135,14 +134,13 @@ async function saveChanges() {
     const newDisplayName = `${newNickname}|${newTag}`;
     await user.updateProfile({ displayName: newDisplayName });
     
-    // Обновляем локальные данные
     currentUserData = { ...currentUserData, ...updates };
     userCache.set(user.uid, currentUserData);
     
     messageDiv.innerHTML = '<div class="success">Изменения сохранены!</div>';
     document.querySelector('.profile-left').appendChild(messageDiv);
     
-    cancelEditing(); // Возвращаем интерфейс в режим просмотра
+    cancelEditing(); 
     
     setTimeout(() => messageDiv.remove(), 2000);
   } catch (error) {
@@ -151,7 +149,7 @@ async function saveChanges() {
     document.querySelector('.profile-left').appendChild(messageDiv);
     setTimeout(() => messageDiv.remove(), 2000);
   } finally {
-    isSubmitting = false; // Снимаем блокировку кнопки
+    isSubmitting = false;
   }
 }
 
@@ -334,4 +332,48 @@ function cancelEditing() {
   const buttons = document.getElementById('profileActionButtons');
   if (buttons) buttons.remove();
   loadProfileInfo(); // Перерисовываем информацию из кэша (возвращаем span)
+}
+
+function validateProfileTag(value) {
+  const statusDiv = document.getElementById('tagStatus');
+  
+  // Сбрасываем таймер при каждом новом вводе
+  if (tagCheckTimeout) clearTimeout(tagCheckTimeout);
+  
+  // 1. Проверка на пустоту
+  if (!value.trim()) {
+    statusDiv.textContent = 'Тег не может быть пустым';
+    statusDiv.style.color = '#dc2626'; // Красный
+    isTagValid = false;
+    return;
+  }
+
+  const fullTag = '@' + value.trim();
+  
+  // 2. Проверка, не является ли это текущим тегом пользователя
+  if (fullTag === currentUserData.tag) {
+    statusDiv.textContent = 'Это ваш текущий тег';
+    statusDiv.style.color = '#16a34a'; // Зеленый
+    isTagValid = true;
+    return;
+  }
+
+  // Индикация загрузки
+  statusDiv.textContent = 'Проверка...';
+  statusDiv.style.color = '#666'; // Серый
+  isTagValid = false; // Блокируем сохранение на время проверки
+
+  // 3. Отложенный запрос в базу (чтобы не отправлять запрос на каждую букву)
+  tagCheckTimeout = setTimeout(async () => {
+    const isUnique = await checkTagUnique(value.trim());
+    if (isUnique) {
+      statusDiv.textContent = 'Тег свободен';
+      statusDiv.style.color = '#16a34a'; // Зеленый
+      isTagValid = true;
+    } else {
+      statusDiv.textContent = 'Этот тег уже занят';
+      statusDiv.style.color = '#dc2626'; // Красный
+      isTagValid = false;
+    }
+  }, 500); // Ждем 500мс после того как пользователь перестал печатать
 }
