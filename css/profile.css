@@ -511,3 +511,15 @@
     font-size: 0.85rem;
   }
 }
+
+@media (max-width: 768px) {
+  .profile-two-columns {
+    display: block !important;
+    gap: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+    /* Увеличиваем нижний отступ до 88px + безопасная зона экрана */
+    padding: 16px 16px calc(88px + env(safe-area-inset-bottom, 0px)) 16px !important;
+    flex: none !important;
+  }
+}

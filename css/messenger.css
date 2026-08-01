@@ -161,7 +161,7 @@
 .search-box input {
   width: 100%;
   margin: 0;
-  padding: 14px 20px;
+  padding: 10px 20px;
   pointer-events: auto; /* Включаем кликабельность обратно для самого поля */
   
   /* Эффект прозрачности и размытия (как у мобильной панели) */
@@ -171,10 +171,7 @@
   
   /* Тень и границы */
   border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 28px;
-  box-shadow: 
-    0 12px 28px rgba(0, 0, 0, 0.08),
-    0 4px 12px rgba(0, 0, 0, 0.04);
+  box-shadow: none !important; /* Убрали тень */
     
   font-size: 0.95rem;
   color: #1a1a1a;
@@ -867,7 +864,7 @@
   bottom: calc(12px + env(safe-area-inset-bottom, 0px)); 
   left: 16px;  /* Отступ слева ровно 16px, как у поиска */
   right: 16px; /* Отступ справа ровно 16px, как у поиска */
-  height: 56px;
+  height: 48px;
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -902,6 +899,7 @@
   text-decoration: none;
   transition: all 0.2s ease;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .mobile-bottom-nav .nav-item svg {
@@ -957,13 +955,13 @@ body.chat-mode .mobile-bottom-nav {
 
   /* Уменьшаем высоту зоны поиска, чтобы убрать лишний воздух */
   .search-box {
-    height: 56px !important;
+    height: 48px !important;
     padding: 0 16px !important;
   }
 
   /* Компактный отступ сверху, чтобы первый чат встал ближе к поиску */
   .chats-list {
-    padding-top: 76px !important; 
+    padding-top: 60px !important; 
     padding-left: 16px !important;
     padding-right: 16px !important;
     padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
@@ -979,7 +977,7 @@ body.chat-mode .mobile-bottom-nav {
     left: 16px !important;  
     right: 16px !important; /* Гарантированный отступ справа */
     width: auto !important; /* Сбрасываем возможные конфликты ширины */
-    height: 56px;
+    height: 48px;
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
