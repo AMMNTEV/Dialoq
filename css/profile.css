@@ -58,12 +58,15 @@
   padding: 20px;
   margin: 20px 0;
 }
+/* Обновляем строку с информацией */
 .info-row {
   display: flex;
   align-items: center;
   padding: 12px 0;
   border-bottom: 1px solid #f0f0f0;
+  gap: 10px; /* Добавляем небольшой отступ между элементами для надежности */
 }
+
 .info-row:last-child {
   border-bottom: none;
 }
@@ -73,12 +76,31 @@
   font-weight: 600;
   color: #666;
   text-transform: uppercase;
+  flex-shrink: 0; /* ЗАПРЕЩАЕМ сужаться, чтобы начало текста всегда было на одном уровне */
 }
+
+/* Настраиваем контейнер с самим текстом */
 .info-row span {
   flex: 1;
   color: #1a1a1a;
   font-weight: 500;
+  
+  /* Новые правила для горизонтальной прокрутки: */
+  white-space: nowrap;       /* Запрещаем перенос текста на новую строку */
+  overflow-x: auto;          /* Включаем прокрутку, если текст не влезает */
+  min-width: 0;              /* КРИТИЧЕСКИ ВАЖНО: позволяет флекс-элементу сжиматься, активируя прокрутку */
+  
+  /* Прячем визуальный ползунок скроллбара, чтобы выглядело аккуратно, но свайп/прокрутка будут работать */
+  scrollbar-width: none;     /* Для Firefox */
+  -ms-overflow-style: none;  /* Для IE и Edge */
 }
+
+/* Прячем ползунок для Chrome, Safari, Opera */
+.info-row span::-webkit-scrollbar {
+  display: none;
+}
+
+/* Фиксируем кнопку редактирования, чтобы ее не выдавило за экран */
 .edit-btn {
   background: none;
   border: none;
@@ -88,7 +110,9 @@
   padding: 4px 8px;
   border-radius: 8px;
   width: auto;
+  flex-shrink: 0; /* Запрещаем кнопке сужаться или исчезать */
 }
+
 .edit-btn:hover {
   color: #3b82f6;
   background: #f0f0f0;
@@ -100,6 +124,46 @@
   font-size: 0.95rem;
   width: 100%;
 }
+
+/* Обертка, которая выглядит как поле ввода */
+.tag-input-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 4px 8px;
+  width: 100%;
+  background: white;
+  box-sizing: border-box; 
+  transition: all 0.2s ease;
+}
+
+/* Эффект фокуса переносим на обертку */
+.tag-input-wrapper:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59,130,246,0.1);
+}
+
+/* Неудаляемый символ @ */
+.tag-prefix {
+  color: #666;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-right: 2px;
+  user-select: none; /* Запрещаем выделять этот символ мышкой */
+}
+
+/* Сам инпут (делаем прозрачным и убираем рамки) */
+.edit-input-borderless {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.95rem;
+  width: 100%;
+  padding: 0;
+  color: #1a1a1a;
+}
+
 .save-btn {
   width: 100%;
   padding: 12px;
@@ -249,6 +313,15 @@
     overflow-y: auto !important;
     height: auto !important;
   }
+
+  body:has(.profile-container) .messenger-container {
+    position: static !important;
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
   .profile-container {
     height: auto !important;
     min-height: 100vh;
@@ -351,7 +424,8 @@
     overflow: visible !important;
     padding-right: 0 !important;
     gap: 12px;
-    padding-bottom: 20px;
+    /* Увеличиваем нижний отступ, чтобы посты выезжали из-за панели */
+    padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px)) !important;
     max-height: none !important;
     height: auto !important;
     display: flex !important;
@@ -446,4 +520,17 @@
     padding: 6px 14px;
     font-size: 0.85rem;
   }
+}
+
+@media (max-width: 768px) {
+  .profile-two-columns {
+    display: block !important;
+    gap: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+    /* Увеличиваем нижний отступ до 88px + безопасная зона экрана */
+    padding: 16px 16px calc(88px + env(safe-area-inset-bottom, 0px)) 16px !important;
+    flex: none !important;
+  }
+
 }

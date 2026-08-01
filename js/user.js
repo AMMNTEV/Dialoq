@@ -1,3 +1,16 @@
+// ========== МГНОВЕННАЯ ОТРИСОВКА САЙДБАРА (ДО ЗАПУСКА FIREBASE) ==========
+document.addEventListener("DOMContentLoaded", () => {
+  const lastUid = localStorage.getItem('lastUid');
+  if (lastUid) {
+    const cachedUserStr = localStorage.getItem(`cachedCurrentUser_${lastUid}`);
+    if (cachedUserStr) {
+      if (typeof updateSidebarUser === 'function') {
+        updateSidebarUser(JSON.parse(cachedUserStr));
+      }
+    }
+  }
+});
+
 // ========== ПРОСМОТР ПРОФИЛЯ ДРУГОГО ПОЛЬЗОВАТЕЛЯ ==========
 const urlParams = new URLSearchParams(window.location.search);
 const userId = urlParams.get('id');
@@ -13,7 +26,15 @@ onAuthStateChanged(async (user) => {
     return;
   }
   currentUser = user;
-
+  const cachedUserStr = localStorage.getItem(`cachedCurrentUser_${user.uid}`);
+  if (cachedUserStr) {
+    updateSidebarUser(JSON.parse(cachedUserStr));
+  } else {
+    // Если кэша нет, запрашиваем из базы
+    db.collection('users').doc(user.uid).get().then(doc => {
+      if(doc.exists) updateSidebarUser(doc.data());
+    });
+  }
   try {
     const userDoc = await db.collection('users').doc(userId).get();
     if (!userDoc.exists) {
@@ -97,5 +118,26 @@ async function loadPosts(targetUserId) {
   } catch (error) {
     console.error('Ошибка:', error);
     postsContainer.innerHTML = '<div class="error">Ошибка загрузки постов</div>';
+  }
+}
+
+// Функция для обновления информации текущего пользователя в левом сайдбаре
+function updateSidebarUser(userData) {
+  const nameEl = document.getElementById('sidebarUserName');
+  const tagEl = document.getElementById('sidebarUserTag');
+  const avatarEl = document.getElementById('sidebarUserAvatar');
+  
+  if (nameEl) nameEl.textContent = userData.nickname || 'Пользователь';
+  if (tagEl) tagEl.textContent = userData.tag || '@user';
+  
+  if (avatarEl) {
+    if (userData.avatar) {
+      avatarEl.innerHTML = `<img src="${userData.avatar}" alt="Аватар" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block;">`;
+      avatarEl.style.background = 'transparent';
+    } else {
+      avatarEl.innerHTML = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
+      avatarEl.style.background = '#1a1a1a';
+      avatarEl.style.color = 'white';
+    }
   }
 }

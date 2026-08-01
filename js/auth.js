@@ -70,6 +70,16 @@ async function sendVerificationEmail() {
 }
 
 async function logout() {
+  const uid = localStorage.getItem('lastUid');
+  
+  // Очищаем локальный кэш пользователя перед выходом
+  if (uid) {
+    localStorage.removeItem(`cachedCurrentUser_${uid}`);
+    localStorage.removeItem(`cachedChats_${uid}`);
+    localStorage.removeItem(`cachedUnreads_${uid}`);
+    localStorage.removeItem('lastUid');
+  }
+  
   await auth.signOut();
   window.location.href = 'index.html';
 }
@@ -100,3 +110,19 @@ function preventAtSymbolDeletion(event, input) {
   }
 }
 
+// ========== МГНОВЕННЫЙ ВХОД ==========
+document.addEventListener("DOMContentLoaded", () => {
+  const lastUid = localStorage.getItem('lastUid');
+  
+  // Добавляем страницы settings.html и user.html в список исключений для редиректа
+  const isAlreadyOnMessenger = 
+    window.location.pathname.includes('messenger.html') || 
+    window.location.pathname.includes('profile.html') ||
+    window.location.pathname.includes('settings.html') ||
+    window.location.pathname.includes('user.html');
+  
+  // Если в кэше остался lastUid и мы НЕ на одной из внутренних страниц, перекидываем в мессенджер
+  if (lastUid && !isAlreadyOnMessenger) {
+    window.location.href = 'messenger.html'; 
+  }
+});
