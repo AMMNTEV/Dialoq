@@ -589,34 +589,16 @@ function searchAll() {
 function searchUsersInCreate() {
   const searchText = document.getElementById('searchUsersInCreate').value.toLowerCase();
   const usersList = document.getElementById('usersListModal');
-  if (!usersList) return;
-
-  // 1. Сохраняем ID всех уже выбранных пользователей перед перерисовкой
-  const checkedIds = Array.from(usersList.querySelectorAll('input[type="checkbox"]:checked'))
-    .map(cb => cb.value);
-
-  if (!searchText) { 
-    usersList.innerHTML = '<div class="no-users">Начните вводить имя для поиска</div>'; 
-    return; 
-  }
-
+  if (!searchText) { usersList.innerHTML = '<div class="no-users">Начните вводить имя для поиска</div>'; return; }
   const filtered = allUsersForModal.filter(user =>
     (user.nickname && user.nickname.toLowerCase().includes(searchText)) ||
     (user.tag && user.tag.toLowerCase().includes(searchText))
   );
-
-  if (filtered.length === 0) { 
-    usersList.innerHTML = '<div class="no-users">Ничего не найдено</div>'; 
-    return; 
-  }
-
+  if (filtered.length === 0) { usersList.innerHTML = '<div class="no-users">Ничего не найдено</div>'; return; }
   let html = '';
   filtered.forEach(user => {
-    // 2. Проверяем, был ли этот пользователь выбран ранее
-    const isChecked = checkedIds.includes(user.id) ? 'checked' : '';
-    html += `<label class="user-checkbox"><input type="checkbox" value="${user.id}" ${isChecked}><span>${user.nickname} ${user.tag}</span></label>`;
+    html += `<label class="user-checkbox"><input type="checkbox" value="${user.id}"><span>${user.nickname} ${user.tag}</span></label>`;
   });
-  
   usersList.innerHTML = html;
 }
 
@@ -624,35 +606,17 @@ function searchUsersToAdd() {
   if (!selectedChat) return;
   const searchText = document.getElementById('searchUsersToAdd').value.toLowerCase();
   const addList = document.getElementById('addParticipantsList');
-  if (!addList) return;
-
-  // 1. Сохраняем ID уже выбранных чекбоксов перед перерисовкой
-  const checkedIds = Array.from(addList.querySelectorAll('input[type="checkbox"]:checked'))
-    .map(cb => cb.value);
-
-  if (!searchText) { 
-    addList.innerHTML = '<div class="no-users">Начните вводить имя для поиска</div>'; 
-    return; 
-  }
-
+  if (!searchText) { addList.innerHTML = '<div class="no-users">Начните вводить имя для поиска</div>'; return; }
   const nonParticipants = allUsersForModal.filter(user => !selectedChat.participants.includes(user.id));
   const filtered = nonParticipants.filter(user =>
     (user.nickname && user.nickname.toLowerCase().includes(searchText)) ||
     (user.tag && user.tag.toLowerCase().includes(searchText))
   );
-
-  if (filtered.length === 0) { 
-    addList.innerHTML = '<div class="no-users">Ничего не найдено</div>'; 
-    return; 
-  }
-
+  if (filtered.length === 0) { addList.innerHTML = '<div class="no-users">Ничего не найдено</div>'; return; }
   let html = '';
   filtered.forEach(user => {
-    // 2. Восстанавливаем состояние галочки
-    const isChecked = checkedIds.includes(user.id) ? 'checked' : '';
-    html += `<label class="user-checkbox"><input type="checkbox" value="${user.id}" ${isChecked}><span>${user.nickname} ${user.tag}</span></label>`;
+    html += `<label class="user-checkbox"><input type="checkbox" value="${user.id}"><span>${user.nickname} ${user.tag}</span></label>`;
   });
-  
   addList.innerHTML = html;
 }
 
