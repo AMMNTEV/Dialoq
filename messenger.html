@@ -138,6 +138,19 @@
         <button onclick="hideGroupInfoModal()" class="modal-close">&times;</button>
       </div>
       <div class="modal-body">
+
+        <!-- НОВЫЙ БЛОК: Аватарка беседы -->
+        <div class="group-avatar-section" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
+          <div class="avatar-large" id="groupInfoAvatar" style="width: 100px; height: 100px; border-radius: 50%; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; cursor: pointer; overflow: hidden; border: 2px solid #333;" onclick="document.getElementById('groupAvatarInput').click()">
+            👥
+          </div>
+          <!-- Скрытый инпут для выбора файла -->
+          <input type="file" id="groupAvatarInput" accept="image/png, image/jpeg, image/webp" style="display: none;">
+          <span style="font-size: 0.8rem; color: #888; margin-top: 8px; cursor: pointer;" onclick="document.getElementById('groupAvatarInput').click()">
+            Нажмите, чтобы изменить
+          </span>
+        </div>
+
         <div class="group-info-section">
           <h4>Участники:</h4>
           <div id="groupParticipants" class="group-participants-list"></div>
