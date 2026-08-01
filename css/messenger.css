@@ -171,6 +171,7 @@
   
   /* Тень и границы */
   border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 28px; 
   box-shadow: none !important; /* Убрали тень */
     
   font-size: 0.95rem;
