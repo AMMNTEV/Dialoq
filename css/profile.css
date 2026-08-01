@@ -415,7 +415,8 @@
     overflow: visible !important;
     padding-right: 0 !important;
     gap: 12px;
-    padding-bottom: 20px;
+    /* Увеличиваем нижний отступ, чтобы посты выезжали из-за панели */
+    padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px)) !important;
     max-height: none !important;
     height: auto !important;
     display: flex !important;
@@ -522,4 +523,5 @@
     padding: 16px 16px calc(88px + env(safe-area-inset-bottom, 0px)) 16px !important;
     flex: none !important;
   }
+
 }

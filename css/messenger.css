@@ -207,6 +207,7 @@
   cursor: pointer;
   transition: background 0.2s;
   margin-bottom: 4px;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .chat-item:hover,
