@@ -1192,6 +1192,15 @@ async function openChatInfo(chatId) {
     const chat = chatDoc.data();
     selectedChat = { ...selectedChat, participants: chat.participants, name: chat.name };
 
+    const avatarDiv = document.getElementById('groupInfoAvatar');
+    if (avatarDiv) {
+      if (chat.avatar) {
+        avatarDiv.innerHTML = `<img src="${chat.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
+      } else {
+        avatarDiv.innerHTML = chat.name ? chat.name.charAt(0).toUpperCase() : '👥';
+      }
+    }
+
     let participantsHTML = '<ul class="participants-list">';
     for (const userId of chat.participants) {
       const userData = await getUserById(userId);
@@ -1558,5 +1567,80 @@ function updateSidebarUser(userData) {
       avatarEl.style.background = '#1a1a1a';
       avatarEl.style.color = 'white';
     }
+  }
+}
+
+// ========== ЗАГРУЗКА АВАТАРКИ ДЛЯ БЕСЕДЫ ==========
+document.getElementById('groupAvatarInput')?.addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file || !selectedChat || !selectedChat.isGroup) return;
+
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    const img = new Image();
+    img.onload = function() {
+      // Создаем холст для изменения размера (как в профиле)
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const targetSize = 800;
+      
+      canvas.width = targetSize;
+      canvas.height = targetSize;
+
+      // Вычисляем координаты для обрезки (crop) по центру в идеальный квадрат
+      const minDim = Math.min(img.width, img.height);
+      const startX = (img.width - minDim) / 2;
+      const startY = (img.height - minDim) / 2;
+
+      // Отрисовываем картинку
+      ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, targetSize, targetSize);
+
+      // Получаем Base64 строку (JPEG, 70% качества)
+      const base64Avatar = canvas.toDataURL('image/jpeg', 0.7);
+
+      if (base64Avatar.length > 1000000) {
+        alert('Файл слишком большой даже после сжатия. Пожалуйста, выберите другую картинку.');
+        return;
+      }
+
+      saveGroupAvatarToFirebase(base64Avatar);
+    };
+    img.src = event.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+async function saveGroupAvatarToFirebase(base64String) {
+  if (!selectedChat || !selectedChat.isGroup) return;
+  try {
+    // 1. Пишем в базу данных
+    await db.collection('chats').doc(selectedChat.id).update({ avatar: base64String });
+    
+    // 2. Отправляем системное сообщение об изменении
+    await db.collection('chats').doc(selectedChat.id).collection('messages').add({
+      text: `🖼️ ${currentUserData.nickname} обновил(а) аватарку беседы`,
+      senderId: 'system',
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      read: false,
+      isSystem: true
+    });
+
+    // 3. Обновляем UI в модалке мгновенно
+    const avatarDiv = document.getElementById('groupInfoAvatar');
+    if (avatarDiv) {
+      avatarDiv.innerHTML = `<img src="${base64String}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
+    }
+    
+    // 4. Обновляем шапку открытого чата
+    selectedChat.chatImage = base64String;
+    updateChatHeader(selectedChat);
+    
+    // 5. Перезапускаем слушатель, чтобы аватарка обновилась в списке чатов слева
+    if (unsubscribeChats) { unsubscribeChats(); }
+    listenForChats();
+
+  } catch (error) {
+    console.error('Ошибка сохранения аватарки беседы:', error);
+    alert('Ошибка при загрузке аватарки');
   }
 }
