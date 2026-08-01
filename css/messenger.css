@@ -963,7 +963,7 @@ body.chat-mode .mobile-bottom-nav {
 
   /* Компактный отступ сверху, чтобы первый чат встал ближе к поиску */
   .chats-list {
-    padding-top: 60px !important; 
+    padding-top: 76px !important; 
     padding-left: 16px !important;
     padding-right: 16px !important;
     padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;

@@ -313,6 +313,15 @@
     overflow-y: auto !important;
     height: auto !important;
   }
+
+  body:has(.profile-container) .messenger-container {
+    position: static !important;
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
   .profile-container {
     height: auto !important;
     min-height: 100vh;
