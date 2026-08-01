@@ -269,6 +269,21 @@ let unreadCounts = {};
 let isCreatingGroup = false;
 let isNewChatPending = false;
 
+// Глобальные множества для хранения выбранных ID пользователей
+let selectedUsersForCreate = new Set();
+let selectedUsersForAdd = new Set();
+
+// Функция для обработки клика по галочке
+function toggleUserSelection(userId, isChecked, mode) {
+  if (mode === 'create') {
+    if (isChecked) selectedUsersForCreate.add(userId);
+    else selectedUsersForCreate.delete(userId);
+  } else if (mode === 'add') {
+    if (isChecked) selectedUsersForAdd.add(userId);
+    else selectedUsersForAdd.delete(userId);
+  }
+}
+
 // ========== ЗАГРУЗКА ПОЛЬЗОВАТЕЛЕЙ ==========
 async function loadAllUsers() {
   if (!currentUser) return;
@@ -591,10 +606,6 @@ function searchUsersInCreate() {
   const usersList = document.getElementById('usersListModal');
   if (!usersList) return;
 
-  // 1. Сохраняем ID всех уже выбранных пользователей перед перерисовкой
-  const checkedIds = Array.from(usersList.querySelectorAll('input[type="checkbox"]:checked'))
-    .map(cb => cb.value);
-
   if (!searchText) { 
     usersList.innerHTML = '<div class="no-users">Начните вводить имя для поиска</div>'; 
     return; 
@@ -612,9 +623,9 @@ function searchUsersInCreate() {
 
   let html = '';
   filtered.forEach(user => {
-    // 2. Проверяем, был ли этот пользователь выбран ранее
-    const isChecked = checkedIds.includes(user.id) ? 'checked' : '';
-    html += `<label class="user-checkbox"><input type="checkbox" value="${user.id}" ${isChecked}><span>${user.nickname} ${user.tag}</span></label>`;
+    // Проверяем, есть ли ID в нашем глобальном хранилище
+    const isChecked = selectedUsersForCreate.has(user.id) ? 'checked' : '';
+    html += `<label class="user-checkbox"><input type="checkbox" value="${user.id}" onchange="toggleUserSelection('${user.id}', this.checked, 'create')" ${isChecked}><span>${user.nickname} ${user.tag}</span></label>`;
   });
   
   usersList.innerHTML = html;
@@ -625,10 +636,6 @@ function searchUsersToAdd() {
   const searchText = document.getElementById('searchUsersToAdd').value.toLowerCase();
   const addList = document.getElementById('addParticipantsList');
   if (!addList) return;
-
-  // 1. Сохраняем ID уже выбранных чекбоксов перед перерисовкой
-  const checkedIds = Array.from(addList.querySelectorAll('input[type="checkbox"]:checked'))
-    .map(cb => cb.value);
 
   if (!searchText) { 
     addList.innerHTML = '<div class="no-users">Начните вводить имя для поиска</div>'; 
@@ -648,9 +655,9 @@ function searchUsersToAdd() {
 
   let html = '';
   filtered.forEach(user => {
-    // 2. Восстанавливаем состояние галочки
-    const isChecked = checkedIds.includes(user.id) ? 'checked' : '';
-    html += `<label class="user-checkbox"><input type="checkbox" value="${user.id}" ${isChecked}><span>${user.nickname} ${user.tag}</span></label>`;
+    // Проверяем, есть ли ID в нашем глобальном хранилище
+    const isChecked = selectedUsersForAdd.has(user.id) ? 'checked' : '';
+    html += `<label class="user-checkbox"><input type="checkbox" value="${user.id}" onchange="toggleUserSelection('${user.id}', this.checked, 'add')" ${isChecked}><span>${user.nickname} ${user.tag}</span></label>`;
   });
   
   addList.innerHTML = html;
@@ -1132,6 +1139,7 @@ async function sendMessage() {
 
 // ========== СОЗДАНИЕ ГРУППЫ ==========
 function showCreateGroupModal() {
+  selectedUsersForCreate.clear(); // Очищаем выбранных людей перед открытием окна
   const usersList = document.getElementById('usersListModal');
   if (!usersList) return;
   document.getElementById('searchUsersInCreate').value = '';
@@ -1144,13 +1152,18 @@ function hideCreateGroupModal() {
 async function createGroupChat() {
   if (isCreatingGroup) return;
   const groupName = document.getElementById('groupName').value.trim();
-  const checkboxes = document.querySelectorAll('#usersListModal input[type="checkbox"]:checked');
+  
   if (!groupName) { alert('Введите название беседы'); return; }
-  if (checkboxes.length === 0) { alert('Выберите хотя бы одного участника'); return; }
+  // Проверяем наличие выбранных людей в нашем глобальном множестве
+  if (selectedUsersForCreate.size === 0) { alert('Выберите хотя бы одного участника'); return; }
+  
   isCreatingGroup = true;
   hideCreateGroupModal();
+  
   const participants = [currentUser.uid];
-  checkboxes.forEach(cb => participants.push(cb.value));
+  // Добавляем всех из памяти
+  selectedUsersForCreate.forEach(userId => participants.push(userId));
+  
   try {
     await db.collection('chats').add({
       name: groupName,
@@ -1162,6 +1175,7 @@ async function createGroupChat() {
       lastMessageTime: null
     });
     document.getElementById('groupName').value = '';
+    selectedUsersForCreate.clear(); // Очищаем после успешного создания
   } catch (error) {
     console.error('Ошибка создания беседы:', error);
     alert('Ошибка при создании беседы: ' + error.message);
@@ -1204,6 +1218,7 @@ async function openChatInfo(chatId) {
 
     document.getElementById('searchUsersToAdd').value = '';
     document.getElementById('addParticipantsList').innerHTML = '<div class="no-users">Начните вводить имя для поиска</div>';
+    selectedUsersForAdd.clear(); // Очищаем список добавления
 
     const deleteBtn = document.getElementById('deleteGroupBtn');
     if (chat.createdBy === currentUser.uid) {
@@ -1256,10 +1271,10 @@ async function removeParticipant(userId) {
 
 async function addSelectedParticipants() {
   if (!selectedChat) return;
-  const checkboxes = document.querySelectorAll('#addParticipantsList input[type="checkbox"]:checked');
-  if (checkboxes.length === 0) { alert('Выберите пользователей для добавления'); return; }
-  const newParticipants = [];
-  checkboxes.forEach(cb => newParticipants.push(cb.value));
+  
+  if (selectedUsersForAdd.size === 0) { alert('Выберите пользователей для добавления'); return; }
+  const newParticipants = Array.from(selectedUsersForAdd);
+  
   try {
     await db.collection('chats').doc(selectedChat.id).update({
       participants: firebase.firestore.FieldValue.arrayUnion(...newParticipants)
@@ -1287,6 +1302,7 @@ async function addSelectedParticipants() {
     updateChatHeaderParticipantCount();
     if (unsubscribeChats) { unsubscribeChats(); }
     listenForChats();
+    selectedUsersForAdd.clear(); // Очищаем после успешного добавления
   } catch (error) {
     console.error('Ошибка добавления участников:', error);
     alert('Ошибка при добавлении участников');
