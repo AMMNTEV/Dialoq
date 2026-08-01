@@ -269,6 +269,21 @@ let unreadCounts = {};
 let isCreatingGroup = false;
 let isNewChatPending = false;
 
+// Глобальные множества для хранения выбранных ID пользователей
+let selectedUsersForCreate = new Set();
+let selectedUsersForAdd = new Set();
+
+// Функция для обработки клика по галочке
+function toggleUserSelection(userId, isChecked, mode) {
+  if (mode === 'create') {
+    if (isChecked) selectedUsersForCreate.add(userId);
+    else selectedUsersForCreate.delete(userId);
+  } else if (mode === 'add') {
+    if (isChecked) selectedUsersForAdd.add(userId);
+    else selectedUsersForAdd.delete(userId);
+  }
+}
+
 // ========== ЗАГРУЗКА ПОЛЬЗОВАТЕЛЕЙ ==========
 async function loadAllUsers() {
   if (!currentUser) return;
@@ -589,16 +604,30 @@ function searchAll() {
 function searchUsersInCreate() {
   const searchText = document.getElementById('searchUsersInCreate').value.toLowerCase();
   const usersList = document.getElementById('usersListModal');
-  if (!searchText) { usersList.innerHTML = '<div class="no-users">Начните вводить имя для поиска</div>'; return; }
+  if (!usersList) return;
+
+  if (!searchText) { 
+    usersList.innerHTML = '<div class="no-users">Начните вводить имя для поиска</div>'; 
+    return; 
+  }
+
   const filtered = allUsersForModal.filter(user =>
     (user.nickname && user.nickname.toLowerCase().includes(searchText)) ||
     (user.tag && user.tag.toLowerCase().includes(searchText))
   );
-  if (filtered.length === 0) { usersList.innerHTML = '<div class="no-users">Ничего не найдено</div>'; return; }
+
+  if (filtered.length === 0) { 
+    usersList.innerHTML = '<div class="no-users">Ничего не найдено</div>'; 
+    return; 
+  }
+
   let html = '';
   filtered.forEach(user => {
-    html += `<label class="user-checkbox"><input type="checkbox" value="${user.id}"><span>${user.nickname} ${user.tag}</span></label>`;
+    // Проверяем, есть ли ID в нашем глобальном хранилище
+    const isChecked = selectedUsersForCreate.has(user.id) ? 'checked' : '';
+    html += `<label class="user-checkbox"><input type="checkbox" value="${user.id}" onchange="toggleUserSelection('${user.id}', this.checked, 'create')" ${isChecked}><span>${user.nickname} ${user.tag}</span></label>`;
   });
+  
   usersList.innerHTML = html;
 }
 
@@ -606,17 +635,31 @@ function searchUsersToAdd() {
   if (!selectedChat) return;
   const searchText = document.getElementById('searchUsersToAdd').value.toLowerCase();
   const addList = document.getElementById('addParticipantsList');
-  if (!searchText) { addList.innerHTML = '<div class="no-users">Начните вводить имя для поиска</div>'; return; }
+  if (!addList) return;
+
+  if (!searchText) { 
+    addList.innerHTML = '<div class="no-users">Начните вводить имя для поиска</div>'; 
+    return; 
+  }
+
   const nonParticipants = allUsersForModal.filter(user => !selectedChat.participants.includes(user.id));
   const filtered = nonParticipants.filter(user =>
     (user.nickname && user.nickname.toLowerCase().includes(searchText)) ||
     (user.tag && user.tag.toLowerCase().includes(searchText))
   );
-  if (filtered.length === 0) { addList.innerHTML = '<div class="no-users">Ничего не найдено</div>'; return; }
+
+  if (filtered.length === 0) { 
+    addList.innerHTML = '<div class="no-users">Ничего не найдено</div>'; 
+    return; 
+  }
+
   let html = '';
   filtered.forEach(user => {
-    html += `<label class="user-checkbox"><input type="checkbox" value="${user.id}"><span>${user.nickname} ${user.tag}</span></label>`;
+    // Проверяем, есть ли ID в нашем глобальном хранилище
+    const isChecked = selectedUsersForAdd.has(user.id) ? 'checked' : '';
+    html += `<label class="user-checkbox"><input type="checkbox" value="${user.id}" onchange="toggleUserSelection('${user.id}', this.checked, 'add')" ${isChecked}><span>${user.nickname} ${user.tag}</span></label>`;
   });
+  
   addList.innerHTML = html;
 }
 
@@ -1096,6 +1139,7 @@ async function sendMessage() {
 
 // ========== СОЗДАНИЕ ГРУППЫ ==========
 function showCreateGroupModal() {
+  selectedUsersForCreate.clear(); // Очищаем выбранных людей перед открытием окна
   const usersList = document.getElementById('usersListModal');
   if (!usersList) return;
   document.getElementById('searchUsersInCreate').value = '';
@@ -1108,13 +1152,18 @@ function hideCreateGroupModal() {
 async function createGroupChat() {
   if (isCreatingGroup) return;
   const groupName = document.getElementById('groupName').value.trim();
-  const checkboxes = document.querySelectorAll('#usersListModal input[type="checkbox"]:checked');
+  
   if (!groupName) { alert('Введите название беседы'); return; }
-  if (checkboxes.length === 0) { alert('Выберите хотя бы одного участника'); return; }
+  // Проверяем наличие выбранных людей в нашем глобальном множестве
+  if (selectedUsersForCreate.size === 0) { alert('Выберите хотя бы одного участника'); return; }
+  
   isCreatingGroup = true;
   hideCreateGroupModal();
+  
   const participants = [currentUser.uid];
-  checkboxes.forEach(cb => participants.push(cb.value));
+  // Добавляем всех из памяти
+  selectedUsersForCreate.forEach(userId => participants.push(userId));
+  
   try {
     await db.collection('chats').add({
       name: groupName,
@@ -1126,6 +1175,7 @@ async function createGroupChat() {
       lastMessageTime: null
     });
     document.getElementById('groupName').value = '';
+    selectedUsersForCreate.clear(); // Очищаем после успешного создания
   } catch (error) {
     console.error('Ошибка создания беседы:', error);
     alert('Ошибка при создании беседы: ' + error.message);
@@ -1141,6 +1191,15 @@ async function openChatInfo(chatId) {
     const chatDoc = await db.collection('chats').doc(chatId).get();
     const chat = chatDoc.data();
     selectedChat = { ...selectedChat, participants: chat.participants, name: chat.name };
+
+    const avatarDiv = document.getElementById('groupInfoAvatar');
+    if (avatarDiv) {
+      if (chat.avatar) {
+        avatarDiv.innerHTML = `<img src="${chat.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
+      } else {
+        avatarDiv.innerHTML = chat.name ? chat.name.charAt(0).toUpperCase() : '👥';
+      }
+    }
 
     let participantsHTML = '<ul class="participants-list">';
     for (const userId of chat.participants) {
@@ -1168,6 +1227,7 @@ async function openChatInfo(chatId) {
 
     document.getElementById('searchUsersToAdd').value = '';
     document.getElementById('addParticipantsList').innerHTML = '<div class="no-users">Начните вводить имя для поиска</div>';
+    selectedUsersForAdd.clear(); // Очищаем список добавления
 
     const deleteBtn = document.getElementById('deleteGroupBtn');
     if (chat.createdBy === currentUser.uid) {
@@ -1220,10 +1280,10 @@ async function removeParticipant(userId) {
 
 async function addSelectedParticipants() {
   if (!selectedChat) return;
-  const checkboxes = document.querySelectorAll('#addParticipantsList input[type="checkbox"]:checked');
-  if (checkboxes.length === 0) { alert('Выберите пользователей для добавления'); return; }
-  const newParticipants = [];
-  checkboxes.forEach(cb => newParticipants.push(cb.value));
+  
+  if (selectedUsersForAdd.size === 0) { alert('Выберите пользователей для добавления'); return; }
+  const newParticipants = Array.from(selectedUsersForAdd);
+  
   try {
     await db.collection('chats').doc(selectedChat.id).update({
       participants: firebase.firestore.FieldValue.arrayUnion(...newParticipants)
@@ -1251,6 +1311,7 @@ async function addSelectedParticipants() {
     updateChatHeaderParticipantCount();
     if (unsubscribeChats) { unsubscribeChats(); }
     listenForChats();
+    selectedUsersForAdd.clear(); // Очищаем после успешного добавления
   } catch (error) {
     console.error('Ошибка добавления участников:', error);
     alert('Ошибка при добавлении участников');
@@ -1506,5 +1567,80 @@ function updateSidebarUser(userData) {
       avatarEl.style.background = '#1a1a1a';
       avatarEl.style.color = 'white';
     }
+  }
+}
+
+// ========== ЗАГРУЗКА АВАТАРКИ ДЛЯ БЕСЕДЫ ==========
+document.getElementById('groupAvatarInput')?.addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file || !selectedChat || !selectedChat.isGroup) return;
+
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    const img = new Image();
+    img.onload = function() {
+      // Создаем холст для изменения размера (как в профиле)
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const targetSize = 800;
+      
+      canvas.width = targetSize;
+      canvas.height = targetSize;
+
+      // Вычисляем координаты для обрезки (crop) по центру в идеальный квадрат
+      const minDim = Math.min(img.width, img.height);
+      const startX = (img.width - minDim) / 2;
+      const startY = (img.height - minDim) / 2;
+
+      // Отрисовываем картинку
+      ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, targetSize, targetSize);
+
+      // Получаем Base64 строку (JPEG, 70% качества)
+      const base64Avatar = canvas.toDataURL('image/jpeg', 0.7);
+
+      if (base64Avatar.length > 1000000) {
+        alert('Файл слишком большой даже после сжатия. Пожалуйста, выберите другую картинку.');
+        return;
+      }
+
+      saveGroupAvatarToFirebase(base64Avatar);
+    };
+    img.src = event.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+async function saveGroupAvatarToFirebase(base64String) {
+  if (!selectedChat || !selectedChat.isGroup) return;
+  try {
+    // 1. Пишем в базу данных
+    await db.collection('chats').doc(selectedChat.id).update({ avatar: base64String });
+    
+    // 2. Отправляем системное сообщение об изменении
+    await db.collection('chats').doc(selectedChat.id).collection('messages').add({
+      text: `🖼️ ${currentUserData.nickname} обновил(а) аватарку беседы`,
+      senderId: 'system',
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      read: false,
+      isSystem: true
+    });
+
+    // 3. Обновляем UI в модалке мгновенно
+    const avatarDiv = document.getElementById('groupInfoAvatar');
+    if (avatarDiv) {
+      avatarDiv.innerHTML = `<img src="${base64String}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
+    }
+    
+    // 4. Обновляем шапку открытого чата
+    selectedChat.chatImage = base64String;
+    updateChatHeader(selectedChat);
+    
+    // 5. Перезапускаем слушатель, чтобы аватарка обновилась в списке чатов слева
+    if (unsubscribeChats) { unsubscribeChats(); }
+    listenForChats();
+
+  } catch (error) {
+    console.error('Ошибка сохранения аватарки беседы:', error);
+    alert('Ошибка при загрузке аватарки');
   }
 }
