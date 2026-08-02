@@ -69,40 +69,40 @@ async function toggleTheme(isDark) {
 async function deleteAccount() {
   if (!currentUser) return;
   
-  const isConfirmed = confirm("Вы уверены, что хотите удалить аккаунт? Ваш ник изменится на «Удаленный аккаунт», а сам профиль будет удален.");
+  const isConfirmed = confirm("Вы уверены, что хотите удалить аккаунт? Профиль будет полностью удален.");
   if (!isConfirmed) return;
 
   try {
     const uid = currentUser.uid;
     
-    // 1. СНАЧАЛА чистим весь локальный кэш, чтобы при редиректе ничего не мелькало
+    // 1. СНАЧАЛА пробуем удалить пользователя из Authentication. 
+    // Если сессия старая, здесь сразу вылетит ошибка auth/requires-recent-login, 
+    // МЫ НЕ УСПЕЕМ испортить данные в базе!
+    await currentUser.delete();
+    
+    // 2. Если удаление в Auth прошло успешно, только теперь зачищаем базу и кэш
     localStorage.removeItem(`cachedCurrentUser_${uid}`);
     localStorage.removeItem(`cachedChats_${uid}`);
     localStorage.removeItem(`cachedUnreads_${uid}`);
     localStorage.removeItem('lastUid');
-    if (window.userCache) window.userCache.delete(uid); // Очистка глобальной Map, если есть
+    if (window.userCache) window.userCache.delete(uid);
     
-    // 2. Помечаем аккаунт как удаленный в Firestore (Стираем личные данные, оставляем ID для чатов)
     await db.collection('users').doc(uid).update({
       nickname: 'Удаленный аккаунт',
-      email: '', // Пустой email - флаг удаленного аккаунта
+      email: '',
       avatar: '',
       tag: '',
       deletedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-
-    // 3. Навсегда удаляем пользователя из Firebase Authentication
-    await currentUser.delete();
     
-    // 4. Перенаправляем на страницу входа
+    // 3. Перенаправляем на главную
     window.location.href = 'index.html';
     
   } catch (error) {
     console.error('Ошибка при удалении аккаунта:', error);
     
-    // Если токен сессии устарел, Firebase выдаст эту ошибку
     if (error.code === 'auth/requires-recent-login') {
-      alert("В целях безопасности Firebase требует подтвердить, что это ваш аккаунт. Войдите заново, а затем снова нажмите «Удалить».");
+      alert("В целях безопасности Firebase требует подтвердить вход. Сейчас вы выйдете из системы — войдите заново и сразу нажмите «Удалить» еще раз.");
       await auth.signOut();
       window.location.href = 'index.html';
     } else {
