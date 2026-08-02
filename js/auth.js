@@ -168,6 +168,31 @@ async function continueWithGoogle() {
       avatar: avatarUrl, // Сохраняем ссылку на фото
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
+  } else {
+    // Дополнительная проверка на сломанные или отсутствующие теги
+    const data = doc.data();
+    if (!data.tag || data.tag === '@undefined') {
+      let tag = '';
+      let isUnique = false;
+      
+      while (!isUnique) {
+        const randomDigits = Math.floor(10000 + Math.random() * 90000);
+        tag = '@user' + randomDigits;
+        const snapshot = await db.collection('users').where('tag', '==', tag).get();
+        if (snapshot.empty) isUnique = true;
+      }
+
+      // Обновляем профиль Firebase
+      const nickname = user.displayName || 'Пользователь';
+      await user.updateProfile({ 
+        displayName: nickname + '|' + tag 
+      });
+
+      // Перезаписываем сломанный тег в Firestore
+      await db.collection('users').doc(user.uid).update({
+        tag: tag
+      });
+    }
   }
   
   // Если аккаунт уже был (doc.exists === true), Firebase уже авторизовал его,
