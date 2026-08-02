@@ -44,6 +44,12 @@
         <a href="forgot-password.html" class="forgot-password-link">Забыли пароль?</a>
       </div>
       <button type="submit" class="auth-button" id="loginBtn">Войти</button>
+      <div class="auth-divider">or</div>
+      
+      <button type="button" class="oauth-btn" id="googleLoginBtn">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google">
+        Continue with Google
+      </button>
     </form>
     <div class="auth-footer">
       Нет аккаунта? <a href="register.html">Зарегистрироваться</a>
@@ -54,6 +60,22 @@
   <script src="js/firebase-config.js"></script>
   <script src="js/auth.js"></script>
   <script>
+    // Обработка входа через Google
+    document.getElementById('googleLoginBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('googleLoginBtn');
+      const messageDiv = document.getElementById('message');
+      btn.disabled = true;
+      try {
+        await continueWithGoogle();
+        window.location.href = 'messenger.html'; // Успех -> идем в мессенджер
+      } catch (error) {
+        console.error('Ошибка Google:', error);
+        let errorMsg = error.code === 'auth/popup-closed-by-user' ? 'Вход отменен' : 'Ошибка авторизации';
+        messageDiv.innerHTML = `<div class="error">❌ ${errorMsg}</div>`;
+        btn.disabled = false;
+      }
+    });
+  
     // Проверяем, не залогинен ли уже пользователь
     onAuthStateChanged((user) => {
       if (user && user.emailVerified) {

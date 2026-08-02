@@ -33,6 +33,13 @@
   <div class="auth-card">
     <h1>Регистрация</h1>
     <p class="auth-subtitle">Создайте аккаунт чтобы начать общение</p>
+    <button type="button" class="oauth-btn" id="googleRegBtn" style="margin-bottom: 0;">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google">
+      Continue with Google
+    </button>
+    
+    <div class="auth-divider">or</div>
+
     <form id="registerForm">
       <div class="auth-input-group">
         <label>Никнейм</label>
@@ -148,6 +155,22 @@
         }
       }, 500);
     }
+
+    // Обработка регистрации через Google
+    document.getElementById('googleRegBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('googleRegBtn');
+      const messageDiv = document.getElementById('message');
+      btn.disabled = true;
+      try {
+        await continueWithGoogle();
+        window.location.href = 'messenger.html'; // Успех -> идем в мессенджер
+      } catch (error) {
+        console.error('Ошибка Google:', error);
+        let errorMsg = error.code === 'auth/popup-closed-by-user' ? 'Регистрация отменена' : 'Ошибка авторизации';
+        messageDiv.innerHTML = `<div class="error">❌ ${errorMsg}</div>`;
+        btn.disabled = false;
+      }
+    });
 
     // Обработка отправки формы
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
