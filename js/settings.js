@@ -65,4 +65,38 @@ async function toggleTheme(isDark) {
   }
 }
 
-// logout уже определён в auth.js, но здесь мы его переопределять не будем — используем глобальный
+// ========== УДАЛЕНИЕ АККАУНТА ==========
+async function deleteAccount() {
+  if (!currentUser) return;
+  
+  // Запрашиваем подтверждение
+  const isConfirmed = confirm("Вы уверены, что хотите удалить аккаунт? Ваш ник изменится на «Удаленный аккаунт», а сам профиль будет удален.");
+  
+  if (!isConfirmed) return;
+
+  try {
+    // 1. Заменяем никнейм в Firestore (тег остается нетронутым)
+    await db.collection('users').doc(currentUser.uid).update({
+      nickname: 'Удаленный аккаунт',
+      // Опционально: можно также сбросить аватарку, если нужно
+      // avatar: '' 
+    });
+
+    // 2. Удаляем аккаунт из Firebase Authentication
+    await currentUser.delete();
+    
+    // После успешного удаления сработает onAuthStateChanged и сам перекинет на index.html
+    
+  } catch (error) {
+    console.error('Ошибка при удалении аккаунта:', error);
+    
+    // Обрабатываем специфичную ошибку Firebase: "Требуется недавний вход"
+    if (error.code === 'auth/requires-recent-login') {
+      alert("В целях безопасности, чтобы удалить аккаунт, необходимо войти в него заново. Сейчас вы будете перенаправлены на страницу входа.");
+      await auth.signOut();
+      window.location.href = 'index.html';
+    } else {
+      alert("Произошла ошибка при удалении: " + error.message);
+    }
+  }
+}
