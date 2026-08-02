@@ -204,9 +204,11 @@ async function continueWithGoogle() {
   const currentDisplayName = user.displayName || '';
   let currentTag = data.tag || '';
   
-  const hasBrokenTag = currentTag.includes('undefined') || 
-                       currentDisplayName.includes('undefined') || 
+  const hasBrokenTag = !currentTag || 
+                       String(currentTag).includes('undefined') || 
+                       String(currentDisplayName).includes('undefined') || 
                        currentTag === '' || 
+                       currentTag === '@' ||
                        currentTag === '@user';
 
   if (hasBrokenTag) {
