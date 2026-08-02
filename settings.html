@@ -19,23 +19,23 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-<!-- Подключаем сам манифест (для Android и современных браузеров) -->
-<link rel="manifest" href="/manifest.json">
+<!-- Подключаем сам манифест (без первого слеша) -->
+<link rel="manifest" href="manifest.json">
 
 <!-- Цвет статус-бара для Android -->
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#121212">
 
 <!-- Указываем Safari, что это PWA -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 
-<!-- Настраиваем внешний вид статус-бара на iOS (default, black или black-translucent) -->
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<!-- Настраиваем внешний вид статус-бара на iOS (black-translucent делает его прозрачным поверх приложения) -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-<!-- Название приложения на экране "Домой" для iOS -->
-<meta name="apple-mobile-web-app-title" content="Твое Название">
+<!-- Название приложения на экране "Домой" для iOS (замени TSA на свое короткое название, если нужно) -->
+<meta name="apple-mobile-web-app-title" content="TSA">
 
-<!-- Иконка приложения для iOS (ОБЯЗАТЕЛЬНО, иначе Safari поставит скриншот сайта) -->
-<link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+<!-- Иконка приложения для iOS (указали правильный путь к твоей картинке) -->
+<link rel="apple-touch-icon" href="img/user.png">
 </head>
 <body class="settings-page">
   <div class="settings-container">
