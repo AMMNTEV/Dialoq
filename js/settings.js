@@ -24,6 +24,14 @@ onAuthStateChanged(async (user) => {
     const doc = await db.collection('users').doc(user.uid).get();
     if (doc.exists) {
       currentUserData = doc.data();
+      
+      // ВАЖНО: Проверяем и синхронизируем displayName с данными из Firestore
+      const expectedDisplayName = currentUserData.nickname + '|' + currentUserData.tag;
+      if (user.displayName !== expectedDisplayName) {
+        await user.updateProfile({ displayName: expectedDisplayName });
+        console.log('✅ Синхронизирован displayName на странице настроек');
+      }
+      
       document.getElementById('userAvatar').textContent = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
       document.getElementById('userName').textContent = currentUserData.nickname || 'Пользователь';
       document.getElementById('userTag').textContent = currentUserData.tag || '@user';
@@ -44,7 +52,6 @@ onAuthStateChanged(async (user) => {
     console.error('Ошибка загрузки пользователя:', error);
   }
 });
-
 async function toggleTheme(isDark) {
   const theme = isDark ? 'dark' : 'light';
   if (isDark) {

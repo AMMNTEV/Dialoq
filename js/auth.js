@@ -136,13 +136,23 @@ async function continueWithGoogle() {
   // Проверяем, существует ли уже этот пользователь в нашей базе Firestore
   const doc = await db.collection('users').doc(user.uid).get();
   
+  // Получаем чистое имя из displayName
+  let cleanNickname = 'Пользователь';
+  if (user.displayName) {
+    // Если есть | - берем первую часть
+    if (user.displayName.includes('|')) {
+      cleanNickname = user.displayName.split('|')[0].trim();
+    } else {
+      cleanNickname = user.displayName.trim();
+    }
+    // Если имя пустое или состоит только из символов
+    if (!cleanNickname || cleanNickname.length < 1) {
+      cleanNickname = 'Пользователь';
+    }
+  }
+
   // Если документ НЕ существует - это 100% новый пользователь
   if (!doc.exists) {
-    // Проверяем, не было ли ранее удаленного аккаунта с таким email
-    // Ищем удаленный аккаунт с таким же email (поле email пустое, но мы не можем искать по пустому email)
-    // Поэтому ищем по nickname = 'Удаленный аккаунт' - но это ненадежно
-    
-    // Самый надежный способ: просто создаем новый аккаунт
     let tag = '';
     let isUnique = false;
     let attempts = 0;
@@ -159,9 +169,9 @@ async function continueWithGoogle() {
       tag = '@user' + Date.now().toString().slice(-6);
     }
 
-    const cleanNickname = user.displayName ? user.displayName.split('|')[0].trim() || 'Пользователь' : 'Пользователь';
     const avatarUrl = user.photoURL || '';
 
+    // ВАЖНО: Принудительно обновляем displayName
     await user.updateProfile({ 
       displayName: cleanNickname + '|' + tag,
       photoURL: avatarUrl
@@ -184,10 +194,6 @@ async function continueWithGoogle() {
   
   // Если аккаунт был удален (email пустой)
   if (data.email === '') {
-    // НЕЛЬЗЯ перезаписывать документ с новым UID!
-    // Вместо этого создаем новый аккаунт с новым UID и НОВЫМ тегом
-    // Старый документ остается как "Удаленный аккаунт"
-    
     let tag = '';
     let isUnique = false;
     let attempts = 0;
@@ -204,16 +210,15 @@ async function continueWithGoogle() {
       tag = '@user' + Date.now().toString().slice(-6);
     }
 
-    const cleanNickname = user.displayName ? user.displayName.split('|')[0].trim() || 'Пользователь' : 'Пользователь';
     const avatarUrl = user.photoURL || '';
 
+    // ВАЖНО: Принудительно обновляем displayName
     await user.updateProfile({ 
       displayName: cleanNickname + '|' + tag,
       photoURL: avatarUrl
     });
 
     // СОЗДАЕМ НОВЫЙ документ с НОВЫМ UID
-    // Старый документ остается нетронутым как "Удаленный аккаунт"
     await db.collection('users').doc(user.uid).set({
       nickname: cleanNickname,
       tag: tag,
@@ -227,7 +232,14 @@ async function continueWithGoogle() {
   }
 
   // Если аккаунт существует и не удален - проверяем тег
-  if (!data.tag || data.tag === '@undefined' || data.tag === '') {
+  // Также проверяем, не содержит ли displayName @undefined
+  const currentDisplayName = user.displayName || '';
+  const hasUndefinedTag = currentDisplayName.includes('@undefined') || 
+                          !data.tag || 
+                          data.tag === '@undefined' || 
+                          data.tag === '';
+
+  if (hasUndefinedTag) {
     let tag = '';
     let isUnique = false;
     let attempts = 0;
@@ -244,10 +256,9 @@ async function continueWithGoogle() {
       tag = '@user' + Date.now().toString().slice(-6);
     }
 
-    const cleanNickname = user.displayName ? user.displayName.split('|')[0].trim() || 'Пользователь' : 'Пользователь';
-
+    // ВАЖНО: Принудительно обновляем displayName
     await user.updateProfile({ 
-      displayName: cleanNickname + '|' + tag 
+      displayName: cleanNickname + '|' + tag
     });
 
     await db.collection('users').doc(user.uid).update({
@@ -256,6 +267,15 @@ async function continueWithGoogle() {
     });
     
     console.log('✅ Исправлен сломанный тег для пользователя:', cleanNickname, tag);
+  } else {
+    // Дополнительная проверка: если displayName не совпадает с данными в Firestore
+    const expectedDisplayName = data.nickname + '|' + data.tag;
+    if (currentDisplayName !== expectedDisplayName) {
+      await user.updateProfile({ 
+        displayName: expectedDisplayName
+      });
+      console.log('✅ Синхронизирован displayName:', expectedDisplayName);
+    }
   }
   
   return user;
