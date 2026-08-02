@@ -135,40 +135,38 @@ async function continueWithGoogle() {
 
   // Проверяем, существует ли уже этот пользователь в нашей базе Firestore
   const doc = await db.collection('users').doc(user.uid).get();
-  const data = doc.exists ? doc.data() : null;
-
-  // 1. ОПРЕДЕЛЯЕМ, НУЖНА ЛИ ПОЛНАЯ РЕГИСТРАЦИЯ
-  // Аккаунт "новый", если документа нет, ИЛИ если мы его удаляли (почта стерта)
-  const isNewOrDeleted = !doc.exists || (data && data.email === '');
-
-  // 2. ОЧИЩАЕМ ИМЯ ОТ ЗАСТРЯВШЕГО ТЕГА
-  // Если в Firebase Auth застрял старый багованный тег (например, "Иван|@undefined"), отрезаем его
-  let cleanNickname = 'Пользователь';
-  if (user.displayName) {
-    cleanNickname = user.displayName.split('|')[0]; 
-  }
-
-  if (isNewOrDeleted) {
+  
+  // Если документ НЕ существует - это 100% новый пользователь
+  if (!doc.exists) {
+    // Проверяем, не было ли ранее удаленного аккаунта с таким email
+    // Ищем удаленный аккаунт с таким же email (поле email пустое, но мы не можем искать по пустому email)
+    // Поэтому ищем по nickname = 'Удаленный аккаунт' - но это ненадежно
+    
+    // Самый надежный способ: просто создаем новый аккаунт
     let tag = '';
     let isUnique = false;
+    let attempts = 0;
     
-    // Генерируем уникальный тег
-    while (!isUnique) {
+    while (!isUnique && attempts < 50) {
+      attempts++;
       const randomDigits = Math.floor(10000 + Math.random() * 90000); 
       tag = '@user' + randomDigits;
       const snapshot = await db.collection('users').where('tag', '==', tag).get();
       if (snapshot.empty) isUnique = true;
     }
+    
+    if (!isUnique) {
+      tag = '@user' + Date.now().toString().slice(-6);
+    }
 
+    const cleanNickname = user.displayName ? user.displayName.split('|')[0].trim() || 'Пользователь' : 'Пользователь';
     const avatarUrl = user.photoURL || '';
 
-    // Обновляем базовый профиль чистым именем и новым тегом
     await user.updateProfile({ 
       displayName: cleanNickname + '|' + tag,
       photoURL: avatarUrl
     });
 
-    // Используем .set(), чтобы ПЕРЕЗАПИСАТЬ заглушку "Удаленного аккаунта" новыми данными
     await db.collection('users').doc(user.uid).set({
       nickname: cleanNickname,
       tag: tag,
@@ -176,27 +174,88 @@ async function continueWithGoogle() {
       avatar: avatarUrl,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-  } else {
-    // Если аккаунт рабочий, но тег почему-то сломан
-    if (!data.tag || data.tag === '@undefined') {
-      let tag = '';
-      let isUnique = false;
-      
-      while (!isUnique) {
-        const randomDigits = Math.floor(10000 + Math.random() * 90000);
-        tag = '@user' + randomDigits;
-        const snapshot = await db.collection('users').where('tag', '==', tag).get();
-        if (snapshot.empty) isUnique = true;
-      }
+    
+    console.log('✅ Создан новый аккаунт:', cleanNickname, tag);
+    return user;
+  }
 
-      await user.updateProfile({ 
-        displayName: cleanNickname + '|' + tag 
-      });
-
-      await db.collection('users').doc(user.uid).update({
-        tag: tag
-      });
+  // Если документ существует - проверяем, не удален ли он
+  const data = doc.data();
+  
+  // Если аккаунт был удален (email пустой)
+  if (data.email === '') {
+    // НЕЛЬЗЯ перезаписывать документ с новым UID!
+    // Вместо этого создаем новый аккаунт с новым UID и НОВЫМ тегом
+    // Старый документ остается как "Удаленный аккаунт"
+    
+    let tag = '';
+    let isUnique = false;
+    let attempts = 0;
+    
+    while (!isUnique && attempts < 50) {
+      attempts++;
+      const randomDigits = Math.floor(10000 + Math.random() * 90000); 
+      tag = '@user' + randomDigits;
+      const snapshot = await db.collection('users').where('tag', '==', tag).get();
+      if (snapshot.empty) isUnique = true;
     }
+    
+    if (!isUnique) {
+      tag = '@user' + Date.now().toString().slice(-6);
+    }
+
+    const cleanNickname = user.displayName ? user.displayName.split('|')[0].trim() || 'Пользователь' : 'Пользователь';
+    const avatarUrl = user.photoURL || '';
+
+    await user.updateProfile({ 
+      displayName: cleanNickname + '|' + tag,
+      photoURL: avatarUrl
+    });
+
+    // СОЗДАЕМ НОВЫЙ документ с НОВЫМ UID
+    // Старый документ остается нетронутым как "Удаленный аккаунт"
+    await db.collection('users').doc(user.uid).set({
+      nickname: cleanNickname,
+      tag: tag,
+      email: user.email,
+      avatar: avatarUrl,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
+    console.log('✅ Создан новый аккаунт (старый был удален):', cleanNickname, tag);
+    return user;
+  }
+
+  // Если аккаунт существует и не удален - проверяем тег
+  if (!data.tag || data.tag === '@undefined' || data.tag === '') {
+    let tag = '';
+    let isUnique = false;
+    let attempts = 0;
+    
+    while (!isUnique && attempts < 50) {
+      attempts++;
+      const randomDigits = Math.floor(10000 + Math.random() * 90000);
+      tag = '@user' + randomDigits;
+      const snapshot = await db.collection('users').where('tag', '==', tag).get();
+      if (snapshot.empty) isUnique = true;
+    }
+    
+    if (!isUnique) {
+      tag = '@user' + Date.now().toString().slice(-6);
+    }
+
+    const cleanNickname = user.displayName ? user.displayName.split('|')[0].trim() || 'Пользователь' : 'Пользователь';
+
+    await user.updateProfile({ 
+      displayName: cleanNickname + '|' + tag 
+    });
+
+    await db.collection('users').doc(user.uid).update({
+      tag: tag,
+      nickname: cleanNickname
+    });
+    
+    console.log('✅ Исправлен сломанный тег для пользователя:', cleanNickname, tag);
   }
   
   return user;

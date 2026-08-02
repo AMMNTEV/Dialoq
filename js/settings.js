@@ -74,25 +74,28 @@ async function deleteAccount() {
   if (!isConfirmed) return;
 
   try {
-    // 1. Очищаем персональные данные в Firestore, оставляя заглушку для чатов
-    await db.collection('users').doc(currentUser.uid).update({
+    const uid = currentUser.uid;
+    
+    // 1. Помечаем аккаунт как удаленный в Firestore (НЕ УДАЛЯЕМ документ!)
+    await db.collection('users').doc(uid).update({
       nickname: 'Удаленный аккаунт',
-      email: '', // Стираем почту, чтобы не было дубликатов
-      avatar: '', // Стираем аватарку
+      email: '', // Стираем почту
+      avatar: '',
       tag: '',
+      deletedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
     // 2. Удаляем аккаунт из Firebase Authentication
     await currentUser.delete();
     
-    // 3. НОВОЕ: Полностью чистим локальный кэш
-    const uid = localStorage.getItem('lastUid');
-    if (uid) {
-      localStorage.removeItem(`cachedCurrentUser_${uid}`);
-      localStorage.removeItem(`cachedChats_${uid}`);
-      localStorage.removeItem(`cachedUnreads_${uid}`);
-      localStorage.removeItem('lastUid');
-    }
+    // 3. Чистим локальный кэш
+    localStorage.removeItem(`cachedCurrentUser_${uid}`);
+    localStorage.removeItem(`cachedChats_${uid}`);
+    localStorage.removeItem(`cachedUnreads_${uid}`);
+    localStorage.removeItem('lastUid');
+    
+    // 4. Перенаправляем на страницу входа
+    window.location.href = 'index.html';
     
   } catch (error) {
     console.error('Ошибка при удалении аккаунта:', error);
