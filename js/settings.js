@@ -24,14 +24,6 @@ onAuthStateChanged(async (user) => {
     const doc = await db.collection('users').doc(user.uid).get();
     if (doc.exists) {
       currentUserData = doc.data();
-      
-      // ВАЖНО: Проверяем и синхронизируем displayName с данными из Firestore
-      const expectedDisplayName = currentUserData.nickname + '|' + currentUserData.tag;
-      if (user.displayName !== expectedDisplayName) {
-        await user.updateProfile({ displayName: expectedDisplayName });
-        console.log('✅ Синхронизирован displayName на странице настроек');
-      }
-      
       document.getElementById('userAvatar').textContent = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
       document.getElementById('userName').textContent = currentUserData.nickname || 'Пользователь';
       document.getElementById('userTag').textContent = currentUserData.tag || '@user';
@@ -52,6 +44,7 @@ onAuthStateChanged(async (user) => {
     console.error('Ошибка загрузки пользователя:', error);
   }
 });
+
 async function toggleTheme(isDark) {
   const theme = isDark ? 'dark' : 'light';
   if (isDark) {
@@ -77,29 +70,29 @@ async function deleteAccount() {
   if (!currentUser) return;
   
   const isConfirmed = confirm("Вы уверены, что хотите удалить аккаунт? Ваш ник изменится на «Удаленный аккаунт», а сам профиль будет удален.");
-  
   if (!isConfirmed) return;
 
   try {
     const uid = currentUser.uid;
     
-    // 1. Помечаем аккаунт как удаленный в Firestore (НЕ УДАЛЯЕМ документ!)
+    // 1. СНАЧАЛА чистим весь локальный кэш, чтобы при редиректе ничего не мелькало
+    localStorage.removeItem(`cachedCurrentUser_${uid}`);
+    localStorage.removeItem(`cachedChats_${uid}`);
+    localStorage.removeItem(`cachedUnreads_${uid}`);
+    localStorage.removeItem('lastUid');
+    if (window.userCache) window.userCache.delete(uid); // Очистка глобальной Map, если есть
+    
+    // 2. Помечаем аккаунт как удаленный в Firestore (Стираем личные данные, оставляем ID для чатов)
     await db.collection('users').doc(uid).update({
       nickname: 'Удаленный аккаунт',
-      email: '', // Стираем почту
+      email: '', // Пустой email - флаг удаленного аккаунта
       avatar: '',
       tag: '',
       deletedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    // 2. Удаляем аккаунт из Firebase Authentication
+    // 3. Навсегда удаляем пользователя из Firebase Authentication
     await currentUser.delete();
-    
-    // 3. Чистим локальный кэш
-    localStorage.removeItem(`cachedCurrentUser_${uid}`);
-    localStorage.removeItem(`cachedChats_${uid}`);
-    localStorage.removeItem(`cachedUnreads_${uid}`);
-    localStorage.removeItem('lastUid');
     
     // 4. Перенаправляем на страницу входа
     window.location.href = 'index.html';
@@ -107,8 +100,9 @@ async function deleteAccount() {
   } catch (error) {
     console.error('Ошибка при удалении аккаунта:', error);
     
+    // Если токен сессии устарел, Firebase выдаст эту ошибку
     if (error.code === 'auth/requires-recent-login') {
-      alert("В целях безопасности, чтобы удалить аккаунт, необходимо войти в него заново. Сейчас вы будете перенаправлены на страницу входа.");
+      alert("В целях безопасности Firebase требует подтвердить, что это ваш аккаунт. Войдите заново, а затем снова нажмите «Удалить».");
       await auth.signOut();
       window.location.href = 'index.html';
     } else {
