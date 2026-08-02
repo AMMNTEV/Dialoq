@@ -126,3 +126,51 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = 'messenger.html'; 
   }
 });
+
+// ========== АВТОРИЗАЦИЯ ЧЕРЕЗ GOOGLE ==========
+async function continueWithGoogle() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  const result = await auth.signInWithPopup(provider);
+  const user = result.user;
+
+  // Проверяем, существует ли уже этот пользователь в нашей базе Firestore
+  const doc = await db.collection('users').doc(user.uid).get();
+
+  // Если аккаунта нет, значит это регистрация
+  if (!doc.exists) {
+    let tag = '';
+    let isUnique = false;
+    
+    // Генерируем уникальный тег (например: @user45812)
+    while (!isUnique) {
+      const randomDigits = Math.floor(10000 + Math.random() * 90000); // 5 случайных цифр
+      tag = '@user' + randomDigits;
+      // Проверяем, не занят ли случайно сгенерированный тег
+      const snapshot = await db.collection('users').where('tag', '==', tag).get();
+      if (snapshot.empty) isUnique = true;
+    }
+
+    // Берем данные из Google (или ставим дефолтные, если их нет)
+    const nickname = user.displayName || 'Пользователь';
+    const avatarUrl = user.photoURL || '';
+
+    // 1. Обновляем базовый профиль Firebase (включая аватарку)
+    await user.updateProfile({ 
+      displayName: nickname + '|' + tag,
+      photoURL: avatarUrl
+    });
+
+    // 2. Сохраняем в Firestore
+    await db.collection('users').doc(user.uid).set({
+      nickname: nickname,
+      tag: tag,
+      email: user.email,
+      avatar: avatarUrl, // Сохраняем ссылку на фото
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }
+  
+  // Если аккаунт уже был (doc.exists === true), Firebase уже авторизовал его,
+  // профиль обновлять не нужно, просто возвращаем пользователя.
+  return user;
+}
