@@ -135,42 +135,49 @@ async function continueWithGoogle() {
 
   // Проверяем, существует ли уже этот пользователь в нашей базе Firestore
   const doc = await db.collection('users').doc(user.uid).get();
+  const data = doc.exists ? doc.data() : null;
 
-  // Если аккаунта нет, значит это регистрация
-  if (!doc.exists) {
+  // 1. ОПРЕДЕЛЯЕМ, НУЖНА ЛИ ПОЛНАЯ РЕГИСТРАЦИЯ
+  // Аккаунт "новый", если документа нет, ИЛИ если мы его удаляли (почта стерта)
+  const isNewOrDeleted = !doc.exists || (data && data.email === '');
+
+  // 2. ОЧИЩАЕМ ИМЯ ОТ ЗАСТРЯВШЕГО ТЕГА
+  // Если в Firebase Auth застрял старый багованный тег (например, "Иван|@undefined"), отрезаем его
+  let cleanNickname = 'Пользователь';
+  if (user.displayName) {
+    cleanNickname = user.displayName.split('|')[0]; 
+  }
+
+  if (isNewOrDeleted) {
     let tag = '';
     let isUnique = false;
     
-    // Генерируем уникальный тег (например: @user45812)
+    // Генерируем уникальный тег
     while (!isUnique) {
-      const randomDigits = Math.floor(10000 + Math.random() * 90000); // 5 случайных цифр
+      const randomDigits = Math.floor(10000 + Math.random() * 90000); 
       tag = '@user' + randomDigits;
-      // Проверяем, не занят ли случайно сгенерированный тег
       const snapshot = await db.collection('users').where('tag', '==', tag).get();
       if (snapshot.empty) isUnique = true;
     }
 
-    // Берем данные из Google (или ставим дефолтные, если их нет)
-    const nickname = user.displayName || 'Пользователь';
     const avatarUrl = user.photoURL || '';
 
-    // 1. Обновляем базовый профиль Firebase (включая аватарку)
+    // Обновляем базовый профиль чистым именем и новым тегом
     await user.updateProfile({ 
-      displayName: nickname + '|' + tag,
+      displayName: cleanNickname + '|' + tag,
       photoURL: avatarUrl
     });
 
-    // 2. Сохраняем в Firestore
+    // Используем .set(), чтобы ПЕРЕЗАПИСАТЬ заглушку "Удаленного аккаунта" новыми данными
     await db.collection('users').doc(user.uid).set({
-      nickname: nickname,
+      nickname: cleanNickname,
       tag: tag,
       email: user.email,
-      avatar: avatarUrl, // Сохраняем ссылку на фото
+      avatar: avatarUrl,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
   } else {
-    // Дополнительная проверка на сломанные или отсутствующие теги
-    const data = doc.data();
+    // Если аккаунт рабочий, но тег почему-то сломан
     if (!data.tag || data.tag === '@undefined') {
       let tag = '';
       let isUnique = false;
@@ -182,20 +189,15 @@ async function continueWithGoogle() {
         if (snapshot.empty) isUnique = true;
       }
 
-      // Обновляем профиль Firebase
-      const nickname = user.displayName || 'Пользователь';
       await user.updateProfile({ 
-        displayName: nickname + '|' + tag 
+        displayName: cleanNickname + '|' + tag 
       });
 
-      // Перезаписываем сломанный тег в Firestore
       await db.collection('users').doc(user.uid).update({
         tag: tag
       });
     }
   }
   
-  // Если аккаунт уже был (doc.exists === true), Firebase уже авторизовал его,
-  // профиль обновлять не нужно, просто возвращаем пользователя.
   return user;
 }

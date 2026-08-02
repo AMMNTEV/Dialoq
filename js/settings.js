@@ -85,6 +85,15 @@ async function deleteAccount() {
     // 2. Удаляем аккаунт из Firebase Authentication
     await currentUser.delete();
     
+    // 3. НОВОЕ: Полностью чистим локальный кэш
+    const uid = localStorage.getItem('lastUid');
+    if (uid) {
+      localStorage.removeItem(`cachedCurrentUser_${uid}`);
+      localStorage.removeItem(`cachedChats_${uid}`);
+      localStorage.removeItem(`cachedUnreads_${uid}`);
+      localStorage.removeItem('lastUid');
+    }
+    
   } catch (error) {
     console.error('Ошибка при удалении аккаунта:', error);
     
