@@ -134,12 +134,22 @@ async function generateUniqueTag() {
   let attempts = 0;
   
   while (!isUnique && attempts < 10) {
+    attempts++; // Инкремент попыток для предотвращения бесконечного цикла
     const randomDigits = Math.floor(10000 + Math.random() * 90000); 
     tag = '@user' + randomDigits;
-    const snapshot = await db.collection('users').where('tag', '==', tag).get();
-    if (snapshot.empty) isUnique = true;
+    
+    try {
+      const snapshot = await db.collection('users').where('tag', '==', tag).get();
+      if (snapshot.empty) {
+        isUnique = true;
+      }
+    } catch (err) {
+      console.error('Ошибка проверки уникальности тега:', err);
+      break;
+    }
   }
   
+  // Если за 10 попыток не нашли свободный — генерируем на основе времени
   if (!isUnique) {
     tag = '@user' + Date.now().toString().slice(-6);
   }
@@ -150,16 +160,23 @@ async function generateUniqueTag() {
 async function continueWithGoogle() {
   const provider = new firebase.auth.GoogleAuthProvider();
   
-  // ВАЖНО: Форсируем появление окна выбора аккаунта Google (сбрасывает "память" авто-входа)
+  // Форсируем выбор аккаунта Google
   provider.setCustomParameters({ prompt: 'select_account' });
   
   const result = await auth.signInWithPopup(provider);
   const user = result.user;
 
-  const doc = await db.collection('users').doc(user.uid).get();
-  const data = doc.exists ? doc.data() : null;
+  let doc = null;
+  let data = null;
+
+  try {
+    doc = await db.collection('users').doc(user.uid).get();
+    data = doc.exists ? doc.data() : null;
+  } catch (err) {
+    console.error('Ошибка получения данных из Firestore:', err);
+  }
   
-  // 1. Безопасное получение никнейма (защита от строки "undefined")
+  // 1. Извлекаем чистый никнейм (без части с тегом "|...")
   let cleanNickname = 'Пользователь';
   if (user.displayName) {
     cleanNickname = user.displayName.includes('|') 
@@ -167,31 +184,31 @@ async function continueWithGoogle() {
       : user.displayName.trim();
   }
   
-  // Если никнейм пустой или буквально равен слову "undefined" или "null"
   if (!cleanNickname || cleanNickname.toLowerCase() === 'undefined' || cleanNickname.toLowerCase() === 'null') {
     cleanNickname = 'Пользователь';
   }
 
   const avatarUrl = user.photoURL || '';
 
-  // 2. Ситуация: Новый пользователь ИЛИ аккаунт был "мягко удален" (email === '')
-  const isCompletelyNew = !doc.exists;
-  const isDeletedAccount = doc.exists && data.email === '';
+  // 2. Флаги нового аккаунта или восстановленного после мягкого удаления
+  const isCompletelyNew = !doc || !doc.exists;
+  const isDeletedAccount = doc && doc.exists && data && data.email === '';
 
+  // 3. Создание абсолютно нового профиля
   if (isCompletelyNew || isDeletedAccount) {
     const newTag = await generateUniqueTag();
 
-    // Принудительно обновляем профиль в Authentication
+    // Обновляем профиль Firebase Auth
     await user.updateProfile({ 
       displayName: cleanNickname + '|' + newTag,
       photoURL: avatarUrl
     });
 
-    // Записываем чистые данные в Firestore
+    // Сохраняем в Firestore
     await db.collection('users').doc(user.uid).set({
       nickname: cleanNickname,
       tag: newTag,
-      email: user.email,
+      email: user.email || '',
       avatar: avatarUrl,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
@@ -200,37 +217,23 @@ async function continueWithGoogle() {
     return user;
   }
 
-  // 3. Ситуация: Аккаунт существует и не удален. Проверяем тег на поломку.
-  const currentDisplayName = user.displayName || '';
-  let currentTag = data.tag || '';
-  
-  const hasBrokenTag = !currentTag || 
-                       String(currentTag).includes('undefined') || 
-                       String(currentDisplayName).includes('undefined') || 
-                       currentTag === '' || 
-                       currentTag === '@' ||
-                       currentTag === '@user';
+  // 4. Существующий аккаунт: берем тег ИЗ БАЗЫ (сохраняя любой выбранный пользователем тег)
+  let currentTag = data ? data.tag : null;
 
-  if (hasBrokenTag) {
+  // Если поля `tag` вообще нет в документе базы — только тогда создаем его
+  if (currentTag === undefined || currentTag === null || currentTag === '') {
     currentTag = await generateUniqueTag();
+    await db.collection('users').doc(user.uid).update({ tag: currentTag });
+    console.log('✅ Назначен отсутствовавший тег:', currentTag);
+  }
 
-    await user.updateProfile({ 
-      displayName: cleanNickname + '|' + currentTag 
-    });
-
-    await db.collection('users').doc(user.uid).update({
-      tag: currentTag,
-      nickname: cleanNickname
-    });
-    
-    console.log('✅ Исправлен сломанный тег');
-  } else {
-    // Просто синхронизируем displayName, если он сбился, но тег валидный
-    const expectedDisplayName = data.nickname + '|' + currentTag;
-    if (currentDisplayName !== expectedDisplayName) {
-      await user.updateProfile({ displayName: expectedDisplayName });
-      console.log('✅ Синхронизирован displayName');
-    }
+  // Синхронизируем displayName в Auth (для кэша и быстрой отрисовки)
+  const savedNickname = (data && data.nickname) ? data.nickname : cleanNickname;
+  const expectedDisplayName = savedNickname + '|' + currentTag;
+  
+  if (user.displayName !== expectedDisplayName) {
+    await user.updateProfile({ displayName: expectedDisplayName });
+    console.log('✅ Синхронизирован displayName:', expectedDisplayName);
   }
   
   return user;
