@@ -80,16 +80,35 @@ onAuthStateChanged(async (user) => {
   try {
     const doc = await db.collection('users').doc(user.uid).get();
     if (!doc.exists) {
-      // Создаем пользователя, если его нет
-      await db.collection('users').doc(user.uid).set({
-        nickname: user.displayName ? user.displayName.split('|')[0] : 'Пользователь',
-        tag: user.displayName ? '@' + user.displayName.split('|')[1] : '@user',
-        email: user.email,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      window.location.reload();
-      return;
-    }
+  // Защита от '@undefined': проверяем, есть ли символ '|' в имени
+  let nickname = 'Пользователь';
+  let tag = '';
+  
+  if (user.displayName && user.displayName.includes('|')) {
+    const parts = user.displayName.split('|');
+    nickname = parts[0];
+    tag = '@' + parts[1];
+  } else {
+    nickname = user.displayName || 'Пользователь';
+    // Используем вашу готовую функцию для генерации корректного тега
+    tag = await generateUniqueTag(); 
+  }
+
+  // Создаем пользователя
+  await db.collection('users').doc(user.uid).set({
+    nickname: nickname,
+    tag: tag,
+    email: user.email || '',
+    avatar: user.photoURL || '', // Сохраняем аватарку из Google
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  
+  // Синхронизируем displayName в Firebase Auth для будущих сессий
+  await user.updateProfile({ displayName: nickname + '|' + tag.replace('@', '') });
+  
+  window.location.reload();
+  return;
+}
     
     currentUserData = doc.data();
     

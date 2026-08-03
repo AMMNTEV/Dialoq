@@ -77,16 +77,43 @@ onAuthStateChanged(async (user) => {
   try {
     const doc = await db.collection('users').doc(user.uid).get();
     if (!doc.exists) {
-      // Создаем пользователя, если его нет
-      await db.collection('users').doc(user.uid).set({
-        nickname: user.displayName ? user.displayName.split('|')[0] : 'Пользователь',
-        tag: user.displayName ? '@' + user.displayName.split('|')[1] : '@user',
-        email: user.email,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      window.location.reload();
-      return;
-    }
+  // Защита от '@undefined': проверяем, есть ли символ '|' в имени
+  let nickname = 'Пользователь';
+  let tag = '';
+  
+  if (user.displayName && user.displayName.includes('|')) {
+    const parts = user.displayName.split('|');
+    nickname = parts[0];
+    tag = '@' + parts[1];
+  } else {
+    nickname = user.displayName || 'Пользователь';
+    tag = await generateUniqueTag(); 
+  }
+
+  const newUserData = {
+    nickname: nickname,
+    tag: tag,
+    email: user.email || '',
+    avatar: user.photoURL || '',
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+
+  // 1. Создаем пользователя в Firestore
+  await db.collection('users').doc(user.uid).set(newUserData);
+  
+  // 2. Синхронизируем displayName в Firebase Auth
+  await user.updateProfile({ displayName: nickname + '|' + tag.replace('@', '') });
+
+  // 3. Обновляем локальные переменные и кэш БЕЗ перезагрузки страницы (window.location.reload)
+  currentUserData = newUserData;
+  localStorage.setItem(cacheKey, JSON.stringify(currentUserData));
+  userCache.set(user.uid, currentUserData);
+  
+  // 4. Мгновенно обновляем UI
+  updateSidebarUser(currentUserData);
+  if (document.getElementById('profileInfo')) loadProfileInfo();
+  return;
+}
     
     currentUserData = doc.data();
     
@@ -291,8 +318,10 @@ async function loadAllUsers() {
     const snapshot = await db.collection('users').get();
     allUsers = [];
     snapshot.forEach(doc => {
-      if (doc.id !== currentUser.uid) {
-        allUsers.push({ id: doc.id, ...doc.data() });
+      const data = doc.data();
+      // Исключаем удаленные аккаунты из глобального поиска
+      if (doc.id !== currentUser.uid && data.nickname !== 'Удаленный аккаунт' && !data.deletedAt) {
+        allUsers.push({ id: doc.id, ...data });
       }
     });
   } catch (error) {
@@ -306,8 +335,10 @@ async function loadAllUsersForModal() {
     const snapshot = await db.collection('users').get();
     allUsersForModal = [];
     snapshot.forEach(doc => {
-      if (doc.id !== currentUser.uid) {
-        allUsersForModal.push({ id: doc.id, ...doc.data() });
+      const data = doc.data();
+      // Исключаем удаленные аккаунты из списков добавления в беседу
+      if (doc.id !== currentUser.uid && data.nickname !== 'Удаленный аккаунт' && !data.deletedAt) {
+        allUsersForModal.push({ id: doc.id, ...data });
       }
     });
   } catch (error) {
@@ -511,6 +542,13 @@ function listenForChats() {
 
 function displayChats(chats) {
   const chatsList = document.getElementById('chatsList');
+  
+  // Если список чатов пуст, выводим об этом информацию
+  if (!chats || chats.length === 0) {
+  	chatsList.innerHTML = '<div class="no-chats">Список чатов пуст</div>';
+  	return;
+  }
+
   chatsList.innerHTML = chats.map(chat => {
     const unreadCount = unreadCounts[chat.id] || 0;
     const unreadBadge = unreadCount > 0 ? `<span class="unread-badge">${unreadCount}</span>` : '';
@@ -706,6 +744,7 @@ async function createPrivateChat(userId, nickname, tag) {
 }
 
 // ========== ВЫБОР ЧАТА ==========
+// ========== ВЫБОР ЧАТА ==========
 async function selectChat(chat) {
   if (unsubscribeMessages) {
     unsubscribeMessages();
@@ -714,13 +753,32 @@ async function selectChat(chat) {
 
   const messagesContainer = document.getElementById('messagesContainer');
   const chatHeader = document.getElementById('chatHeader');
+  const messageInputArea = document.getElementById('messageInputArea');
+
+  // Проверяем, является ли собеседник удаленным аккаунтом
+  const isDeletedAccount = !chat.isGroup && (chat.displayName === 'Удаленный аккаунт' || !chat.displayAvatar);
+
+  // Отрисовываем поле ввода или заглушку
+  if (isDeletedAccount) {
+    messageInputArea.innerHTML = '<span style="color: #888; font-size: 0.95rem; margin: auto;">Этот пользователь удалил страницу</span>';
+  } else {
+    messageInputArea.innerHTML = `
+      <input type="text" id="messageInput" placeholder="Введите сообщение..." onkeypress="if(event.key==='Enter') sendMessage()">
+      <button onclick="sendMessage()" id="sendButton" title="Отправить">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 2L11 13"/>
+          <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
+        </svg>
+      </button>
+    `;
+  }
+  messageInputArea.style.display = 'flex';
 
   if (chat.isNew) {
     selectedChat = chat;
     currentChatId = chat.id;
     updateChatHeader(chat);
     messagesContainer.innerHTML = '<div class="no-messages">Нет сообщений. Напишите что-нибудь!</div>';
-    document.getElementById('messageInputArea').style.display = 'flex';
     if (window.innerWidth <= 768) {
       enterChatMode();
     }
@@ -731,7 +789,6 @@ async function selectChat(chat) {
   currentChatId = chat.id;
   messagesContainer.innerHTML = '<div class="loading">Загрузка сообщений...</div>';
   updateChatHeader(chat);
-  document.getElementById('messageInputArea').style.display = 'flex';
 
   await loadMessages(true);
 

@@ -7,8 +7,8 @@
 .settings-container {
   max-width: 600px;
   margin: 0 auto;
-  padding: 20px;
-  height: 100%;
+  padding: 20px 20px 40px 20px; 
+  min-height: 100%;
 }
 .settings-header {
   display: flex;
@@ -161,4 +161,77 @@
 }
 .switch input:checked + .slider:before {
   transform: translateX(22px);
+}
+
+/* Исправление сетки и панели навигации на странице настроек */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Главный контейнер на всю высоту экрана */
+.settings-page .messenger-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background: #f8fafc;
+  overflow: hidden;
+  gap: 0;
+}
+
+/* Фиксация левого сайдбара, чтобы он не сжимался */
+.settings-page .nav-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  height: 100%;
+  background: #ffffff;
+  border-right: 1px solid #eef2f6;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Контейнер самих настроек занимает оставшееся пространство и скроллится */
+.settings-page .settings-container {
+  flex: 1;
+  height: 100%;
+  overflow-y: auto;
+  max-width: none; /* Снимаем ограничение ширины, чтобы контент не был прижат */
+  margin: 0;
+  padding: 20px 40px 40px 40px;
+  box-sizing: border-box;
+}
+
+/* Ограничиваем ширину внутренней карточки для красоты на больших мониторах */
+.settings-page .settings-content {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .settings-page .messenger-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  /* На мобилках скрываем десктопный сайдбар, оставляем нижнюю панель */
+  .settings-page .nav-sidebar {
+    display: none !important;
+  }
+
+  .settings-page .settings-container {
+    width: 100% !important;
+    padding: 16px 16px 90px 16px !important; /* Оставляем место снизу под плавающую панель */
+  }
+
+  /* Показываем нижнюю навигационную панель на мобильных */
+  .settings-page .mobile-bottom-nav {
+    display: flex !important;
+  }
 }

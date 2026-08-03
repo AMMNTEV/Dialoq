@@ -71,7 +71,7 @@
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s;
-  margin: 8px 0 20px;
+  margin: 8px 0;
 }
 .auth-button:hover {
   background: #5a67d8;
@@ -83,6 +83,7 @@
   color: #666;
   font-size: 0.95rem;
   width: 100%;
+  margin-top: 24px;
 }
 .auth-footer a {
   color: #667eea;
@@ -208,4 +209,53 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Разделитель "or" */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+  color: #888;
+  font-size: 0.9rem;
+  width: 100%;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e0e0e0;
+}
+.auth-divider:not(:empty)::before {
+  margin-right: 0.75em;
+}
+.auth-divider:not(:empty)::after {
+  margin-left: 0.75em;
+}
+
+/* Кнопка Google */
+.oauth-btn {
+  width: 100%;
+  padding: 12px;
+  background: #ffffff;
+  color: #333333;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.2s;
+}
+.oauth-btn:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+.oauth-btn img {
+  width: 20px;
+  height: 20px;
 }
