@@ -14,18 +14,36 @@
 })();
 
 // ========== МГНОВЕННАЯ ОТРИСОВКА ==========
-document.addEventListener("DOMContentLoaded", () => {
+function applyCachedUser() {
   const lastUid = localStorage.getItem('lastUid');
-  if (lastUid) {
-    const cachedUserStr = localStorage.getItem(`cachedCurrentUser_${lastUid}`);
-    if (cachedUserStr) {
+  if (!lastUid) return;
+
+  const cachedUserStr = localStorage.getItem(`cachedCurrentUser_${lastUid}`);
+  if (cachedUserStr) {
+    try {
       const currentUserData = JSON.parse(cachedUserStr);
-      if (typeof updateSidebarUser === 'function') {
-        updateSidebarUser(currentUserData); // Мгновенно обновляем боковую панель
+      
+      // Заполняем Map-кэш в памяти (если он используется)
+      if (window.userCache) {
+        window.userCache.set(lastUid, currentUserData);
       }
+
+      // Обновляем UI боковой панели
+      if (typeof updateSidebarUser === 'function') {
+        updateSidebarUser(currentUserData);
+      }
+    } catch (e) {
+      console.error('Ошибка чтения кэша пользователя:', e);
     }
   }
-});
+}
+
+// Запускаем подгрузку из кэша сразу (не дожидаясь DOMContentLoaded, если DOM уже готов)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', applyCachedUser);
+} else {
+  applyCachedUser();
+}
 
 onAuthStateChanged(async (user) => {
   if (!user || !user.emailVerified) {
@@ -68,7 +86,15 @@ onAuthStateChanged(async (user) => {
     } else {
       // Обновляем кэш и сайдбар свежими данными из базы
       const userData = doc.data();
+
+      // !!! ОБЯЗАТЕЛЬНО: сохраняем lastUid, чтобы при следующей перезагрузке знать, чей кэш читать
+      localStorage.setItem('lastUid', user.uid);
       localStorage.setItem(`cachedCurrentUser_${user.uid}`, JSON.stringify(userData));
+
+      if (window.userCache) {
+        window.userCache.set(user.uid, userData);
+      }
+
       if (typeof updateSidebarUser === 'function') {
         updateSidebarUser(userData);
       }
