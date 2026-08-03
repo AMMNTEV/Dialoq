@@ -180,12 +180,11 @@ async function deleteAccount() {
     }
   }
 }
-
-// Функция обновления карточки пользователя в боковой панели
+// Функция обновления карточки пользователя на странице настроек
 function updateSidebarUser(userData) {
-  const nameEl = document.getElementById('sidebarUserName');
-  const tagEl = document.getElementById('sidebarUserTag');
-  const avatarEl = document.getElementById('sidebarUserAvatar');
+  const nameEl = document.getElementById('userName'); 
+  const tagEl = document.getElementById('userTag');
+  const avatarEl = document.getElementById('userAvatar');
   
   if (nameEl) nameEl.textContent = userData.nickname || 'Пользователь';
   if (tagEl) tagEl.textContent = userData.tag || '@user';
@@ -196,7 +195,7 @@ function updateSidebarUser(userData) {
       avatarEl.style.background = 'transparent';
     } else {
       avatarEl.innerHTML = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
-      avatarEl.style.background = '#1a1a1a';
+      avatarEl.style.background = '#3b82f6'; // Вернул синий цвет, как у вас в CSS
       avatarEl.style.color = 'white';
     }
   }
