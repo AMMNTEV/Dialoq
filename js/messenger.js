@@ -87,23 +87,31 @@ onAuthStateChanged(async (user) => {
     tag = '@' + parts[1];
   } else {
     nickname = user.displayName || 'Пользователь';
-    // Используем вашу готовую функцию для генерации корректного тега
     tag = await generateUniqueTag(); 
   }
 
-  // Создаем пользователя
-  await db.collection('users').doc(user.uid).set({
+  const newUserData = {
     nickname: nickname,
     tag: tag,
     email: user.email || '',
-    avatar: user.photoURL || '', // Сохраняем аватарку из Google
+    avatar: user.photoURL || '',
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
+  };
+
+  // 1. Создаем пользователя в Firestore
+  await db.collection('users').doc(user.uid).set(newUserData);
   
-  // Синхронизируем displayName в Firebase Auth для будущих сессий
+  // 2. Синхронизируем displayName в Firebase Auth
   await user.updateProfile({ displayName: nickname + '|' + tag.replace('@', '') });
+
+  // 3. Обновляем локальные переменные и кэш БЕЗ перезагрузки страницы (window.location.reload)
+  currentUserData = newUserData;
+  localStorage.setItem(cacheKey, JSON.stringify(currentUserData));
+  userCache.set(user.uid, currentUserData);
   
-  window.location.reload();
+  // 4. Мгновенно обновляем UI
+  updateSidebarUser(currentUserData);
+  if (document.getElementById('profileInfo')) loadProfileInfo();
   return;
 }
     
