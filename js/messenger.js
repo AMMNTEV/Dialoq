@@ -545,8 +545,8 @@ function displayChats(chats) {
   
   // Если список чатов пуст, выводим об этом информацию
   if (!chats || chats.length === 0) {
-    chatsList.innerHTML = '<div class="no-chats" style="text-align: center; color: #888; padding: 20px;">Список чатов пуст</div>';
-    return;
+  	chatsList.innerHTML = '<div class="no-chats">Список чатов пуст</div>';
+  	return;
   }
 
   chatsList.innerHTML = chats.map(chat => {
