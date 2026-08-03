@@ -34,18 +34,21 @@ async function register(email, password, nickname, tag) {
   const userCredential = await auth.createUserWithEmailAndPassword(email, password);
   const user = userCredential.user;
 
+  // Гарантируем корректный формат тега с @
+  const formattedTag = tag.startsWith('@') ? tag : '@' + tag;
+
   // 2. Обновляем displayName
-  await user.updateProfile({ displayName: nickname + '|' + tag });
+  await user.updateProfile({ displayName: nickname + '|' + formattedTag });
 
   // 3. Сохраняем данные пользователя в Firestore
   await db.collection('users').doc(user.uid).set({
     nickname: nickname,
-    tag: tag,
+    tag: formattedTag,
     email: email,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
-  // 4. Отправляем письмо с подтверждением (с правильным URL)
+  // 4. Отправляем письмо с подтверждением
   await user.sendEmailVerification({
     url: window.location.origin + '/index.html'
   });
@@ -72,7 +75,6 @@ async function sendVerificationEmail() {
 async function logout() {
   const uid = localStorage.getItem('lastUid');
   
-  // Очищаем локальный кэш пользователя перед выходом
   if (uid) {
     localStorage.removeItem(`cachedCurrentUser_${uid}`);
     localStorage.removeItem(`cachedChats_${uid}`);
@@ -86,7 +88,7 @@ async function logout() {
 
 // ========== ПРОВЕРКА УНИКАЛЬНОСТИ ТЕГА ==========
 async function checkTagUnique(tag) {
-  const fullTag = '@' + tag;
+  const fullTag = tag.startsWith('@') ? tag : '@' + tag;
   const snapshot = await db.collection('users').where('tag', '==', fullTag).get();
   return snapshot.empty;
 }
@@ -114,14 +116,12 @@ function preventAtSymbolDeletion(event, input) {
 document.addEventListener("DOMContentLoaded", () => {
   const lastUid = localStorage.getItem('lastUid');
   
-  // Добавляем страницы settings.html и user.html в список исключений для редиректа
   const isAlreadyOnMessenger = 
     window.location.pathname.includes('messenger.html') || 
     window.location.pathname.includes('profile.html') ||
     window.location.pathname.includes('settings.html') ||
     window.location.pathname.includes('user.html');
   
-  // Если в кэше остался lastUid и мы НЕ на одной из внутренних страниц, перекидываем в мессенджер
   if (lastUid && !isAlreadyOnMessenger) {
     window.location.href = 'messenger.html'; 
   }
@@ -134,7 +134,7 @@ async function generateUniqueTag() {
   let attempts = 0;
   
   while (!isUnique && attempts < 10) {
-    attempts++; // Инкремент попыток для предотвращения бесконечного цикла
+    attempts++;
     const randomDigits = Math.floor(10000 + Math.random() * 90000); 
     tag = '@user' + randomDigits;
     
@@ -149,7 +149,6 @@ async function generateUniqueTag() {
     }
   }
   
-  // Если за 10 попыток не нашли свободный — генерируем на основе времени
   if (!isUnique) {
     tag = '@user' + Date.now().toString().slice(-6);
   }
@@ -160,7 +159,6 @@ async function generateUniqueTag() {
 async function continueWithGoogle() {
   const provider = new firebase.auth.GoogleAuthProvider();
   
-  // Форсируем выбор аккаунта Google
   provider.setCustomParameters({ prompt: 'select_account' });
   
   const result = await auth.signInWithPopup(provider);
@@ -176,7 +174,7 @@ async function continueWithGoogle() {
     console.error('Ошибка получения данных из Firestore:', err);
   }
   
-  // 1. Извлекаем чистый никнейм (без части с тегом "|...")
+  // 1. Извлекаем чистый никнейм из Google (имя пользователя)
   let cleanNickname = 'Пользователь';
   if (user.displayName) {
     cleanNickname = user.displayName.includes('|') 
@@ -190,7 +188,7 @@ async function continueWithGoogle() {
 
   const avatarUrl = user.photoURL || '';
 
-  // 2. Флаги нового аккаунта или восстановленного после мягкого удаления
+  // 2. Флаги нового или восстановленного аккаунта
   const isCompletelyNew = !doc || !doc.exists;
   const isDeletedAccount = doc && doc.exists && data && data.email === '';
 
@@ -198,13 +196,11 @@ async function continueWithGoogle() {
   if (isCompletelyNew || isDeletedAccount) {
     const newTag = await generateUniqueTag();
 
-    // Обновляем профиль Firebase Auth
     await user.updateProfile({ 
       displayName: cleanNickname + '|' + newTag,
       photoURL: avatarUrl
     });
 
-    // Сохраняем в Firestore
     await db.collection('users').doc(user.uid).set({
       nickname: cleanNickname,
       tag: newTag,
@@ -217,18 +213,18 @@ async function continueWithGoogle() {
     return user;
   }
 
-  // 4. Существующий аккаунт: берем тег ИЗ БАЗЫ (сохраняя любой выбранный пользователем тег)
+  // 4. Проверяем имеющийся тег в Firestore
   let currentTag = data ? data.tag : null;
 
-  // Если поля `tag` вообще нет в документе базы — только тогда создаем его
-  if (currentTag === undefined || currentTag === null || currentTag === '') {
+  // Если тега нет, либо он содержит строку "undefined" / "null" — автогенерируем новый
+  if (!currentTag || currentTag.includes('undefined') || currentTag.includes('null') || currentTag === '@') {
     currentTag = await generateUniqueTag();
     await db.collection('users').doc(user.uid).update({ tag: currentTag });
-    console.log('✅ Назначен отсутствовавший тег:', currentTag);
+    console.log('✅ Исправлен/назначен новый тег:', currentTag);
   }
 
-  // Синхронизируем displayName в Auth (для кэша и быстрой отрисовки)
-  const savedNickname = (data && data.nickname) ? data.nickname : cleanNickname;
+  // 5. Синхронизируем displayName в Firebase Auth
+  const savedNickname = (data && data.nickname && data.nickname !== 'undefined') ? data.nickname : cleanNickname;
   const expectedDisplayName = savedNickname + '|' + currentTag;
   
   if (user.displayName !== expectedDisplayName) {
