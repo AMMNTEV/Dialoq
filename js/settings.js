@@ -125,6 +125,7 @@ async function toggleTheme(isDark) {
 }
 
 // ========== УДАЛЕНИЕ АККАУНТА ==========
+// ========== УДАЛЕНИЕ АККАУНТА ==========
 async function deleteAccount() {
   if (!currentUser) return;
   
@@ -134,6 +135,15 @@ async function deleteAccount() {
   const uid = currentUser.uid;
   let oldData = null;
 
+  // Функция для полной очистки локального кэша
+  const clearLocalCache = (userId) => {
+    localStorage.removeItem(`cachedCurrentUser_${userId}`);
+    localStorage.removeItem(`cachedChats_${userId}`);
+    localStorage.removeItem(`cachedUnreads_${userId}`);
+    localStorage.removeItem('lastUid');
+    if (window.userCache) window.userCache.delete(userId);
+  };
+
   try {
     // 1. Сохраняем текущие данные пользователя для возможного "отката"
     const docSnap = await db.collection('users').doc(uid).get();
@@ -141,24 +151,32 @@ async function deleteAccount() {
       oldData = docSnap.data();
     }
     
-    // 2. СНАЧАЛА зачищаем базу, ПОКА ЕСТЬ ПРАВА (сессия еще жива)
-    await db.collection('users').doc(uid).update({
-      nickname: 'Удаленный аккаунт',
-      email: '',
-      avatar: '',
-      tag: '',
-      deletedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    // 2. Проверяем, есть ли у пользователя активные чаты в Firestore
+    const chatsSnapshot = await db.collection('chats')
+      .where('participants', 'array-contains', uid)
+      .get();
 
-    // 3. ТЕПЕРЬ удаляем пользователя из Authentication
+    const hasChats = !chatsSnapshot.empty;
+
+    if (!hasChats) {
+      // ЕСПИ ЧАТОВ НЕТ: полностью удаляем документ пользователя из Firestore
+      await db.collection('users').doc(uid).delete();
+    } else {
+      // ЕСЛИ ЧАТЫ ЕСТЬ: делаем «мягкое удаление» (анти-краш для чужих чатов)
+      await db.collection('users').doc(uid).update({
+        nickname: 'Удаленный аккаунт',
+        email: '',
+        avatar: '',
+        tag: '',
+        deletedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+
+    // 3. Удаляем пользователя из Authentication
     await currentUser.delete();
     
     // 4. Очищаем локальный кэш
-    localStorage.removeItem(`cachedCurrentUser_${uid}`);
-    localStorage.removeItem(`cachedChats_${uid}`);
-    localStorage.removeItem(`cachedUnreads_${uid}`);
-    localStorage.removeItem('lastUid');
-    if (window.userCache) window.userCache.delete(uid);
+    clearLocalCache(uid);
     
     // 5. Перенаправляем на главную
     window.location.href = 'index.html';
@@ -167,12 +185,22 @@ async function deleteAccount() {
     console.error('Ошибка при удалении аккаунта:', error);
     
     if (error.code === 'auth/requires-recent-login') {
-      // ЕСЛИ ОШИБКА СЕССИИ — ОТКАТЫВАЕМ ДАННЫЕ В БАЗЕ НАЗАД, так как аккаунт не удалился
+      // ЕСЛИ ОШИБКА СЕССИИ — ОТКАТЫВАЕМ ДАННЫЕ В БАЗЕ НАЗАД (если они там вообще оставались)
       if (oldData) {
-        await db.collection('users').doc(uid).set(oldData);
+        // Проверяем, существовал ли документ до удаления (на случай если чатов не было)
+        const checkDoc = await db.collection('users').doc(uid).get();
+        if (!checkDoc.exists) {
+          await db.collection('users').doc(uid).set(oldData);
+        } else {
+          await db.collection('users').doc(uid).set(oldData);
+        }
       }
       
       alert("В целях безопасности Firebase требует подтвердить вход. Сейчас вы выйдете из системы — войдите заново и сразу нажмите «Удалить» еще раз.");
+      
+      // Очищаем кэш ПЕРЕД тем, как выкинуть пользователя из аккаунта
+      clearLocalCache(uid);
+      
       await auth.signOut();
       window.location.href = 'index.html';
     } else {
@@ -180,6 +208,7 @@ async function deleteAccount() {
     }
   }
 }
+
 // Функция обновления карточки пользователя на странице настроек
 function updateSidebarUser(userData) {
   const nameEl = document.getElementById('userName'); 
