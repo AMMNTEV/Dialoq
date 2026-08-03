@@ -22,24 +22,36 @@ onAuthStateChanged(async (user) => {
 
   try {
     const doc = await db.collection('users').doc(user.uid).get();
-    if (doc.exists) {
-      currentUserData = doc.data();
-      document.getElementById('userAvatar').textContent = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
-      document.getElementById('userName').textContent = currentUserData.nickname || 'Пользователь';
-      document.getElementById('userTag').textContent = currentUserData.tag || '@user';
+    if (!doc.exists) {
+  // Защита от '@undefined': проверяем, есть ли символ '|' в имени
+  let nickname = 'Пользователь';
+  let tag = '';
+  
+  if (user.displayName && user.displayName.includes('|')) {
+    const parts = user.displayName.split('|');
+    nickname = parts[0];
+    tag = '@' + parts[1];
+  } else {
+    nickname = user.displayName || 'Пользователь';
+    // Используем вашу готовую функцию для генерации корректного тега
+    tag = await generateUniqueTag(); 
+  }
 
-      if (currentUserData.theme === 'dark') {
-        document.body.classList.add('dark-theme');
-        document.body.classList.remove('light-theme');
-        document.getElementById('darkThemeToggle').checked = true;
-        localStorage.setItem('theme', 'dark');
-      } else {
-        document.body.classList.add('light-theme');
-        document.body.classList.remove('dark-theme');
-        document.getElementById('darkThemeToggle').checked = false;
-        localStorage.setItem('theme', 'light');
-      }
-    }
+  // Создаем пользователя
+  await db.collection('users').doc(user.uid).set({
+    nickname: nickname,
+    tag: tag,
+    email: user.email || '',
+    avatar: user.photoURL || '', // Сохраняем аватарку из Google
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  
+  // Синхронизируем displayName в Firebase Auth для будущих сессий
+  await user.updateProfile({ displayName: nickname + '|' + tag.replace('@', '') });
+  
+  window.location.reload();
+  return;
+}
   } catch (error) {
     console.error('Ошибка загрузки пользователя:', error);
   }

@@ -37,13 +37,36 @@ onAuthStateChanged(async (user) => {
   }
   try {
     const userDoc = await db.collection('users').doc(userId).get();
-    if (!userDoc.exists) {
-      document.getElementById('profileContent').innerHTML = `
-        <div class="error">Пользователь не найден</div>
-        <a href="messenger.html" style="display: block; text-align: center; margin-top: 20px; color: #667eea;">Вернуться в мессенджер</a>
-      `;
-      return;
-    }
+    if (!doc.exists) {
+  // Защита от '@undefined': проверяем, есть ли символ '|' в имени
+  let nickname = 'Пользователь';
+  let tag = '';
+  
+  if (user.displayName && user.displayName.includes('|')) {
+    const parts = user.displayName.split('|');
+    nickname = parts[0];
+    tag = '@' + parts[1];
+  } else {
+    nickname = user.displayName || 'Пользователь';
+    // Используем вашу готовую функцию для генерации корректного тега
+    tag = await generateUniqueTag(); 
+  }
+
+  // Создаем пользователя
+  await db.collection('users').doc(user.uid).set({
+    nickname: nickname,
+    tag: tag,
+    email: user.email || '',
+    avatar: user.photoURL || '', // Сохраняем аватарку из Google
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  
+  // Синхронизируем displayName в Firebase Auth для будущих сессий
+  await user.updateProfile({ displayName: nickname + '|' + tag.replace('@', '') });
+  
+  window.location.reload();
+  return;
+}
     const userData = userDoc.data();
     
     // Получаем первую букву, если аватарки нет
