@@ -209,8 +209,9 @@ async function deleteAccount() {
   }
 }
 
-// Функция обновления карточки пользователя на странице настроек
+// Функция обновления карточки пользователя в настройках И в левом сайдбаре
 function updateSidebarUser(userData) {
+  // 1. Обновление центральной карточки настроек
   const nameEl = document.getElementById('userName'); 
   const tagEl = document.getElementById('userTag');
   const avatarEl = document.getElementById('userAvatar');
@@ -224,8 +225,27 @@ function updateSidebarUser(userData) {
       avatarEl.style.background = 'transparent';
     } else {
       avatarEl.innerHTML = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
-      avatarEl.style.background = '#3b82f6'; // Вернул синий цвет, как у вас в CSS
+      avatarEl.style.background = '#3b82f6';
       avatarEl.style.color = 'white';
+    }
+  }
+
+  // 2. Обновление левого сайдбара навигации
+  const sidebarNameEl = document.getElementById('sidebarUserName');
+  const sidebarTagEl = document.getElementById('sidebarUserTag');
+  const sidebarAvatarEl = document.getElementById('sidebarUserAvatar');
+  
+  if (sidebarNameEl) sidebarNameEl.textContent = userData.nickname || 'Пользователь';
+  if (sidebarTagEl) sidebarTagEl.textContent = userData.tag || '@user';
+  
+  if (sidebarAvatarEl) {
+    if (userData.avatar) {
+      sidebarAvatarEl.innerHTML = `<img src="${userData.avatar}" alt="Аватар" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block;">`;
+      sidebarAvatarEl.style.background = 'transparent';
+    } else {
+      sidebarAvatarEl.innerHTML = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
+      sidebarAvatarEl.style.background = '#1a1a1a';
+      sidebarAvatarEl.style.color = 'white';
     }
   }
 }
