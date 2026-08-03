@@ -752,6 +752,21 @@
   display: block;
 }
 
+/* Единые стили для пустых списков и загрузки */
+.no-chats,
+.no-users,
+.no-messages,
+.loading {
+  text-align: center;
+  color: #64748b;
+  padding: 20px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 /* ==========================================
    8. АДАПТИВНОСТЬ И МОБИЛЬНЫЕ СТИЛИ
    ========================================== */
@@ -849,6 +864,7 @@
     display: flex;
   }
 
+  .no-chats,
   .no-messages,
   .no-users,
   .loading {
