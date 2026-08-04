@@ -136,10 +136,11 @@
         </div>
 
         <!-- ===== КНОПКИ ===== -->
-        <!-- Убираем инлайн-стили! Классы делают всю работу -->
         <div class="settings-section" style="display: flex; flex-direction: column; gap: 10px;">
-          <button onclick="logout()" class="settings-danger-btn logout-btn-settings">Выйти из аккаунта</button>
-          <button onclick="deleteAccount()" class="settings-danger-btn delete-account-btn">Удалить аккаунт</button>
+          <!-- Выйти — используем класс settings-btn (серая) -->
+          <button onclick="logout()" class="settings-btn">Выйти из аккаунта</button>
+          <!-- Удалить — используем класс settings-danger-btn (красная) -->
+          <button onclick="deleteAccount()" class="settings-danger-btn">Удалить аккаунт</button>
         </div>
       </div>
     </div>
