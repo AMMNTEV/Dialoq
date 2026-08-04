@@ -6,19 +6,19 @@
 /* ------ ГЛОБАЛЬНЫЕ ПЕРЕОПРЕДЕЛЕНИЯ ------ */
 .dark-theme {
   /* Базовые цвета — грифельная палитра */
-  --bg-primary: #111318;
-  --bg-secondary: #181b22;
-  --bg-tertiary: #1e212a;
+  --bg-primary: #0d0f14;
+  --bg-secondary: #111318;
+  --bg-tertiary: #181b22;
   --bg-card: #1a1d26;
   --bg-hover: #252934;
-  --bg-input: #111318;
-  --bg-chat: #111318;
+  --bg-input: #0d0f14;
+  --bg-chat: #0d0f14;
   
   /* Текст — холодный белый */
   --text-primary: #e6e9f0;
   --text-secondary: #8e95a8;
   --text-muted: #5d6478;
-  --text-inverse: #111318;
+  --text-inverse: #0d0f14;
   
   /* Границы */
   --border-color: #252934;
@@ -42,7 +42,7 @@
   --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.6);
   
   /* Скроллбар — грифельный */
-  --scrollbar-track: #181b22;
+  --scrollbar-track: #0d0f14;
   --scrollbar-thumb: #2f3542;
   --scrollbar-thumb-hover: #3d4556;
 }
@@ -177,7 +177,7 @@
   color: var(--text-secondary) !important;
 }
 
-/* --- Кнопки --- */
+/* --- Кнопки навигации (не опасные) --- */
 .dark-theme .nav-button,
 .dark-theme .popup-item,
 .dark-theme .modal-cancel-btn {
@@ -193,30 +193,52 @@
   background: var(--bg-hover) !important;
 }
 
-.dark-theme .nav-button.logout-btn:hover,
-.dark-theme .popup-item.logout:hover {
-  background: rgba(196, 84, 84, 0.15) !important;
-  color: var(--danger) !important;
+/* --- Только кнопка "Выход" в навигации --- */
+.dark-theme .nav-button.logout-btn,
+.dark-theme .popup-item.logout {
+  color: var(--text-secondary) !important;
+  background: transparent !important;
 }
 
-/* --- Кнопка "Опасное действие" --- */
-.dark-theme .settings-danger-btn {
+.dark-theme .nav-button.logout-btn:hover,
+.dark-theme .popup-item.logout:hover {
   background: rgba(196, 84, 84, 0.12) !important;
   color: var(--danger) !important;
 }
 
-.dark-theme .settings-danger-btn:hover {
+/* --- Кнопка "Выйти из аккаунта" в настройках (НЕ КРАСНАЯ) --- */
+.dark-theme .settings-danger-btn:not(.delete-account-btn) {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.dark-theme .settings-danger-btn:not(.delete-account-btn):hover {
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+/* --- Кнопка "Удалить аккаунт" (КРАСНАЯ) --- */
+.dark-theme .settings-danger-btn.delete-account-btn {
+  background: rgba(196, 84, 84, 0.12) !important;
+  color: var(--danger) !important;
+  border: 1px solid rgba(196, 84, 84, 0.15) !important;
+}
+
+.dark-theme .settings-danger-btn.delete-account-btn:hover {
   background: rgba(196, 84, 84, 0.22) !important;
 }
 
-/* --- Кнопка выхода в профиле --- */
+/* --- Кнопка выхода в профиле (маленькая, НЕ КРАСНАЯ) --- */
 .dark-theme .logout-small-header {
-  background: rgba(196, 84, 84, 0.12) !important;
-  color: var(--danger) !important;
+  background: var(--bg-tertiary) !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--border-color) !important;
 }
 
 .dark-theme .logout-small-header:hover {
-  background: rgba(196, 84, 84, 0.22) !important;
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
 }
 
 /* --- Синяя кнопка (главная) --- */
@@ -271,7 +293,7 @@
 .dark-theme .skeleton-circle,
 .dark-theme .skeleton-line,
 .dark-theme .skeleton-post {
-  background: linear-gradient(90deg, #1e212a 25%, #2f3542 50%, #1e212a 75%) !important;
+  background: linear-gradient(90deg, #1a1d26 25%, #2f3542 50%, #1a1d26 75%) !important;
   background-size: 200% 100% !important;
 }
 
@@ -517,7 +539,7 @@
 
 /* --- Авторизация --- */
 .dark-theme .auth-page {
-  background: linear-gradient(135deg, #111318 0%, #1a1d26 100%) !important;
+  background: linear-gradient(135deg, #0d0f14 0%, #181b22 100%) !important;
 }
 
 .dark-theme .auth-card {
@@ -646,6 +668,36 @@
 .dark-theme .message-input-area {
   background: var(--bg-card) !important;
   border-top-color: var(--border-color) !important;
+}
+
+/* ==========================================
+   НАСТРОЙКИ — ФОН ТЕМНЕЕ КАРТОЧЕК
+   ========================================== */
+
+.dark-theme .settings-page {
+  background: var(--bg-primary) !important;
+}
+
+.dark-theme .settings-page .settings-container {
+  background: transparent !important;
+}
+
+/* --- Карточки настроек видны на тёмном фоне --- */
+.dark-theme .settings-page .settings-section,
+.dark-theme .settings-page .user-card {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+/* --- Элементы настроек при наведении --- */
+.dark-theme .settings-page .settings-item:hover {
+  background: var(--bg-hover) !important;
+}
+
+/* --- Заголовок настроек --- */
+.dark-theme .settings-page .settings-header {
+  border-bottom-color: var(--border-color) !important;
 }
 
 /* ==========================================
