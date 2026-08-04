@@ -7,10 +7,8 @@
   (function () {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
-      // Моментально красим фон, чтобы не было белой вспышки
-      document.documentElement.style.backgroundColor = '#121212';
+      document.documentElement.style.backgroundColor = '#0a0c10';
       
-      // Добавляем класс на body, как только он появится в DOM
       document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.add('dark-theme');
       });
@@ -26,22 +24,13 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-<!-- Подключаем сам манифест (без первого слеша) -->
 <link rel="manifest" href="manifest.json">
 
-<!-- Цвет статус-бара для Android -->
-<meta name="theme-color" content="#121212">
+<meta name="theme-color" content="#0a0c10">
 
-<!-- Указываем Safari, что это PWA -->
 <meta name="apple-mobile-web-app-capable" content="yes">
-
-<!-- Настраиваем внешний вид статус-бара на iOS (black-translucent делает его прозрачным поверх приложения) -->
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-<!-- Название приложения на экране "Домой" для iOS (замени TSA на свое короткое название, если нужно) -->
 <meta name="apple-mobile-web-app-title" content="TSA">
-
-<!-- Иконка приложения для iOS (указали правильный путь к твоей картинке) -->
 <link rel="apple-touch-icon" href="img/user.png">
 </head>
 <body class="settings-page">
@@ -67,7 +56,7 @@
           Мессенджер
         </a>
         <a href="settings.html" class="nav-button active">
-          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           Настройки
         </a>
       </div>
@@ -81,7 +70,6 @@
     </div>
 
     <!-- ===== КОНТЕНТ НАСТРОЕК ===== -->
-    <!-- Добавлен flex: 1 и скролл, чтобы настройки вели себя как контент справа -->
     <div class="settings-container" style="flex: 1; overflow-y: auto; padding-bottom: 70px;">
       <div class="settings-header">
         <a href="messenger.html" class="back-btn"><</a>
@@ -147,9 +135,11 @@
           </div>
         </div>
 
+        <!-- ===== КНОПКИ ===== -->
+        <!-- Убираем инлайн-стили! Классы делают всю работу -->
         <div class="settings-section" style="display: flex; flex-direction: column; gap: 10px;">
-          <button onclick="logout()" class="settings-danger-btn" style="background: #f1f5f9; color: #475569;">Выйти из аккаунта</button>
-          <button onclick="deleteAccount()" class="settings-danger-btn">Удалить аккаунт</button>
+          <button onclick="logout()" class="settings-danger-btn logout-btn-settings">Выйти из аккаунта</button>
+          <button onclick="deleteAccount()" class="settings-danger-btn delete-account-btn">Удалить аккаунт</button>
         </div>
       </div>
     </div>
