@@ -105,6 +105,27 @@
   color: #94a3b8;
   font-size: 1.2rem;
 }
+
+/* --- Кнопки в настройках --- */
+
+/* Обычная кнопка (серая) — для "Выйти из аккаунта" */
+.settings-btn {
+  width: 100%;
+  padding: 14px;
+  background: #f1f5f9;
+  color: #475569;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.settings-btn:hover {
+  background: #e2e8f0;
+}
+
+/* Опасная кнопка (красная) — для "Удалить аккаунт" */
 .settings-danger-btn {
   width: 100%;
   padding: 14px;
@@ -198,7 +219,7 @@ html, body {
   flex: 1;
   height: 100%;
   overflow-y: auto;
-  max-width: none; /* Снимаем ограничение ширины, чтобы контент не был прижат */
+  max-width: none;
   margin: 0;
   padding: 20px 40px 40px 40px;
   box-sizing: border-box;
@@ -220,17 +241,15 @@ html, body {
     bottom: 0;
   }
 
-  /* На мобилках скрываем десктопный сайдбар, оставляем нижнюю панель */
   .settings-page .nav-sidebar {
     display: none !important;
   }
 
   .settings-page .settings-container {
     width: 100% !important;
-    padding: 16px 16px 90px 16px !important; /* Оставляем место снизу под плавающую панель */
+    padding: 16px 16px 90px 16px !important;
   }
 
-  /* Показываем нижнюю навигационную панель на мобильных */
   .settings-page .mobile-bottom-nav {
     display: flex !important;
   }

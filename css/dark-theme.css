@@ -703,5 +703,61 @@
 }
 
 /* ==========================================
+   НАСТРОЙКИ — КНОПКИ В ТЁМНОЙ ТЕМЕ
+   ========================================== */
+
+/* --- Кнопка "Выйти из аккаунта" (серая) --- */
+.dark-theme .settings-btn {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.dark-theme .settings-btn:hover {
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+/* --- Кнопка "Удалить аккаунт" (красная) --- */
+.dark-theme .settings-danger-btn {
+  background: rgba(184, 74, 74, 0.12) !important;
+  color: var(--danger) !important;
+  border: 1px solid rgba(184, 74, 74, 0.2) !important;
+}
+
+.dark-theme .settings-danger-btn:hover {
+  background: rgba(184, 74, 74, 0.22) !important;
+}
+
+/* ==========================================
+   НАСТРОЙКИ — ФОН И КАРТОЧКИ
+   ========================================== */
+
+.dark-theme .settings-page {
+  background: var(--bg-primary) !important;
+}
+
+.dark-theme .settings-page .settings-container,
+.dark-theme .settings-page .messenger-container {
+  background: transparent !important;
+}
+
+.dark-theme .settings-page .settings-section,
+.dark-theme .settings-page .user-card {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.dark-theme .settings-page .settings-item:hover {
+  background: var(--bg-hover) !important;
+}
+
+.dark-theme .settings-page .settings-header {
+  border-bottom-color: var(--border-color) !important;
+  background: transparent !important;
+}
+
+/* ==========================================
    КОНЕЦ DARK THEME
    ========================================== */
