@@ -1,49 +1,50 @@
 /* ==========================================
-   DARK THEME — красивая тёмная тема
-   Основана на тёмно-синей палитре с серыми оттенками
+   DARK THEME — грифельная тёмная тема
+   Основана на тёмно-серых оттенках с холодным подтоном
    ========================================== */
 
 /* ------ ГЛОБАЛЬНЫЕ ПЕРЕОПРЕДЕЛЕНИЯ ------ */
 .dark-theme {
-  /* Базовые цвета */
-  --bg-primary: #0f1724;
-  --bg-secondary: #151f2e;
-  --bg-tertiary: #1a2638;
-  --bg-card: #1a2638;
-  --bg-hover: #1f2d42;
-  --bg-input: #0f1724;
+  /* Базовые цвета — грифельная палитра */
+  --bg-primary: #111318;
+  --bg-secondary: #181b22;
+  --bg-tertiary: #1e212a;
+  --bg-card: #1a1d26;
+  --bg-hover: #252934;
+  --bg-input: #111318;
+  --bg-chat: #111318;
   
-  /* Текст */
-  --text-primary: #e8edf5;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --text-inverse: #0f1724;
+  /* Текст — холодный белый */
+  --text-primary: #e6e9f0;
+  --text-secondary: #8e95a8;
+  --text-muted: #5d6478;
+  --text-inverse: #111318;
   
   /* Границы */
-  --border-color: #1f2d42;
-  --border-light: #2a3a52;
+  --border-color: #252934;
+  --border-light: #2f3542;
   
-  /* Акценты (фирменный синий) */
-  --accent: #3b82f6;
-  --accent-hover: #60a5fa;
-  --accent-light: #1e3a5f;
-  --accent-glow: rgba(59, 130, 246, 0.15);
+  /* Акценты — приглушённый синий */
+  --accent: #4a7dbd;
+  --accent-hover: #6b97cf;
+  --accent-light: #1e2d45;
+  --accent-glow: rgba(74, 125, 189, 0.12);
   
   /* Статусы */
-  --success: #10b981;
-  --danger: #ef4444;
-  --warning: #f59e0b;
-  --info: #3b82f6;
+  --success: #4a9e6e;
+  --danger: #c45454;
+  --warning: #c49b3a;
+  --info: #4a7dbd;
   
   /* Тени */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.6);
   
-  /* Скроллбар */
-  --scrollbar-track: #0f1724;
-  --scrollbar-thumb: #2a3a52;
-  --scrollbar-thumb-hover: #3b4a66;
+  /* Скроллбар — грифельный */
+  --scrollbar-track: #181b22;
+  --scrollbar-thumb: #2f3542;
+  --scrollbar-thumb-hover: #3d4556;
 }
 
 /* ==========================================
@@ -54,7 +55,8 @@
 .dark-theme,
 .dark-theme body,
 .dark-theme .settings-page,
-.dark-theme .messenger-container {
+.dark-theme .messenger-container,
+.dark-theme .chat-area {
   background: var(--bg-primary) !important;
   color: var(--text-primary) !important;
 }
@@ -68,15 +70,23 @@
 .dark-theme .nav-sidebar,
 .dark-theme .nav-user-box,
 .dark-theme .chats-sidebar,
-.dark-theme .chat-area,
 .dark-theme .chat-header,
 .dark-theme .profile-card,
 .dark-theme .post-card,
 .dark-theme .modal-content,
-.dark-theme .mobile-popup-menu,
-.dark-theme .mobile-bottom-nav {
+.dark-theme .mobile-popup-menu {
   background: var(--bg-card) !important;
   border-color: var(--border-color) !important;
+}
+
+/* --- Список чатов --- */
+.dark-theme .chats-list {
+  background: var(--bg-primary) !important;
+}
+
+/* --- Область сообщений --- */
+.dark-theme .messages-container {
+  background: var(--bg-chat) !important;
 }
 
 /* --- Текст --- */
@@ -93,7 +103,8 @@
 .dark-theme .chat-name,
 .dark-theme .settings-item-title,
 .dark-theme .profile-info span,
-.dark-theme .post-content {
+.dark-theme .post-content,
+.dark-theme .chat-info h3 {
   color: var(--text-primary) !important;
 }
 
@@ -109,7 +120,8 @@
 .dark-theme .no-posts,
 .dark-theme .loading,
 .dark-theme .auth-subtitle,
-.dark-theme .auth-footer {
+.dark-theme .auth-footer,
+.dark-theme .chat-info p {
   color: var(--text-secondary) !important;
 }
 
@@ -123,7 +135,8 @@
 .dark-theme .profile-header,
 .dark-theme .post-header,
 .dark-theme .info-row,
-.dark-theme .message-input-area {
+.dark-theme .message-input-area,
+.dark-theme .selected-chat {
   border-color: var(--border-color) !important;
 }
 
@@ -182,28 +195,28 @@
 
 .dark-theme .nav-button.logout-btn:hover,
 .dark-theme .popup-item.logout:hover {
-  background: rgba(239, 68, 68, 0.15) !important;
+  background: rgba(196, 84, 84, 0.15) !important;
   color: var(--danger) !important;
 }
 
 /* --- Кнопка "Опасное действие" --- */
 .dark-theme .settings-danger-btn {
-  background: rgba(239, 68, 68, 0.15) !important;
+  background: rgba(196, 84, 84, 0.12) !important;
   color: var(--danger) !important;
 }
 
 .dark-theme .settings-danger-btn:hover {
-  background: rgba(239, 68, 68, 0.25) !important;
+  background: rgba(196, 84, 84, 0.22) !important;
 }
 
 /* --- Кнопка выхода в профиле --- */
 .dark-theme .logout-small-header {
-  background: rgba(239, 68, 68, 0.15) !important;
+  background: rgba(196, 84, 84, 0.12) !important;
   color: var(--danger) !important;
 }
 
 .dark-theme .logout-small-header:hover {
-  background: rgba(239, 68, 68, 0.25) !important;
+  background: rgba(196, 84, 84, 0.22) !important;
 }
 
 /* --- Синяя кнопка (главная) --- */
@@ -222,14 +235,10 @@
 .dark-theme .modal-save-btn:hover,
 .dark-theme .message-input-area button:hover {
   background: var(--accent-hover) !important;
-  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3) !important;
+  box-shadow: 0 8px 24px rgba(74, 125, 189, 0.3) !important;
 }
 
 /* --- Сообщения в чате --- */
-.dark-theme .messages-container {
-  background: var(--bg-secondary) !important;
-}
-
 .dark-theme .my-message {
   background: var(--accent) !important;
   color: #ffffff !important;
@@ -253,16 +262,16 @@
 }
 
 .dark-theme .message-delete-btn:hover {
-  background: rgba(239, 68, 68, 0.2) !important;
+  background: rgba(196, 84, 84, 0.2) !important;
   color: var(--danger) !important;
-  border-color: rgba(239, 68, 68, 0.3) !important;
+  border-color: rgba(196, 84, 84, 0.3) !important;
 }
 
 /* --- Скелетоны (загрузка) --- */
 .dark-theme .skeleton-circle,
 .dark-theme .skeleton-line,
 .dark-theme .skeleton-post {
-  background: linear-gradient(90deg, #1a2638 25%, #2a3a52 50%, #1a2638 75%) !important;
+  background: linear-gradient(90deg, #1e212a 25%, #2f3542 50%, #1e212a 75%) !important;
   background-size: 200% 100% !important;
 }
 
@@ -279,7 +288,7 @@
 
 /* --- Тоггл-свитч --- */
 .dark-theme .slider {
-  background: #2a3a52 !important;
+  background: #2f3542 !important;
 }
 
 .dark-theme .switch input:checked + .slider {
@@ -298,12 +307,12 @@
 
 .dark-theme .chat-item.has-unread,
 .dark-theme .user-item.has-unread {
-  background: rgba(59, 130, 246, 0.1) !important;
+  background: rgba(74, 125, 189, 0.08) !important;
 }
 
 .dark-theme .chat-item.has-unread:hover,
 .dark-theme .user-item.has-unread:hover {
-  background: rgba(59, 130, 246, 0.2) !important;
+  background: rgba(74, 125, 189, 0.16) !important;
 }
 
 /* --- Разделитель даты --- */
@@ -316,7 +325,42 @@
   background: var(--border-color) !important;
 }
 
-/* --- Скроллбары --- */
+/* ==========================================
+   СКРОЛЛБАРЫ — КАСТОМНЫЕ ГРИФЕЛЬНЫЕ
+   ========================================== */
+
+/* Firefox */
+.dark-theme * {
+  scrollbar-width: thin !important;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track) !important;
+}
+
+/* WebKit (Chrome, Safari, Edge) */
+.dark-theme ::-webkit-scrollbar {
+  width: 5px !important;
+  height: 5px !important;
+}
+
+.dark-theme ::-webkit-scrollbar-track {
+  background: var(--scrollbar-track) !important;
+  border-radius: 10px !important;
+}
+
+.dark-theme ::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb) !important;
+  border-radius: 10px !important;
+  transition: background 0.2s ease !important;
+}
+
+.dark-theme ::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover) !important;
+}
+
+.dark-theme ::-webkit-scrollbar-corner {
+  background: var(--scrollbar-track) !important;
+}
+
+/* --- Специфичные скроллбары для контейнеров --- */
 .dark-theme .chats-list::-webkit-scrollbar-track,
 .dark-theme .messages-container::-webkit-scrollbar-track,
 .dark-theme .posts-container::-webkit-scrollbar-track,
@@ -335,6 +379,7 @@
 .dark-theme .users-list::-webkit-scrollbar-thumb,
 .dark-theme .profile-left::-webkit-scrollbar-thumb {
   background: var(--scrollbar-thumb) !important;
+  border-radius: 10px !important;
 }
 
 .dark-theme .chats-list::-webkit-scrollbar-thumb:hover,
@@ -347,18 +392,56 @@
   background: var(--scrollbar-thumb-hover) !important;
 }
 
+/* ==========================================
+   МОБИЛЬНАЯ НИЖНЯЯ ПАНЕЛЬ
+   ========================================== */
+
+/* --- Десктоп: скрываем --- */
+.dark-theme .mobile-bottom-nav {
+  display: none !important;
+}
+
+/* --- Мобилки: красивая тёмная панель --- */
+@media (max-width: 768px) {
+  .dark-theme .mobile-bottom-nav {
+    display: flex !important;
+    background: rgba(26, 29, 38, 0.92) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 28px !important;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+  }
+  
+  .dark-theme .mobile-bottom-nav .nav-item {
+    color: var(--text-muted) !important;
+    transition: all 0.2s ease !important;
+  }
+  
+  .dark-theme .mobile-bottom-nav .nav-item.active {
+    color: var(--accent) !important;
+    background: rgba(74, 125, 189, 0.15) !important;
+  }
+  
+  .dark-theme .mobile-bottom-nav .nav-item:hover {
+    color: var(--text-secondary) !important;
+  }
+}
+
 /* --- Модальные окна --- */
 .dark-theme .modal-overlay {
-  background: rgba(0, 0, 0, 0.7) !important;
+  background: rgba(0, 0, 0, 0.75) !important;
 }
 
 .dark-theme .modal-delete-btn {
-  background: rgba(239, 68, 68, 0.15) !important;
+  background: rgba(196, 84, 84, 0.12) !important;
   color: var(--danger) !important;
 }
 
 .dark-theme .modal-delete-btn:hover {
-  background: rgba(239, 68, 68, 0.25) !important;
+  background: rgba(196, 84, 84, 0.22) !important;
 }
 
 .dark-theme .modal-option-btn {
@@ -372,34 +455,34 @@
 }
 
 .dark-theme .modal-option-btn.delete {
-  background: rgba(239, 68, 68, 0.15) !important;
+  background: rgba(196, 84, 84, 0.12) !important;
   color: var(--danger) !important;
-  border-color: rgba(239, 68, 68, 0.2) !important;
+  border-color: rgba(196, 84, 84, 0.2) !important;
 }
 
 .dark-theme .modal-option-btn.delete:hover {
-  background: rgba(239, 68, 68, 0.25) !important;
+  background: rgba(196, 84, 84, 0.22) !important;
 }
 
 /* --- Сообщения статуса (success/error/etc) --- */
 .dark-theme .success {
-  background: rgba(16, 185, 129, 0.15) !important;
-  color: #34d399 !important;
+  background: rgba(74, 158, 110, 0.12) !important;
+  color: #6abf8a !important;
 }
 
 .dark-theme .error {
-  background: rgba(239, 68, 68, 0.15) !important;
-  color: #f87171 !important;
+  background: rgba(196, 84, 84, 0.12) !important;
+  color: #d97a7a !important;
 }
 
 .dark-theme .warning {
-  background: rgba(245, 158, 11, 0.15) !important;
-  color: #fbbf24 !important;
+  background: rgba(196, 155, 58, 0.12) !important;
+  color: #d4b35a !important;
 }
 
 .dark-theme .info {
-  background: rgba(59, 130, 246, 0.15) !important;
-  color: #60a5fa !important;
+  background: rgba(74, 125, 189, 0.12) !important;
+  color: #6b97cf !important;
 }
 
 /* --- Чекбоксы в группах --- */
@@ -434,7 +517,7 @@
 
 /* --- Авторизация --- */
 .dark-theme .auth-page {
-  background: linear-gradient(135deg, #0f1724 0%, #1a2638 100%) !important;
+  background: linear-gradient(135deg, #111318 0%, #1a1d26 100%) !important;
 }
 
 .dark-theme .auth-card {
@@ -479,11 +562,6 @@
   color: var(--text-muted) !important;
 }
 
-/* --- Список чатов и пользователей --- */
-.dark-theme .chats-list {
-  background: var(--bg-primary) !important;
-}
-
 /* --- Участники группы --- */
 .dark-theme .group-participants-list,
 .dark-theme .group-info-section,
@@ -502,7 +580,7 @@
 }
 
 .dark-theme .remove-participant-btn:hover {
-  background: rgba(239, 68, 68, 0.15) !important;
+  background: rgba(196, 84, 84, 0.12) !important;
   color: var(--danger) !important;
 }
 
@@ -560,31 +638,14 @@
 }
 
 .dark-theme .delete-post-btn:hover {
-  background: rgba(239, 68, 68, 0.15) !important;
+  background: rgba(196, 84, 84, 0.12) !important;
   color: var(--danger) !important;
 }
 
-/* --- Мобильная нижняя навигация --- */
-@media (max-width: 768px) {
-  .dark-theme .mobile-bottom-nav {
-    background: rgba(15, 23, 36, 0.92) !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
-    border-color: var(--border-color) !important;
-  }
-  
-  .dark-theme .mobile-bottom-nav .nav-item {
-    color: var(--text-muted) !important;
-  }
-  
-  .dark-theme .mobile-bottom-nav .nav-item.active {
-    color: var(--accent) !important;
-    background: var(--accent-glow) !important;
-  }
-  
-  .dark-theme .mobile-bottom-nav .nav-item:hover {
-    color: var(--text-secondary) !important;
-  }
+/* --- Панель ввода сообщения --- */
+.dark-theme .message-input-area {
+  background: var(--bg-card) !important;
+  border-top-color: var(--border-color) !important;
 }
 
 /* ==========================================
