@@ -61,9 +61,9 @@
 }
 
 /* --- Карточки и блоки --- */
-.dark-theme .settings-container,
-.dark-theme .settings-content,
 .dark-theme .user-card,
+.dark-theme .settings-section,
+.dark-theme .settings-item,
 .dark-theme .settings-section,
 .dark-theme .settings-item,
 .dark-theme .nav-sidebar,
@@ -204,29 +204,28 @@
   color: var(--danger) !important;
 }
 
-/* --- Кнопка "Выйти из аккаунта" в настройках (ТЕМНО-СЕРАЯ, НЕ КРАСНАЯ) --- */
-.dark-theme .settings-danger-btn:not(.delete-account-btn) {
+/* --- Кнопка "Выйти из аккаунта" в настройках (ТЕМНО-СЕРАЯ) --- */
+.dark-theme .settings-btn {
   background: var(--bg-tertiary) !important;
   color: var(--text-primary) !important;
   border: 1px solid var(--border-color) !important;
 }
 
-.dark-theme .settings-danger-btn:not(.delete-account-btn):hover {
+.dark-theme .settings-btn:hover {
   background: var(--bg-hover) !important;
   color: var(--text-primary) !important;
 }
 
 /* --- Кнопка "Удалить аккаунт" (КРАСНАЯ) --- */
-.dark-theme .settings-danger-btn.delete-account-btn {
+.dark-theme .settings-danger-btn {
   background: rgba(184, 74, 74, 0.12) !important;
   color: var(--danger) !important;
   border: 1px solid rgba(184, 74, 74, 0.2) !important;
 }
 
-.dark-theme .settings-danger-btn.delete-account-btn:hover {
+.dark-theme .settings-danger-btn:hover {
   background: rgba(184, 74, 74, 0.22) !important;
 }
-
 /* --- Кнопка выхода в профиле (маленькая, ТЕМНО-СЕРАЯ) --- */
 .dark-theme .logout-small-header {
   background: var(--bg-tertiary) !important;
@@ -730,18 +729,29 @@
 }
 
 /* ==========================================
-   НАСТРОЙКИ — ФОН И КАРТОЧКИ
+   НАСТРОЙКИ — ИСПРАВЛЕННАЯ СЕТКА И ФОНЫ
    ========================================== */
 
-.dark-theme .settings-page {
+/* Глубокий фон для всей страницы и контейнера настроек */
+.dark-theme .settings-page,
+.dark-theme .settings-page .messenger-container,
+.dark-theme .settings-page .settings-container {
   background: var(--bg-primary) !important;
 }
 
-.dark-theme .settings-page .settings-container,
-.dark-theme .settings-page .messenger-container {
+/* Обертка контента должна быть прозрачной, чтобы не ломать отступы */
+.dark-theme .settings-page .settings-content {
   background: transparent !important;
+  border: none !important;
 }
 
+/* Сайдбар слева выделяем цветом карточек */
+.dark-theme .settings-page .nav-sidebar {
+  background: var(--bg-card) !important;
+  border-right: 1px solid var(--border-color) !important;
+}
+
+/* Сами карточки настроек */
 .dark-theme .settings-page .settings-section,
 .dark-theme .settings-page .user-card {
   background: var(--bg-card) !important;
@@ -749,15 +759,16 @@
   box-shadow: var(--shadow-sm) !important;
 }
 
+/* Элементы настроек при наведении */
 .dark-theme .settings-page .settings-item:hover {
   background: var(--bg-hover) !important;
 }
 
+/* Заголовок настроек */
 .dark-theme .settings-page .settings-header {
   border-bottom-color: var(--border-color) !important;
   background: transparent !important;
 }
-
 /* ==========================================
    КОНЕЦ DARK THEME
    ========================================== */
