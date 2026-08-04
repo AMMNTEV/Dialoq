@@ -760,8 +760,8 @@ async function selectChat(chat) {
 
   // Отрисовываем поле ввода или заглушку
   if (isDeletedAccount) {
-    messageInputArea.innerHTML = '<span style="color: #888; font-size: 0.95rem; margin: auto;">Этот пользователь удалил страницу</span>';
-  } else {
+  messageInputArea.innerHTML = '<div class="deleted-user-stub">Этот пользователь удалил страницу</div>';
+} else {
     messageInputArea.innerHTML = `
       <input type="text" id="messageInput" placeholder="Введите сообщение..." onkeypress="if(event.key==='Enter') sendMessage()">
       <button onclick="sendMessage()" id="sendButton" title="Отправить">
