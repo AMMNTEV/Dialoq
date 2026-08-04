@@ -152,6 +152,11 @@
   border-color: var(--border-color) !important;
   color: var(--text-primary) !important;
 }
+.dark-theme .deleted-user-stub {
+  background: var(--bg-input) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-muted) !important;
+}
 
 .dark-theme input::placeholder,
 .dark-theme .search-box input::placeholder {
