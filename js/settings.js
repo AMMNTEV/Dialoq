@@ -104,25 +104,28 @@ onAuthStateChanged(async (user) => {
   }
 });
 
-async function toggleTheme(isDark) {
-  const theme = isDark ? 'dark' : 'light';
+// Функция переключения темы
+function toggleTheme(isDark) {
   if (isDark) {
     document.body.classList.add('dark-theme');
-    document.body.classList.remove('light-theme');
+    localStorage.setItem('theme', 'dark');
+    // Опционально: меняем цвет статус-бара на темный
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#121212');
   } else {
-    document.body.classList.add('light-theme');
     document.body.classList.remove('dark-theme');
-  }
-  localStorage.setItem('theme', theme);
-
-  if (currentUser) {
-    try {
-      await db.collection('users').doc(currentUser.uid).update({ theme: theme });
-    } catch (error) {
-      console.error('Ошибка сохранения темы:', error);
-    }
+    localStorage.setItem('theme', 'light');
+    // Возвращаем светлый цвет статус-бара
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff'); 
   }
 }
+
+// При загрузке страницы настроек проверяем localStorage, чтобы тумблер был в правильном положении
+document.addEventListener('DOMContentLoaded', () => {
+  const themeToggle = document.getElementById('darkThemeToggle');
+  if (themeToggle) {
+    themeToggle.checked = localStorage.getItem('theme') === 'dark';
+  }
+});
 
 // ========== УДАЛЕНИЕ АККАУНТА ==========
 // ========== УДАЛЕНИЕ АККАУНТА ==========
@@ -249,3 +252,4 @@ function updateSidebarUser(userData) {
     }
   }
 }
+
