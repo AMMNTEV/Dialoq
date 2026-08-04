@@ -534,3 +534,28 @@
   }
 
 }
+
+/* Убираем системный прямоугольник при тапе на мобильных устройствах (iOS/Android) для всех элементов */
+* {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Убираем системную рамку (outline) при фокусе и клике для всех интерактивных элементов */
+button, 
+a, 
+input, 
+textarea,
+.chat-item, 
+.user-item, 
+.settings-item,
+.nav-button,
+.nav-item,
+.popup-item {
+  outline: none !important;
+}
+
+/* На всякий случай дублируем для состояния :focus */
+button:focus, 
+a:focus {
+  outline: none !important;
+}

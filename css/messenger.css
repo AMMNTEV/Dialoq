@@ -516,6 +516,19 @@
   background: #2563eb;
 }
 
+.deleted-user-stub {
+  width: 100%;
+  height: 44px; /* В точности как у #messageInput */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 22px;
+  color: #888888;
+  font-size: 0.95rem;
+}
+
 /* ==========================================
    6. МОДАЛЬНЫЕ ОКНА И ВСПОМОГАТЕЛЬНЫЕ ЭЛЕМЕНТЫ
    ========================================== */
@@ -1013,4 +1026,29 @@ body.chat-mode .mobile-bottom-nav {
       0 12px 28px rgba(0, 0, 0, 0.08),
       0 4px 12px rgba(0, 0, 0, 0.04);
   }
+}
+
+/* Убираем системный прямоугольник при тапе на мобильных устройствах (iOS/Android) для всех элементов */
+* {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Убираем системную рамку (outline) при фокусе и клике для всех интерактивных элементов */
+button, 
+a, 
+input, 
+textarea,
+.chat-item, 
+.user-item, 
+.settings-item,
+.nav-button,
+.nav-item,
+.popup-item {
+  outline: none !important;
+}
+
+/* На всякий случай дублируем для состояния :focus */
+button:focus, 
+a:focus {
+  outline: none !important;
 }
