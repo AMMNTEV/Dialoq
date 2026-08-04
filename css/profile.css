@@ -345,7 +345,8 @@
     gap: 0 !important;
     overflow: visible !important;
     height: auto !important;
-    padding: 16px 16px 30px 16px !important;
+    /* Добавляем динамический отступ для нижней навигации именно сюда */
+    padding: 16px 16px calc(80px + env(safe-area-inset-bottom, 0px)) 16px !important;
     flex: none !important;
   }
   .profile-left {
@@ -424,8 +425,8 @@
     overflow: visible !important;
     padding-right: 0 !important;
     gap: 12px;
-    /* Увеличиваем нижний отступ, чтобы посты выезжали из-за панели */
-    padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px)) !important;
+    /* Убрали формулу, оставили просто небольшой отступ внизу списка постов */
+    padding-bottom: 16px !important; 
     max-height: none !important;
     height: auto !important;
     display: flex !important;
@@ -522,18 +523,6 @@
   }
 }
 
-@media (max-width: 768px) {
-  .profile-two-columns {
-    display: block !important;
-    gap: 0 !important;
-    overflow: visible !important;
-    height: auto !important;
-    /* Увеличиваем нижний отступ до 88px + безопасная зона экрана */
-    padding: 16px 16px calc(88px + env(safe-area-inset-bottom, 0px)) 16px !important;
-    flex: none !important;
-  }
-
-}
 
 /* Убираем системный прямоугольник при тапе на мобильных устройствах (iOS/Android) для всех элементов */
 * {

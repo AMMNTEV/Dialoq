@@ -816,6 +816,36 @@ button:focus,
 a:focus {
   outline: none !important;
 }
+
+.dark-theme .profile-header {
+  background: var(--bg-primary) !important; /* Или var(--bg-card), если карточки отличаются по цвету */
+  border-bottom-color: var(--border-color) !important;
+}
+
+/* Темный фон для кнопки "Закрыть" / "Отмена" */
+.dark-theme .modal-cancel-btn {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.dark-theme .modal-cancel-btn:hover {
+  background: var(--bg-hover) !important;
+}
+
+/* Возвращаем эффект стекла для поисковой строки в темной теме */
+.dark-theme .search-box input {
+  background: rgba(15, 17, 21, 0.75) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark-theme .search-box input:focus {
+  background: rgba(15, 17, 21, 0.9) !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 4px var(--accent-glow) !important;
+}
 /* ==========================================
    КОНЕЦ DARK THEME
    ========================================== */

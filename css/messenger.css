@@ -195,7 +195,7 @@
   padding-top: 98px !important; 
   padding-left: 16px !important; /* Отступ слева */
   padding-right: 16px !important; /* Отступ справа */
-  padding-bottom: 20px !important; /* Небольшой отступ в самом низу страницы */
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;  
   height: 100%;
   overflow-y: auto;
   width: 100%;
@@ -1051,4 +1051,11 @@ textarea,
 button:focus, 
 a:focus {
   outline: none !important;
+}
+
+/* Центрирование и отступы только для кнопки "Добавить выбранных" */
+.group-info-section .modal-save-btn {
+  display: block;
+  margin: 16px auto 0 auto;
+  width: auto; /* Или 100%, если хотите широкую кнопку */
 }

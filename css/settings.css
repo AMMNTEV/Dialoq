@@ -247,7 +247,7 @@ html, body {
 
   .settings-page .settings-container {
     width: 100% !important;
-    padding: 16px 16px 90px 16px !important;
+    padding: 16px 16px calc(80px + env(safe-area-inset-bottom, 0px)) 16px !important;
   }
 
   .settings-page .mobile-bottom-nav {
