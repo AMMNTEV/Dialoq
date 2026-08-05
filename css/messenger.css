@@ -1092,6 +1092,20 @@ a:focus {
   margin-left: -4px !important; 
 }
 
+.back-btn {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+/* Отключаем появление фона при наведении, клике и фокусе */
+.back-btn:hover,
+.back-btn:focus,
+.back-btn:active {
+  background: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 /* 3. Убираем лишние отступы, чтобы прижать кнопку к левому краю */
 .chat-header {
   padding-left: 8px !important; /* Уменьшаем отступ шапки (было 16px) */
