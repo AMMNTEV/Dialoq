@@ -271,3 +271,27 @@ function toggleDelete() {
   arrow.classList.toggle('open');
 }
 
+// ========== СМЕНА ПАРОЛЯ ==========
+async function changePassword() {
+  if (!currentUser || !currentUser.email) {
+    alert("Не удалось определить email текущего пользователя.");
+    return;
+  }
+
+  const isConfirmed = confirm(`Отправить ссылку для смены пароля на почту ${currentUser.email}?`);
+  if (!isConfirmed) return;
+
+  try {
+    await resetPassword(currentUser.email);
+    alert(`✅ Ссылка для смены пароля отправлена на ${currentUser.email}.\nПроверьте папку «Спам», если письмо не приходит.`);
+  } catch (error) {
+    console.error('Ошибка при отправке письма для смены пароля:', error);
+    if (error.code === 'auth/network-request-failed') {
+      alert('🌐 Проблема с интернетом. Проверьте подключение.');
+    } else if (error.code === 'auth/too-many-requests') {
+      alert('⏳ Слишком много попыток. Попробуйте позже.');
+    } else {
+      alert('❌ Ошибка при отправке письма: ' + error.message);
+    }
+  }
+}
