@@ -113,23 +113,71 @@
         </div>
 
         <div class="settings-section">
-          <div class="settings-item" onclick="window.location.href='help.html'">
-            <div class="settings-item-icon">❓</div>
-            <div class="settings-item-info">
-              <div class="settings-item-title">Помощь / FAQ</div>
-              <div class="settings-item-desc">Ответы на частые вопросы</div>
-            </div>
-            <div class="settings-item-arrow">→</div>
-          </div>
-          <div class="settings-item" onclick="window.location.href='about.html'">
-            <div class="settings-item-icon">ℹ️</div>
-            <div class="settings-item-info">
-              <div class="settings-item-title">О приложении</div>
-              <div class="settings-item-desc">Версия и информация</div>
-            </div>
-            <div class="settings-item-arrow">→</div>
-          </div>
-        </div>
+  <!-- Профиль -->
+  <div class="settings-item" onclick="openModal('profileModal')">
+    <div class="settings-item-icon">
+      <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </div>
+    <div class="settings-item-info">
+      <div class="settings-item-title">Профиль</div>
+      <div class="settings-item-desc">Изменить имя, тег и аватар</div>
+    </div>
+    <div class="settings-item-arrow">→</div>
+  </div>
+
+  <!-- Пароль -->
+  <div class="settings-item" onclick="openModal('passwordModal')">
+    <div class="settings-item-icon">
+      <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+    <div class="settings-item-info">
+      <div class="settings-item-title">Безопасность</div>
+      <div class="settings-item-desc">Настройки пароля и входа</div>
+    </div>
+    <div class="settings-item-arrow">→</div>
+  </div>
+
+  <!-- Темная тема -->
+  <div class="settings-item">
+    <div class="settings-item-icon">
+      <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </div>
+    <div class="settings-item-info">
+      <div class="settings-item-title">Темная тема</div>
+      <div class="settings-item-desc">Использовать темную тему оформления</div>
+    </div>
+    <label class="switch">
+      <input type="checkbox" id="darkThemeToggle" onchange="toggleTheme(this.checked)">
+      <span class="slider"></span>
+    </label>
+  </div>
+</div>
+
+<div class="settings-section">
+  <!-- Помощь -->
+  <div class="settings-item" onclick="openModal('helpModal')">
+    <div class="settings-item-icon">
+      <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <div class="settings-item-info">
+      <div class="settings-item-title">Помощь / FAQ</div>
+      <div class="settings-item-desc">Ответы на частые вопросы</div>
+    </div>
+    <div class="settings-item-arrow">→</div>
+  </div>
+
+  <!-- О приложении -->
+  <div class="settings-item" onclick="openModal('aboutModal')">
+    <div class="settings-item-icon">
+      <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    </div>
+    <div class="settings-item-info">
+      <div class="settings-item-title">О приложении</div>
+      <div class="settings-item-desc">Версия и информация</div>
+    </div>
+    <div class="settings-item-arrow">→</div>
+  </div>
+</div>
 
         <!-- ===== КНОПКИ ===== -->
         <div class="settings-section" style="display: flex; flex-direction: column; gap: 10px;">
