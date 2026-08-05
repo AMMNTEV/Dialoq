@@ -279,3 +279,17 @@ button:focus,
 a:focus {
   outline: none !important;
 }
+
+@media (max-width: 768px) {
+  /* Мессенджер */
+  .chats-list {
+    /* Увеличено до 120px для компенсации перекрытия панелью */
+    padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  
+  /* Настройки */
+  .settings-page .settings-container {
+    /* Увеличено до 120px для компенсации перекрытия панелью */
+    padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
