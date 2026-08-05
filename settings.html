@@ -16,7 +16,7 @@
   })();
 </script>
   <title>Настройки</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='3'/><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z'/></svg>">
   <link rel="stylesheet" href="css/common.css">
   <link rel="stylesheet" href="css/messenger.css"> 
   <link rel="stylesheet" href="css/settings.css">
@@ -83,36 +83,6 @@
         </div>
 
         <div class="settings-section">
-          <div class="settings-item" onclick="window.location.href='profile.html'">
-            <div class="settings-item-icon">👤</div>
-            <div class="settings-item-info">
-              <div class="settings-item-title">Профиль</div>
-              <div class="settings-item-desc">Изменить имя, тег и другую информацию</div>
-            </div>
-            <div class="settings-item-arrow">→</div>
-          </div>
-          <div class="settings-item" onclick="window.location.href='change-password.html'">
-            <div class="settings-item-icon">🔒</div>
-            <div class="settings-item-info">
-              <div class="settings-item-title">Пароль</div>
-              <div class="settings-item-desc">Изменить пароль аккаунта</div>
-            </div>
-            <div class="settings-item-arrow">→</div>
-          </div>
-          <div class="settings-item">
-            <div class="settings-item-icon">🌙</div>
-            <div class="settings-item-info">
-              <div class="settings-item-title">Темная тема</div>
-              <div class="settings-item-desc">Использовать темную тему оформления</div>
-            </div>
-            <label class="switch">
-              <input type="checkbox" id="darkThemeToggle" onchange="toggleTheme(this.checked)">
-              <span class="slider"></span>
-            </label>
-          </div>
-        </div>
-
-        <div class="settings-section">
   <!-- Профиль -->
   <div class="settings-item" onclick="openModal('profileModal')">
     <div class="settings-item-icon">
@@ -154,20 +124,8 @@
 </div>
 
 <div class="settings-section">
-  <!-- Помощь -->
-  <div class="settings-item" onclick="openModal('helpModal')">
-    <div class="settings-item-icon">
-      <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-    </div>
-    <div class="settings-item-info">
-      <div class="settings-item-title">Помощь / FAQ</div>
-      <div class="settings-item-desc">Ответы на частые вопросы</div>
-    </div>
-    <div class="settings-item-arrow">→</div>
-  </div>
-
-  <!-- О приложении -->
-  <div class="settings-item" onclick="openModal('aboutModal')">
+  <!-- О приложении (Выпадающий список) -->
+  <div class="settings-item" onclick="toggleAbout()">
     <div class="settings-item-icon">
       <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
     </div>
@@ -175,7 +133,17 @@
       <div class="settings-item-title">О приложении</div>
       <div class="settings-item-desc">Версия и информация</div>
     </div>
-    <div class="settings-item-arrow">→</div>
+    <div class="settings-item-arrow transition-arrow" id="aboutArrow">
+      <!-- Иконка стрелочки вниз вместо текста -->
+      <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  
+  <!-- Скрытый текст "О приложении" -->
+  <div class="about-content" id="aboutContent">
+    <p><strong>Версия: 1.0.0 (Beta)</strong></p>
+    <p>Современная социальная сеть с минималистичным дизайном, созданная для удобного и безопасного общения.</p>
+    <p>Здесь вы можете обмениваться сообщениями, находить друзей и наслаждаться быстрым интерфейсом без лишних отвлекающих деталей.</p>
   </div>
 </div>
 
