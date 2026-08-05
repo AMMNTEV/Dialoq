@@ -1,0 +1,910 @@
+/* ==========================================
+   DARK THEME — глубокая грифельная тёмная тема
+   ========================================== */
+
+/* ------ ГЛОБАЛЬНЫЕ ПЕРЕОПРЕДЕЛЕНИЯ ------ */
+.dark-theme {
+  /* Базовые цвета — глубокий грифельный монохром */
+  --bg-primary: #0a0c10;
+  --bg-secondary: #0f1115;
+  --bg-tertiary: #14171e;
+  --bg-card: #161920;
+  --bg-hover: #1f232d;
+  --bg-input: #0f1115;
+  --bg-chat: #0a0c10;
+  
+  /* Текст — холодный белый */
+  --text-primary: #e2e6ed;
+  --text-secondary: #8b93a5;
+  --text-muted: #535b6d;
+  --text-inverse: #0a0c10;
+  
+  /* Границы */
+  --border-color: #212631;
+  --border-light: #2b313d;
+  
+  /* Акценты — холодный грифельно-синий */
+  --accent: #3b6ea8;
+  --accent-hover: #5285c2;
+  --accent-light: #182538;
+  --accent-glow: rgba(59, 110, 168, 0.15);
+  
+  /* Статусы */
+  --success: #3e8e63;
+  --danger: #b84a4a;
+  --warning: #b88d33;
+  --info: #3b6ea8;
+  
+  /* Тени */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.7);
+  
+  /* Скроллбар */
+  --scrollbar-track: #0a0c10;
+  --scrollbar-thumb: #212631;
+  --scrollbar-thumb-hover: #2b313d;
+}
+
+/* ==========================================
+   ПРИМЕНЕНИЕ ЦВЕТОВ
+   ========================================== */
+
+/* --- Базовый фон --- */
+.dark-theme,
+.dark-theme body,
+.dark-theme .settings-page,
+.dark-theme .messenger-container,
+.dark-theme .chat-area {
+  background: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* --- Карточки и блоки --- */
+.dark-theme .user-card,
+.dark-theme .settings-section,
+.dark-theme .settings-item,
+.dark-theme .settings-section,
+.dark-theme .settings-item,
+.dark-theme .nav-sidebar,
+.dark-theme .nav-user-box,
+.dark-theme .chats-sidebar,
+.dark-theme .chat-header,
+.dark-theme .profile-card,
+.dark-theme .post-card,
+.dark-theme .modal-content,
+.dark-theme .mobile-popup-menu {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* --- Список чатов --- */
+.dark-theme .chats-list {
+  background: var(--bg-card) !important;
+}
+
+/* --- Область сообщений --- */
+.dark-theme .messages-container {
+  background: var(--bg-chat) !important;
+}
+
+/* --- Текст --- */
+.dark-theme h1,
+.dark-theme h2,
+.dark-theme h3,
+.dark-theme h4,
+.dark-theme .settings-header h1,
+.dark-theme .chats-header h2,
+.dark-theme .posts-header h2,
+.dark-theme .modal-header h3,
+.dark-theme .user-name,
+.dark-theme .nav-user-name,
+.dark-theme .chat-name,
+.dark-theme .settings-item-title,
+.dark-theme .profile-info span,
+.dark-theme .post-content,
+.dark-theme .chat-info h3 {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .settings-item-desc,
+.dark-theme .user-tag,
+.dark-theme .nav-user-tag,
+.dark-theme .chat-tag,
+.dark-theme .chat-last-message,
+.dark-theme .post-date,
+.dark-theme .no-chats,
+.dark-theme .no-messages,
+.dark-theme .no-posts,
+.dark-theme .loading,
+.dark-theme .auth-subtitle,
+.dark-theme .auth-footer,
+.dark-theme .chat-info p {
+  color: var(--text-secondary) !important;
+}
+
+/* --- Границы --- */
+.dark-theme .settings-header,
+.dark-theme .chats-header,
+.dark-theme .chat-header,
+.dark-theme .modal-header,
+.dark-theme .modal-footer,
+.dark-theme .nav-divider,
+.dark-theme .profile-header,
+.dark-theme .post-header,
+.dark-theme .info-row,
+.dark-theme .message-input-area,
+.dark-theme .selected-chat {
+  border-color: var(--border-color) !important;
+}
+
+/* --- Инпуты и поля ввода --- */
+.dark-theme input,
+.dark-theme .search-box input,
+.dark-theme .message-input-area input,
+.dark-theme .modal-input,
+.dark-theme .search-input,
+.dark-theme .edit-input,
+.dark-theme .edit-input-borderless,
+.dark-theme .tag-input-wrapper,
+.dark-theme .auth-input-group input {
+  background: var(--bg-input) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+.dark-theme .deleted-user-stub {
+  background: var(--bg-input) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-muted) !important;
+}
+
+.dark-theme input::placeholder,
+.dark-theme .search-box input::placeholder {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme input:focus,
+.dark-theme .search-box input:focus,
+.dark-theme .message-input-area input:focus,
+.dark-theme .modal-input:focus,
+.dark-theme .search-input:focus,
+.dark-theme .edit-input:focus,
+.dark-theme .tag-input-wrapper:focus-within,
+.dark-theme .auth-input-group input:focus {
+  border-color: var(--accent) !important;
+  background: var(--bg-secondary) !important;
+  box-shadow: 0 0 0 4px var(--accent-glow) !important;
+}
+
+.dark-theme .tag-prefix {
+  color: var(--text-secondary) !important;
+}
+
+/* --- Кнопки навигации (не опасные) --- */
+.dark-theme .nav-button,
+.dark-theme .popup-item,
+.dark-theme .modal-cancel-btn {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .nav-button:hover,
+.dark-theme .popup-item:hover,
+.dark-theme .settings-item:hover,
+.dark-theme .chat-item:hover,
+.dark-theme .user-item:hover,
+.dark-theme .selected-chat:hover {
+  background: var(--bg-hover) !important;
+}
+
+/* --- Только кнопка "Выход" в навигации --- */
+.dark-theme .nav-button.logout-btn,
+.dark-theme .popup-item.logout {
+  color: var(--text-secondary) !important;
+  background: transparent !important;
+}
+
+.dark-theme .nav-button.logout-btn:hover,
+.dark-theme .popup-item.logout:hover {
+  background: rgba(184, 74, 74, 0.12) !important;
+  color: var(--danger) !important;
+}
+
+/* --- Кнопка "Выйти из аккаунта" в настройках (ТЕМНО-СЕРАЯ) --- */
+.dark-theme .settings-btn {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.dark-theme .settings-btn:hover {
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+/* --- Кнопка "Удалить аккаунт" (КРАСНАЯ) --- */
+.dark-theme .settings-danger-btn {
+  background: rgba(184, 74, 74, 0.12) !important;
+  color: var(--danger) !important;
+  border: 1px solid rgba(184, 74, 74, 0.2) !important;
+}
+
+.dark-theme .settings-danger-btn:hover {
+  background: rgba(184, 74, 74, 0.22) !important;
+}
+/* --- Кнопка выхода в профиле (маленькая, ТЕМНО-СЕРАЯ) --- */
+.dark-theme .logout-small-header {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.dark-theme .logout-small-header:hover {
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+/* --- Синяя кнопка (главная) --- */
+.dark-theme .auth-button,
+.dark-theme .save-btn,
+.dark-theme .create-post-btn,
+.dark-theme .modal-save-btn,
+.dark-theme .message-input-area button {
+  background: var(--accent) !important;
+  color: #ffffff !important;
+}
+
+.dark-theme .auth-button:hover,
+.dark-theme .save-btn:hover,
+.dark-theme .create-post-btn:hover,
+.dark-theme .modal-save-btn:hover,
+.dark-theme .message-input-area button:hover {
+  background: var(--accent-hover) !important;
+  box-shadow: 0 8px 24px rgba(59, 110, 168, 0.3) !important;
+}
+
+/* --- Сообщения в чате --- */
+.dark-theme .my-message {
+  background: var(--accent) !important;
+  color: #ffffff !important;
+}
+
+.dark-theme .other-message {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .message.system {
+  background: var(--bg-hover) !important;
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .message-delete-btn {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .message-delete-btn:hover {
+  background: rgba(184, 74, 74, 0.2) !important;
+  color: var(--danger) !important;
+  border-color: rgba(184, 74, 74, 0.3) !important;
+}
+
+/* --- Скелетоны (загрузка) --- */
+.dark-theme .skeleton-circle,
+.dark-theme .skeleton-line,
+.dark-theme .skeleton-post {
+  background: linear-gradient(90deg, #161920 25%, #212631 50%, #161920 75%) !important;
+  background-size: 200% 100% !important;
+}
+
+/* --- Аватары --- */
+.dark-theme .user-avatar,
+.dark-theme .nav-user-avatar,
+.dark-theme .chat-avatar-placeholder,
+.dark-theme .user-avatar-placeholder,
+.dark-theme .avatar-large,
+.dark-theme .settings-item-icon {
+  background: var(--accent-light) !important;
+  color: var(--accent-hover) !important;
+}
+
+/* --- Тоггл-свитч --- */
+.dark-theme .slider {
+  background: #212631 !important;
+}
+
+.dark-theme .switch input:checked + .slider {
+  background: var(--accent) !important;
+}
+
+.dark-theme .slider:before {
+  background: var(--text-primary) !important;
+}
+
+/* --- Бейджи непрочитанных --- */
+.dark-theme .unread-badge {
+  background: var(--accent) !important;
+  color: #ffffff !important;
+}
+
+.dark-theme .chat-item.has-unread,
+.dark-theme .user-item.has-unread {
+  background: rgba(59, 110, 168, 0.08) !important;
+}
+
+.dark-theme .chat-item.has-unread:hover,
+.dark-theme .user-item.has-unread:hover {
+  background: rgba(59, 110, 168, 0.16) !important;
+}
+
+/* --- Разделитель даты --- */
+.dark-theme .date-separator {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .date-separator::before,
+.dark-theme .date-separator::after {
+  background: var(--border-color) !important;
+}
+
+/* ==========================================
+   СКРОЛЛБАРЫ — КАСТОМНЫЕ ГРИФЕЛЬНЫЕ
+   ========================================== */
+
+/* Для Firefox */
+* {
+  scrollbar-width: thin !important;
+  scrollbar-color: #9ca3af transparent !important;
+}
+
+/* Для WebKit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 6px !important;
+  height: 6px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(156, 163, 175, 0.1) !important; /* Прозрачный серый для трека */
+  border-radius: 10px !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #9ca3af !important; /* Универсальный нейтральный серый */
+  border-radius: 10px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6b7280 !important; /* Более тёмный серый при наведении */
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent !important;
+}
+
+/* Принудительное переопределение для всех скроллящихся контейнеров (чтобы затереть старые стили) */
+.chats-list::-webkit-scrollbar,
+.messages-container::-webkit-scrollbar,
+.posts-container::-webkit-scrollbar,
+.users-checkbox-list::-webkit-scrollbar,
+.group-participants-list::-webkit-scrollbar,
+.users-list::-webkit-scrollbar,
+.profile-left::-webkit-scrollbar,
+.settings-container::-webkit-scrollbar,
+.settings-page .settings-container::-webkit-scrollbar {
+  width: 6px !important;
+  background: transparent !important;
+}
+
+.chats-list::-webkit-scrollbar-track,
+.messages-container::-webkit-scrollbar-track,
+.posts-container::-webkit-scrollbar-track,
+.users-checkbox-list::-webkit-scrollbar-track,
+.group-participants-list::-webkit-scrollbar-track,
+.users-list::-webkit-scrollbar-track,
+.profile-left::-webkit-scrollbar-track,
+.settings-container::-webkit-scrollbar-track,
+.settings-page .settings-container::-webkit-scrollbar-track {
+  background: rgba(156, 163, 175, 0.1) !important;
+}
+
+.chats-list::-webkit-scrollbar-thumb,
+.messages-container::-webkit-scrollbar-thumb,
+.posts-container::-webkit-scrollbar-thumb,
+.users-checkbox-list::-webkit-scrollbar-thumb,
+.group-participants-list::-webkit-scrollbar-thumb,
+.users-list::-webkit-scrollbar-thumb,
+.profile-left::-webkit-scrollbar-thumb,
+.settings-container::-webkit-scrollbar-thumb,
+.settings-page .settings-container::-webkit-scrollbar-thumb {
+  background: #9ca3af !important;
+  border-radius: 10px !important;
+}
+
+.chats-list::-webkit-scrollbar-thumb:hover,
+.messages-container::-webkit-scrollbar-thumb:hover,
+.posts-container::-webkit-scrollbar-thumb:hover,
+.users-checkbox-list::-webkit-scrollbar-thumb:hover,
+.group-participants-list::-webkit-scrollbar-thumb:hover,
+.users-list::-webkit-scrollbar-thumb:hover,
+.profile-left::-webkit-scrollbar-thumb:hover,
+.settings-container::-webkit-scrollbar-thumb:hover,
+.settings-page .settings-container::-webkit-scrollbar-thumb:hover {
+  background: #6b7280 !important;
+}
+/* ==========================================
+   МОБИЛЬНАЯ НИЖНЯЯ ПАНЕЛЬ
+   ========================================== */
+
+/* --- Десктоп: скрываем --- */
+.dark-theme .mobile-bottom-nav {
+  display: none !important;
+}
+
+/* --- Мобилки: тёмная панель --- */
+@media (max-width: 768px) {
+  .dark-theme .mobile-bottom-nav {
+    display: flex !important;
+    background: rgba(22, 25, 32, 0.92) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 28px !important;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+  }
+  
+  .dark-theme .mobile-bottom-nav .nav-item {
+    color: var(--text-muted) !important;
+    transition: all 0.2s ease !important;
+  }
+  
+  .dark-theme .mobile-bottom-nav .nav-item.active {
+    color: var(--accent) !important;
+    background: rgba(59, 110, 168, 0.15) !important;
+  }
+  
+  .dark-theme .mobile-bottom-nav .nav-item:hover {
+    color: var(--text-secondary) !important;
+  }
+}
+
+/* --- Модальные окна --- */
+.dark-theme .modal-overlay {
+  background: rgba(0, 0, 0, 0.8) !important;
+}
+
+.dark-theme .modal-delete-btn {
+  background: rgba(184, 74, 74, 0.12) !important;
+  color: var(--danger) !important;
+}
+
+.dark-theme .modal-delete-btn:hover {
+  background: rgba(184, 74, 74, 0.22) !important;
+}
+
+.dark-theme .modal-option-btn {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .modal-option-btn:hover {
+  background: var(--bg-hover) !important;
+}
+
+.dark-theme .modal-option-btn.delete {
+  background: rgba(184, 74, 74, 0.12) !important;
+  color: var(--danger) !important;
+  border-color: rgba(184, 74, 74, 0.2) !important;
+}
+
+.dark-theme .modal-option-btn.delete:hover {
+  background: rgba(184, 74, 74, 0.22) !important;
+}
+
+/* --- Сообщения статуса --- */
+.dark-theme .success {
+  background: rgba(62, 142, 99, 0.12) !important;
+  color: #55b37f !important;
+}
+
+.dark-theme .error {
+  background: rgba(184, 74, 74, 0.12) !important;
+  color: #d16969 !important;
+}
+
+.dark-theme .warning {
+  background: rgba(184, 141, 51, 0.12) !important;
+  color: #cca555 !important;
+}
+
+.dark-theme .info {
+  background: rgba(59, 110, 168, 0.12) !important;
+  color: #5285c2 !important;
+}
+
+/* --- Чекбоксы в группах --- */
+.dark-theme .user-checkbox:hover {
+  background: var(--bg-hover) !important;
+}
+
+.dark-theme .user-checkbox span {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .user-checkbox input[type="checkbox"] {
+  accent-color: var(--accent) !important;
+}
+
+/* --- Ссылки --- */
+.dark-theme a,
+.dark-theme .auth-footer a,
+.dark-theme .forgot-password-link,
+.dark-theme .back-link,
+.dark-theme .resend-btn {
+  color: var(--accent) !important;
+}
+
+.dark-theme a:hover,
+.dark-theme .auth-footer a:hover,
+.dark-theme .forgot-password-link:hover,
+.dark-theme .back-link:hover,
+.dark-theme .resend-btn:hover {
+  color: var(--accent-hover) !important;
+}
+
+/* --- Авторизация --- */
+.dark-theme .auth-page {
+  background: linear-gradient(135deg, #0a0c10 0%, #14171e 100%) !important;
+}
+
+.dark-theme .auth-card {
+  background: var(--bg-card) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.dark-theme .auth-card h1 {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .oauth-btn {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .oauth-btn:hover {
+  background: var(--bg-hover) !important;
+  border-color: var(--border-light) !important;
+}
+
+.dark-theme .auth-divider {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .auth-divider::before,
+.dark-theme .auth-divider::after {
+  border-color: var(--border-color) !important;
+}
+
+/* --- Панель "никнейм" --- */
+.dark-theme .tag-status.available {
+  color: var(--success) !important;
+}
+
+.dark-theme .tag-status.unavailable {
+  color: var(--danger) !important;
+}
+
+.dark-theme .tag-status.loading {
+  color: var(--text-muted) !important;
+}
+
+/* --- Участники группы --- */
+.dark-theme .group-participants-list,
+.dark-theme .group-info-section,
+.dark-theme .users-checkbox-list {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .participants-list li {
+  color: var(--text-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .remove-participant-btn {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .remove-participant-btn:hover {
+  background: rgba(184, 74, 74, 0.12) !important;
+  color: var(--danger) !important;
+}
+
+/* --- Мобильное меню и оверлей --- */
+.dark-theme .mobile-menu-btn {
+  background: var(--accent) !important;
+}
+
+.dark-theme .mobile-popup-menu {
+  background: var(--bg-card) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.dark-theme .sidebar-overlay {
+  background: rgba(0, 0, 0, 0.65) !important;
+}
+
+/* --- Кнопка "Назад" --- */
+.dark-theme .back-btn,
+.dark-theme .mobile-back-btn {
+  color: var(--accent) !important;
+}
+
+.dark-theme .back-btn:hover,
+.dark-theme .mobile-back-btn:hover {
+  background: transparent !important;
+}
+
+/* --- Профиль: информационные строки --- */
+.dark-theme .profile-info {
+  background: var(--bg-tertiary) !important;
+}
+
+.dark-theme .info-row label {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .edit-btn {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .edit-btn:hover {
+  color: var(--accent) !important;
+  background: var(--bg-hover) !important;
+}
+
+/* --- Посты --- */
+.dark-theme .no-posts {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .delete-post-btn {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .delete-post-btn:hover {
+  background: rgba(184, 74, 74, 0.12) !important;
+  color: var(--danger) !important;
+}
+
+/* --- Панель ввода сообщения --- */
+.dark-theme .message-input-area {
+  background: var(--bg-card) !important;
+  border-top-color: var(--border-color) !important;
+}
+
+/* ==========================================
+   НАСТРОЙКИ — ФОН ТЕМНЕЕ КАРТОЧЕК
+   ========================================== */
+
+.dark-theme .settings-page {
+  background: var(--bg-primary) !important;
+}
+
+/* Фоновые контейнеры делаем полностью прозрачными, 
+   чтобы был виден глубокий фон страницы (--bg-primary) */
+.dark-theme .settings-page .settings-container,
+.dark-theme .settings-page .messenger-container {
+  background: transparent !important;
+}
+
+/* --- Карточки настроек видны на тёмном фоне --- */
+.dark-theme .settings-page .settings-section,
+.dark-theme .settings-page .user-card {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+/* --- Элементы настроек при наведении --- */
+.dark-theme .settings-page .settings-item:hover {
+  background: var(--bg-hover) !important;
+}
+
+/* --- Заголовок настроек --- */
+.dark-theme .settings-page .settings-header {
+  border-bottom-color: var(--border-color) !important;
+  background: transparent !important;
+}
+
+/* ==========================================
+   НАСТРОЙКИ — КНОПКИ В ТЁМНОЙ ТЕМЕ
+   ========================================== */
+
+/* --- Кнопка "Выйти из аккаунта" (серая) --- */
+.dark-theme .settings-btn {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.dark-theme .settings-btn:hover {
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+/* --- Кнопка "Удалить аккаунт" (красная) --- */
+.dark-theme .settings-danger-btn {
+  background: rgba(184, 74, 74, 0.12) !important;
+  color: var(--danger) !important;
+  border: 1px solid rgba(184, 74, 74, 0.2) !important;
+}
+
+.dark-theme .settings-danger-btn:hover {
+  background: rgba(184, 74, 74, 0.22) !important;
+}
+
+/* ==========================================
+   НАСТРОЙКИ — ИСПРАВЛЕННАЯ СЕТКА И ФОНЫ
+   ========================================== */
+
+/* Глубокий фон для всей страницы и контейнера настроек */
+.dark-theme .settings-page,
+.dark-theme .settings-page .messenger-container,
+.dark-theme .settings-page .settings-container {
+  background: var(--bg-primary) !important;
+}
+
+/* Обертка контента должна быть прозрачной, чтобы не ломать отступы */
+.dark-theme .settings-page .settings-content {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Сайдбар слева выделяем цветом карточек */
+.dark-theme .settings-page .nav-sidebar {
+  background: var(--bg-card) !important;
+  border-right: 1px solid var(--border-color) !important;
+}
+
+/* Сами карточки настроек */
+.dark-theme .settings-page .settings-section,
+.dark-theme .settings-page .user-card {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+/* Элементы настроек при наведении */
+.dark-theme .settings-page .settings-item:hover {
+  background: var(--bg-hover) !important;
+}
+
+/* Заголовок настроек */
+.dark-theme .settings-page .settings-header {
+  border-bottom-color: var(--border-color) !important;
+  background: transparent !important;
+}
+
+/* Убираем системный прямоугольник при тапе на мобильных устройствах (iOS/Android) для всех элементов */
+* {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Убираем системную рамку (outline) при фокусе и клике для всех интерактивных элементов */
+button, 
+a, 
+input, 
+textarea,
+.chat-item, 
+.user-item, 
+.settings-item,
+.nav-button,
+.nav-item,
+.popup-item {
+  outline: none !important;
+}
+
+/* На всякий случай дублируем для состояния :focus */
+button:focus, 
+a:focus {
+  outline: none !important;
+}
+
+.dark-theme .profile-header {
+  background: var(--bg-primary) !important; /* Или var(--bg-card), если карточки отличаются по цвету */
+  border-bottom-color: var(--border-color) !important;
+}
+
+/* Темный фон для кнопки "Закрыть" / "Отмена" */
+.dark-theme .modal-cancel-btn {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.dark-theme .modal-cancel-btn:hover {
+  background: var(--bg-hover) !important;
+}
+
+/* Возвращаем эффект стекла для поисковой строки в темной теме */
+.dark-theme .search-box input {
+  background: rgba(22, 25, 32, 0.92) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: none !important; /* Убрали тень */
+
+}
+
+.dark-theme .search-box input:focus {
+  background: rgba(22, 25, 32, 0.98) !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 4px var(--accent-glow) !important;
+}
+
+.dark-theme .search-section {
+  background: var(--bg-tertiary) !important;
+}
+.dark-theme .search-section h4 {
+  color: var(--text-muted) !important;
+}
+
+@media (max-width: 768px) {
+  /* Мессенджер */
+  .chats-list {
+    /* Увеличено до 120px для компенсации перекрытия панелью */
+    padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  
+  /* Настройки */
+  .settings-page .settings-container {
+    /* Увеличено до 120px для компенсации перекрытия панелью */
+    padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* --- Кнопка "Покинуть беседу" --- */
+.dark-theme .modal-leave-btn {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.dark-theme .modal-leave-btn:hover {
+  background: rgba(184, 74, 74, 0.12) !important;
+  color: var(--danger) !important;
+  border-color: rgba(184, 74, 74, 0.2) !important;
+}
+
+/* --- Красивое выделение карточек настроек при наведении --- */
+.dark-theme .settings-page .settings-item {
+  transition: all 0.3s ease !important;
+}
+
+.dark-theme .settings-page .settings-item:hover {
+  background: var(--bg-hover) !important;
+  /* Легкое поднятие карточки вверх и добавление тени */
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+  /* Акцентная полоса слева (цвет синий --accent) */
+  border-left: 3px solid var(--accent) !important;
+}
+
+/* --- Цвета для выпадающего текста в темной теме --- */
+.dark-theme .about-content {
+  color: var(--text-secondary) !important;
+}
+.dark-theme .about-content strong {
+  color: var(--text-primary) !important;
+}
+
+/* ==========================================
+   КОНЕЦ DARK THEME
+   ========================================== */

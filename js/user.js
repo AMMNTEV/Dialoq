@@ -16,8 +16,6 @@ const urlParams = new URLSearchParams(window.location.search);
 const userId = urlParams.get('id');
 if (!userId) window.location.href = 'messenger.html';
 
-document.getElementById('backButton').href = `messenger.html?userId=${userId}`;
-
 let unsubscribePosts = null;
 
 onAuthStateChanged(async (user) => {

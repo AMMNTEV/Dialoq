@@ -195,7 +195,7 @@
   padding-top: 98px !important; 
   padding-left: 16px !important; /* Отступ слева */
   padding-right: 16px !important; /* Отступ справа */
-  padding-bottom: 20px !important; /* Небольшой отступ в самом низу страницы */
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;  
   height: 100%;
   overflow-y: auto;
   width: 100%;
@@ -514,6 +514,19 @@
 
 .message-input-area button:hover {
   background: #2563eb;
+}
+
+.deleted-user-stub {
+  width: 100%;
+  height: 44px; /* В точности как у #messageInput */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 22px;
+  color: #888888;
+  font-size: 0.95rem;
 }
 
 /* ==========================================
@@ -1012,5 +1025,99 @@ body.chat-mode .mobile-bottom-nav {
     box-shadow: 
       0 12px 28px rgba(0, 0, 0, 0.08),
       0 4px 12px rgba(0, 0, 0, 0.04);
+  }
+}
+
+/* Убираем системный прямоугольник при тапе на мобильных устройствах (iOS/Android) для всех элементов */
+* {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Убираем системную рамку (outline) при фокусе и клике для всех интерактивных элементов */
+button, 
+a, 
+input, 
+textarea,
+.chat-item, 
+.user-item, 
+.settings-item,
+.nav-button,
+.nav-item,
+.popup-item {
+  outline: none !important;
+}
+
+/* На всякий случай дублируем для состояния :focus */
+button:focus, 
+a:focus {
+  outline: none !important;
+}
+
+/* Центрирование и отступы только для кнопки "Добавить выбранных" */
+.group-info-section .modal-save-btn {
+  display: block;
+  margin: 16px auto 0 auto;
+  width: auto; /* Или 100%, если хотите широкую кнопку */
+}
+
+@media (max-width: 768px) {
+  /* Мессенджер */
+  .chats-list {
+    /* Увеличено до 120px для компенсации перекрытия панелью */
+    padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  
+  /* Настройки */
+  .settings-page .settings-container {
+    /* Увеличено до 120px для компенсации перекрытия панелью */
+    padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* ==========================================
+   ИСПРАВЛЕНИЯ ДЛЯ ШАПКИ ЧАТА И КНОПКИ НАЗАД
+   ========================================== */
+
+/* 1. Убираем постоянный фон (подсветку) у кнопки назад, но сохраняем эффект при наведении */
+.mobile-back-btn:not(:hover), 
+.back-btn:not(:hover) {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* 2. Немного сдвигаем саму иконку левее для визуального баланса */
+.mobile-back-btn, 
+.back-btn {
+  margin-left: -4px !important; 
+}
+
+.back-btn {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+/* Отключаем появление фона при наведении, клике и фокусе */
+.back-btn:hover,
+.back-btn:focus,
+.back-btn:active {
+  background: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* 3. Убираем лишние отступы, чтобы прижать кнопку к левому краю */
+.chat-header {
+  padding-left: 8px !important; /* Уменьшаем отступ шапки (было 16px) */
+}
+
+.selected-chat {
+  padding-left: 4px !important; /* Уменьшаем внутренний отступ карточки (было 12px) */
+}
+
+/* 4. На мобильных устройствах прижимаем к краю еще сильнее */
+@media (max-width: 768px) {
+  .chat-header {
+    padding-left: 4px !important;
   }
 }

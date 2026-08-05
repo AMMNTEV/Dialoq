@@ -4,12 +4,27 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
   <title>Мессенджер</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'/></svg>">
   <link rel="stylesheet" href="css/common.css">
   <link rel="stylesheet" href="css/messenger.css">
+<link rel="stylesheet" href="css/dark-theme.css">
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script>
+  (function () {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      // Моментально красим фон, чтобы не было белой вспышки
+      document.documentElement.style.backgroundColor = '#121212';
+      
+      // Добавляем класс на body, как только он появится в DOM
+      document.addEventListener('DOMContentLoaded', () => {
+        document.body.classList.add('dark-theme');
+      });
+    }
+  })();
+</script>
 <!-- Подключаем сам манифест (без первого слеша) -->
 <link rel="manifest" href="manifest.json">
 

@@ -9,6 +9,7 @@
   margin: 0 auto;
   padding: 20px 20px 40px 20px; 
   min-height: 100%;
+  scrollbar-gutter: stable;
 }
 .settings-header {
   display: flex;
@@ -82,14 +83,21 @@
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: #f1f5f9;
+  /* Лёгкий прозрачный фон для эффекта стекла */
+  background: rgba(100, 116, 139, 0.1); 
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
+  color: #64748b; /* Серый цвет контура, как у иконок в меню */
   margin-right: 14px;
   flex-shrink: 0;
+  transition: all 0.3s ease;
 }
+.settings-item:hover .settings-item-icon {
+  background: rgba(59, 130, 246, 0.1); /* Легкий синий оттенок при наведении */
+  color: #3b82f6;
+}
+
 .settings-item-info {
   flex: 1;
 }
@@ -105,12 +113,33 @@
   color: #94a3b8;
   font-size: 1.2rem;
 }
+
+/* --- Кнопки в настройках --- */
+
+/* Обычная кнопка (серая) — для "Выйти из аккаунта" */
+.settings-btn {
+  width: 100%;
+  padding: 14px;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid transparent; /* Заменяем border: none; */
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.settings-btn:hover {
+  background: #e2e8f0;
+}
+
+/* Опасная кнопка (красная) — для "Удалить аккаунт" */
 .settings-danger-btn {
   width: 100%;
   padding: 14px;
   background: #fee2e2;
   color: #dc2626;
-  border: none;
+  border: 1px solid transparent; /* Заменяем border: none; */
   border-radius: 12px;
   font-weight: 600;
   font-size: 1rem;
@@ -198,7 +227,8 @@ html, body {
   flex: 1;
   height: 100%;
   overflow-y: auto;
-  max-width: none; /* Снимаем ограничение ширины, чтобы контент не был прижат */
+  scrollbar-gutter: stable;
+  max-width: none;
   margin: 0;
   padding: 20px 40px 40px 40px;
   box-sizing: border-box;
@@ -220,18 +250,86 @@ html, body {
     bottom: 0;
   }
 
-  /* На мобилках скрываем десктопный сайдбар, оставляем нижнюю панель */
   .settings-page .nav-sidebar {
     display: none !important;
   }
 
   .settings-page .settings-container {
     width: 100% !important;
-    padding: 16px 16px 90px 16px !important; /* Оставляем место снизу под плавающую панель */
+    padding: 16px 16px calc(80px + env(safe-area-inset-bottom, 0px)) 16px !important;
   }
 
-  /* Показываем нижнюю навигационную панель на мобильных */
   .settings-page .mobile-bottom-nav {
     display: flex !important;
   }
+}
+
+/* Убираем системный прямоугольник при тапе на мобильных устройствах (iOS/Android) для всех элементов */
+* {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Убираем системную рамку (outline) при фокусе и клике для всех интерактивных элементов */
+button, 
+a, 
+input, 
+textarea,
+.chat-item, 
+.user-item, 
+.settings-item,
+.nav-button,
+.nav-item,
+.popup-item {
+  outline: none !important;
+}
+
+/* На всякий случай дублируем для состояния :focus */
+button:focus, 
+a:focus {
+  outline: none !important;
+}
+
+@media (max-width: 768px) {
+  /* Мессенджер */
+  .chats-list {
+    /* Увеличено до 120px для компенсации перекрытия панелью */
+    padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  
+  /* Настройки */
+  .settings-page .settings-container {
+    /* Увеличено до 120px для компенсации перекрытия панелью */
+    padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* --- Выпадающий текст "О приложении" --- */
+.about-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, padding 0.3s ease, opacity 0.3s ease;
+  padding: 0 16px;
+  opacity: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.about-content.open {
+  max-height: 300px;
+  padding: 10px 16px 16px 16px;
+  opacity: 1;
+}
+
+.about-content p {
+  margin: 8px 0;
+}
+
+.transition-arrow svg {
+  transition: transform 0.3s ease;
+}
+
+/* Переворот стрелочки при открытии */
+.transition-arrow.open svg {
+  transform: rotate(180deg);
 }

@@ -104,25 +104,28 @@ onAuthStateChanged(async (user) => {
   }
 });
 
-async function toggleTheme(isDark) {
-  const theme = isDark ? 'dark' : 'light';
+// Функция переключения темы
+function toggleTheme(isDark) {
   if (isDark) {
     document.body.classList.add('dark-theme');
-    document.body.classList.remove('light-theme');
+    localStorage.setItem('theme', 'dark');
+    // Опционально: меняем цвет статус-бара на темный
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#121212');
   } else {
-    document.body.classList.add('light-theme');
     document.body.classList.remove('dark-theme');
-  }
-  localStorage.setItem('theme', theme);
-
-  if (currentUser) {
-    try {
-      await db.collection('users').doc(currentUser.uid).update({ theme: theme });
-    } catch (error) {
-      console.error('Ошибка сохранения темы:', error);
-    }
+    localStorage.setItem('theme', 'light');
+    // Возвращаем светлый цвет статус-бара
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff'); 
   }
 }
+
+// При загрузке страницы настроек проверяем localStorage, чтобы тумблер был в правильном положении
+document.addEventListener('DOMContentLoaded', () => {
+  const themeToggle = document.getElementById('darkThemeToggle');
+  if (themeToggle) {
+    themeToggle.checked = localStorage.getItem('theme') === 'dark';
+  }
+});
 
 // ========== УДАЛЕНИЕ АККАУНТА ==========
 // ========== УДАЛЕНИЕ АККАУНТА ==========
@@ -246,6 +249,49 @@ function updateSidebarUser(userData) {
       sidebarAvatarEl.innerHTML = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
       sidebarAvatarEl.style.background = '#1a1a1a';
       sidebarAvatarEl.style.color = 'white';
+    }
+  }
+}
+
+// Функция для открытия/закрытия блока "О приложении"
+function toggleAbout() {
+  const content = document.getElementById('aboutContent');
+  const arrow = document.getElementById('aboutArrow');
+  
+  if (content && arrow) {
+    content.classList.toggle('open');
+    arrow.classList.toggle('open');
+  }
+}
+
+function toggleDelete() {
+  const content = document.getElementById('deleteContent');
+  const arrow = document.getElementById('deleteArrow');
+  content.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+// ========== СМЕНА ПАРОЛЯ ==========
+async function changePassword() {
+  if (!currentUser || !currentUser.email) {
+    alert("Не удалось определить email текущего пользователя.");
+    return;
+  }
+
+  const isConfirmed = confirm(`Отправить ссылку для смены пароля на почту ${currentUser.email}?`);
+  if (!isConfirmed) return;
+
+  try {
+    await resetPassword(currentUser.email);
+    alert(`✅ Ссылка для смены пароля отправлена на ${currentUser.email}.\nПроверьте папку «Спам», если письмо не приходит.`);
+  } catch (error) {
+    console.error('Ошибка при отправке письма для смены пароля:', error);
+    if (error.code === 'auth/network-request-failed') {
+      alert('🌐 Проблема с интернетом. Проверьте подключение.');
+    } else if (error.code === 'auth/too-many-requests') {
+      alert('⏳ Слишком много попыток. Попробуйте позже.');
+    } else {
+      alert('❌ Ошибка при отправке письма: ' + error.message);
     }
   }
 }
