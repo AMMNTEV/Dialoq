@@ -264,3 +264,10 @@ function toggleAbout() {
   }
 }
 
+function toggleDelete() {
+  const content = document.getElementById('deleteContent');
+  const arrow = document.getElementById('deleteArrow');
+  content.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
