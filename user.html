@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Профиль пользователя</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👤</text></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/><circle cx='12' cy='7' r='4'/></svg>">
   <link rel="stylesheet" href="css/common.css">
   <!-- Обязательно добавляем стили мессенджера для панелей -->
   <link rel="stylesheet" href="css/messenger.css">
@@ -84,7 +84,9 @@
 
     <!-- ===== КОНТЕНТ ПРОФИЛЯ ДРУГОГО ПОЛЬЗОВАТЕЛЯ ===== -->
     <div class="profile-container" style="flex: 1; overflow-y: auto; padding-bottom: 70px;">
-      
+      <div class="profile-header">
+        <a href="messenger.html" class="back-btn" id="backButton"><</a>
+      </div>
       <div class="profile-two-columns" id="profileContent">
         <div class="loading" style="width: 100%; align-self: flex-start; margin-top: 10px;">Загрузка профиля...</div>
       </div>
