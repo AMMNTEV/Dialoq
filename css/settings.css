@@ -301,3 +301,33 @@ a:focus {
   }
 }
 
+/* --- Выпадающий текст "О приложении" --- */
+.about-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, padding 0.3s ease, opacity 0.3s ease;
+  padding: 0 16px;
+  opacity: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.about-content.open {
+  max-height: 300px;
+  padding: 10px 16px 16px 16px;
+  opacity: 1;
+}
+
+.about-content p {
+  margin: 8px 0;
+}
+
+.transition-arrow svg {
+  transition: transform 0.3s ease;
+}
+
+/* Переворот стрелочки при открытии */
+.transition-arrow.open svg {
+  transform: rotate(180deg);
+}

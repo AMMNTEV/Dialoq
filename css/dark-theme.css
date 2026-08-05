@@ -883,6 +883,27 @@ a:focus {
   border-color: rgba(184, 74, 74, 0.2) !important;
 }
 
+/* --- Красивое выделение карточек настроек при наведении --- */
+.dark-theme .settings-page .settings-item {
+  transition: all 0.3s ease !important;
+}
+
+.dark-theme .settings-page .settings-item:hover {
+  background: var(--bg-hover) !important;
+  /* Легкое поднятие карточки вверх и добавление тени */
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+  /* Акцентная полоса слева (цвет синий --accent) */
+  border-left: 3px solid var(--accent) !important;
+}
+
+/* --- Цвета для выпадающего текста в темной теме --- */
+.dark-theme .about-content {
+  color: var(--text-secondary) !important;
+}
+.dark-theme .about-content strong {
+  color: var(--text-primary) !important;
+}
 
 /* ==========================================
    КОНЕЦ DARK THEME
