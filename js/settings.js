@@ -253,3 +253,14 @@ function updateSidebarUser(userData) {
   }
 }
 
+// Функция для открытия/закрытия блока "О приложении"
+function toggleAbout() {
+  const content = document.getElementById('aboutContent');
+  const arrow = document.getElementById('aboutArrow');
+  
+  if (content && arrow) {
+    content.classList.toggle('open');
+    arrow.classList.toggle('open');
+  }
+}
+
