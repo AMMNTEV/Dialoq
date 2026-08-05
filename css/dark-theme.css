@@ -647,7 +647,7 @@
 
 .dark-theme .back-btn:hover,
 .dark-theme .mobile-back-btn:hover {
-  background: var(--bg-hover) !important;
+  background: transparent !important;
 }
 
 /* --- Профиль: информационные строки --- */
