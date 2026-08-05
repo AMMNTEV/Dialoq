@@ -839,9 +839,8 @@ a:focus {
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border: 1px solid var(--border-color) !important;
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+  box-shadow: none !important; /* Убрали тень */
+
 }
 
 .dark-theme .search-box input:focus {
@@ -869,6 +868,19 @@ a:focus {
     /* Увеличено до 120px для компенсации перекрытия панелью */
     padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
   }
+}
+
+/* --- Кнопка "Покинуть беседу" --- */
+.dark-theme .modal-leave-btn {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.dark-theme .modal-leave-btn:hover {
+  background: rgba(184, 74, 74, 0.12) !important;
+  color: var(--danger) !important;
+  border-color: rgba(184, 74, 74, 0.2) !important;
 }
 /* ==========================================
    КОНЕЦ DARK THEME
