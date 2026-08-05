@@ -407,3 +407,8 @@ button:focus,
 a:focus {
   outline: none !important;
 }
+
+.back-btn:hover,
+.mobile-back-btn:hover {
+  background: transparent !important;
+}
