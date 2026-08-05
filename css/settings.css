@@ -82,14 +82,21 @@
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: #f1f5f9;
+  /* Лёгкий прозрачный фон для эффекта стекла */
+  background: rgba(100, 116, 139, 0.1); 
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
+  color: #64748b; /* Серый цвет контура, как у иконок в меню */
   margin-right: 14px;
   flex-shrink: 0;
+  transition: all 0.3s ease;
 }
+.settings-item:hover .settings-item-icon {
+  background: rgba(59, 130, 246, 0.1); /* Легкий синий оттенок при наведении */
+  color: #3b82f6;
+}
+
 .settings-item-info {
   flex: 1;
 }
@@ -293,3 +300,4 @@ a:focus {
     padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
+
