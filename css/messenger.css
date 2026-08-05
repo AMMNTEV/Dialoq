@@ -1073,3 +1073,37 @@ a:focus {
     padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
+
+/* ==========================================
+   ИСПРАВЛЕНИЯ ДЛЯ ШАПКИ ЧАТА И КНОПКИ НАЗАД
+   ========================================== */
+
+/* 1. Убираем постоянный фон (подсветку) у кнопки назад, но сохраняем эффект при наведении */
+.mobile-back-btn:not(:hover), 
+.back-btn:not(:hover) {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* 2. Немного сдвигаем саму иконку левее для визуального баланса */
+.mobile-back-btn, 
+.back-btn {
+  margin-left: -4px !important; 
+}
+
+/* 3. Убираем лишние отступы, чтобы прижать кнопку к левому краю */
+.chat-header {
+  padding-left: 8px !important; /* Уменьшаем отступ шапки (было 16px) */
+}
+
+.selected-chat {
+  padding-left: 4px !important; /* Уменьшаем внутренний отступ карточки (было 12px) */
+}
+
+/* 4. На мобильных устройствах прижимаем к краю еще сильнее */
+@media (max-width: 768px) {
+  .chat-header {
+    padding-left: 4px !important;
+  }
+}
