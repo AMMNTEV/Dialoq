@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -44,35 +44,43 @@
 <link rel="apple-touch-icon" href="img/user.png">
 </head>
 <body class="auth-page">
+  <!-- Добавляем переключатель языков -->
+  <div class="lang-switcher">
+    <button onclick="setLanguage('en')">EN</button>
+    <button onclick="setLanguage('ru')">RU</button>
+  </div>
+
   <div class="auth-card">
-    <h1>Вход в аккаунт</h1>
+    <!-- Добавляем атрибуты data-i18n и английский текст по умолчанию -->
+    <h1 data-i18n="title">Sign In</h1>
     <form id="loginForm">
       <div class="auth-input-group">
-        <label>Email</label>
+        <label data-i18n="emailLabel">Email</label>
         <input type="email" id="email" placeholder="your@email.com" required>
       </div>
       <div class="auth-input-group">
-        <label>Пароль</label>
+        <label data-i18n="passwordLabel">Password</label>
         <input type="password" id="password" placeholder="••••••••" required>
       </div>
       <div class="auth-links">
-        <a href="forgot-password.html" class="forgot-password-link">Забыли пароль?</a>
+        <a href="forgot-password.html" class="forgot-password-link" data-i18n="forgotPassword">Forgot password?</a>
       </div>
-      <button type="submit" class="auth-button" id="loginBtn">Войти</button>
-      <div class="auth-divider">или</div>
+      <button type="submit" class="auth-button" id="loginBtn" data-i18n="loginBtn">Sign In</button>
+      <div class="auth-divider" data-i18n="or">or</div>
       
       <button type="button" class="oauth-btn" id="googleLoginBtn">
         <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <!-- SVG пути Google остаются без изменений -->
           <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
           <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
           <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
           <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
         </svg>
-        Continue with Google
+        <span data-i18n="googleBtn">Continue with Google</span>
       </button>
     </form>
     <div class="auth-footer">
-      Нет аккаунта? <a href="register.html">Зарегистрироваться</a>
+      <span data-i18n="noAccount">Don't have an account?</span> <a href="register.html" data-i18n="register">Sign up</a>
     </div>
     <div id="message" class="message"></div>
   </div>
@@ -190,5 +198,63 @@
       }
     };
   </script>
+
+<!-- ... предыдущие скрипты ... -->
+  <script>
+    // Словарь переводов
+    const translations = {
+      en: {
+        title: "Sign In",
+        emailLabel: "Email",
+        passwordLabel: "Password",
+        forgotPassword: "Forgot password?",
+        loginBtn: "Sign In",
+        or: "or",
+        googleBtn: "Continue with Google",
+        noAccount: "Don't have an account?",
+        register: "Sign up"
+      },
+      ru: {
+        title: "Вход в аккаунт",
+        emailLabel: "Email",
+        passwordLabel: "Пароль",
+        forgotPassword: "Забыли пароль?",
+        loginBtn: "Войти",
+        or: "или",
+        googleBtn: "Продолжить с Google",
+        noAccount: "Нет аккаунта?",
+        register: "Зарегистрироваться"
+      }
+    };
+
+    // Функция переключения и сохранения языка
+    function setLanguage(lang) {
+      // Сохраняем выбор пользователя
+      localStorage.setItem('app_lang', lang);
+      document.documentElement.lang = lang; // Меняем атрибут lang у <html>
+
+      // Находим все элементы с атрибутом data-i18n и меняем текст
+      document.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        if (translations[lang] && translations[lang][key]) {
+          element.textContent = translations[lang][key];
+        }
+      });
+
+      // Отдельно меняем плейсхолдеры, если нужно
+      const emailInput = document.getElementById('email');
+      if (emailInput) {
+        emailInput.placeholder = lang === 'en' ? 'your@email.com' : 'ваш@email.com';
+      }
+    }
+
+    // Запускаем при загрузке страницы
+    document.addEventListener('DOMContentLoaded', () => {
+      // Берем язык из localStorage, если его нет — ставим 'en' по умолчанию
+      const savedLang = localStorage.getItem('app_lang') || 'en';
+      setLanguage(savedLang);
+    });
+  </script>
 </body>
 </html>
+

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
@@ -8,14 +8,13 @@
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
       document.documentElement.style.backgroundColor = '#0a0c10';
-      
       document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.add('dark-theme');
       });
     }
   })();
-</script>
-  <title>Настройки</title>
+  </script>
+  <title data-i18n="pageTitle">Настройки</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='3'/><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z'/></svg>">
   <link rel="stylesheet" href="css/common.css">
   <link rel="stylesheet" href="css/messenger.css"> 
@@ -24,24 +23,22 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-<link rel="manifest" href="manifest.json">
-
-<meta name="theme-color" content="#0a0c10">
-
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="TSA">
-<link rel="apple-touch-icon" href="img/user.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0c10">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TSA">
+  <link rel="apple-touch-icon" href="img/user.png">
 </head>
 <body class="settings-page">
   <div class="messenger-container">
     
-    <!-- ===== ЛЕВАЯ ПАНЕЛЬ (Сайдбар для ПК) ===== -->
+    <!-- ===== ЛЕВАЯ ПАНЕЛЬ ===== -->
     <div class="nav-sidebar">
       <div class="nav-user-box">
         <div class="nav-user-info">
-          <div class="nav-user-name" id="sidebarUserName">Загрузка...</div>
-          <div class="nav-user-tag" id="sidebarUserTag">@загрузка</div>
+          <div class="nav-user-name" id="sidebarUserName" data-i18n="loading">Загрузка...</div>
+          <div class="nav-user-tag" id="sidebarUserTag">@loading</div>
         </div>
         <div class="nav-user-avatar" id="sidebarUserAvatar"></div>
       </div>
@@ -49,15 +46,15 @@
       <div class="nav-buttons">
         <a href="profile.html" class="nav-button">
           <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Профиль
+          <span data-i18n="navProfile">Профиль</span>
         </a>
         <a href="messenger.html" class="nav-button">
           <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          Мессенджер
+          <span data-i18n="navMessenger">Мессенджер</span>
         </a>
         <a href="settings.html" class="nav-button active">
           <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          Настройки
+          <span data-i18n="navSettings">Настройки</span>
         </a>
       </div>
 
@@ -65,121 +62,134 @@
 
       <button onclick="logout()" class="nav-button logout-btn">
         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Выход
+        <span data-i18n="navLogout">Выход</span>
       </button>
     </div>
 
     <!-- ===== КОНТЕНТ НАСТРОЕК ===== -->
     <div class="settings-container" style="flex: 1; overflow-y: auto; padding-bottom: 70px;">
       
-      
       <div class="settings-content">
         <div class="user-card" id="userCard">
           <div class="user-avatar" id="userAvatar">?</div>
           <div class="user-info">
-            <div class="user-name" id="userName">Загрузка...</div>
+            <div class="user-name" id="userName" data-i18n="loading">Загрузка...</div>
             <div class="user-tag" id="userTag">@loading</div>
           </div>
         </div>
 
         <div class="settings-section">
-  <!-- Профиль -->
-  <div class="settings-item" onclick="window.location.href='profile.html'">
-    <div class="settings-item-icon">
-      <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-    </div>
-    <div class="settings-item-info">
-      <div class="settings-item-title">Профиль</div>
-      <div class="settings-item-desc">Изменить имя, тег и аватар</div>
-    </div>
-    <div class="settings-item-arrow">→</div>
-  </div>
+          <!-- Профиль -->
+          <div class="settings-item" onclick="window.location.href='profile.html'">
+            <div class="settings-item-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div class="settings-item-info">
+              <div class="settings-item-title" data-i18n="profileTitle">Профиль</div>
+              <div class="settings-item-desc" data-i18n="profileDesc">Изменить имя, тег и аватар</div>
+            </div>
+            <div class="settings-item-arrow">→</div>
+          </div>
 
-  <!-- Смена пароля -->
-  <div class="settings-item" onclick="changePassword()">
-    <div class="settings-item-icon">
-      <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-      </svg>
-    </div>
-    <div class="settings-item-info">
-      <div class="settings-item-title">Смена пароля</div>
-      <div class="settings-item-desc">Отправить ссылку для сброса на почту</div>
-    </div>
-    <div class="settings-item-arrow">→</div>
-  </div>
+          <!-- Смена пароля -->
+          <div class="settings-item" onclick="changePassword()">
+            <div class="settings-item-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </div>
+            <div class="settings-item-info">
+              <div class="settings-item-title" data-i18n="pwdTitle">Смена пароля</div>
+              <div class="settings-item-desc" data-i18n="pwdDesc">Отправить ссылку для сброса на почту</div>
+            </div>
+            <div class="settings-item-arrow">→</div>
+          </div>
 
-  <!-- Темная тема -->
-  <div class="settings-item">
-    <div class="settings-item-icon">
-      <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-    </div>
-    <div class="settings-item-info">
-      <div class="settings-item-title">Темная тема</div>
-      <div class="settings-item-desc">Использовать темную тему оформления</div>
-    </div>
-    <label class="switch">
-      <input type="checkbox" id="darkThemeToggle" onchange="toggleTheme(this.checked)">
-      <span class="slider"></span>
-    </label>
-  </div>
-</div>
+          <!-- Темная тема -->
+          <div class="settings-item">
+            <div class="settings-item-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </div>
+            <div class="settings-item-info">
+              <div class="settings-item-title" data-i18n="themeTitle">Темная тема</div>
+              <div class="settings-item-desc" data-i18n="themeDesc">Использовать темную тему оформления</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="darkThemeToggle" onchange="toggleTheme(this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
 
-<div class="settings-section">
-  <!-- О приложении (Выпадающий список) -->
-  <div class="settings-item" onclick="toggleAbout()">
-    <div class="settings-item-icon">
-      <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-    </div>
-    <div class="settings-item-info">
-      <div class="settings-item-title">О приложении</div>
-      <div class="settings-item-desc">Версия и информация</div>
-    </div>
-    <div class="settings-item-arrow transition-arrow" id="aboutArrow">
-      <!-- Иконка стрелочки вниз вместо текста -->
-      <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-    </div>
-  </div>
-  
-  <!-- Скрытый текст "О приложении" -->
-  <div class="about-content" id="aboutContent">
-    <p><strong>Версия: 1.0.0 (Beta)</strong></p>
-    <p>Современная социальная сеть с минималистичным дизайном, созданная для удобного и безопасного общения.</p>
-    <p>Здесь вы можете обмениваться сообщениями, находить друзей и наслаждаться быстрым интерфейсом без лишних отвлекающих деталей.</p>
-  </div>
-</div>
+          <!-- Язык (НОВОЕ ПОЛЕ) -->
+          <div class="settings-item">
+            <div class="settings-item-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </div>
+            <div class="settings-item-info">
+              <div class="settings-item-title" data-i18n="langTitle">Язык / Language</div>
+              <div class="settings-item-desc" data-i18n="langDesc">Выберите язык приложения</div>
+            </div>
+            <select id="langSelect" class="lang-select" onchange="applyLanguage(this.value)">
+              <option value="en">English</option>
+              <option value="ru">Русский</option>
+            </select>
+          </div>
+        </div>
 
-        <!-- ===== КНОПКИ ===== -->
-<div class="settings-section" style="display: flex; flex-direction: column; gap: 10px;">
-  <!-- Выйти -->
-  <button onclick="logout()" class="settings-btn">Выйти из аккаунта</button>
-  
-  <!-- Удалить (Выпадающая кнопка) -->
-  <div class="settings-item" onclick="toggleDelete()">
-    <div class="settings-item-icon" style="color: #dc2626; background: rgba(220, 38, 38, 0.1);">
-      <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-    </div>
-    <div class="settings-item-info">
-      <div class="settings-item-title" style="color: #dc2626;">Удаление аккаунта</div>
-      <div class="settings-item-desc" style="color: #ef4444;">Безвозвратное удаление данных</div>
-    </div>
-    <div class="settings-item-arrow transition-arrow" id="deleteArrow" style="color: #dc2626;">
-      <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-    </div>
-  </div>
-  
-  <!-- Скрытый контент для удаления -->
-  <div class="about-content" id="deleteContent">
-    <p style="color: #dc2626; font-size: 0.85rem; margin-top: 0; line-height: 1.4;">Внимание: это действие необратимо. Все ваши данные будут навсегда стерты.</p>
-    <button onclick="deleteAccount()" class="settings-danger-btn">Подтвердить удаление</button>
-  </div>
-</div>
+        <div class="settings-section">
+          <!-- О приложении -->
+          <div class="settings-item" onclick="toggleAbout()">
+            <div class="settings-item-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            </div>
+            <div class="settings-item-info">
+              <div class="settings-item-title" data-i18n="aboutTitle">О приложении</div>
+              <div class="settings-item-desc" data-i18n="aboutDesc">Версия и информация</div>
+            </div>
+            <div class="settings-item-arrow transition-arrow" id="aboutArrow">
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+          
+          <!-- Скрытый текст "О приложении" -->
+          <div class="about-content" id="aboutContent">
+            <p><strong data-i18n="aboutV">Версия: 1.0.0 (Beta)</strong></p>
+            <p data-i18n="aboutP1">Современная социальная сеть с минималистичным дизайном, созданная для удобного и безопасного общения.</p>
+            <p data-i18n="aboutP2">Здесь вы можете обмениваться сообщениями, находить друзей и наслаждаться быстрым интерфейсом без лишних отвлекающих деталей.</p>
+          </div>
+        </div>
+
+        <!-- ===== КНОПКИ УДАЛЕНИЯ / ВЫХОДА ===== -->
+        <div class="settings-section" style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- Выйти -->
+          <button onclick="logout()" class="settings-btn" data-i18n="logoutBtn">Выйти из аккаунта</button>
+          
+          <!-- Удалить -->
+          <div class="settings-item" onclick="toggleDelete()">
+            <div class="settings-item-icon" style="color: #dc2626; background: rgba(220, 38, 38, 0.1);">
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            </div>
+            <div class="settings-item-info">
+              <div class="settings-item-title" style="color: #dc2626;" data-i18n="deleteTitle">Удаление аккаунта</div>
+              <div class="settings-item-desc" style="color: #ef4444;" data-i18n="deleteDesc">Безвозвратное удаление данных</div>
+            </div>
+            <div class="settings-item-arrow transition-arrow" id="deleteArrow" style="color: #dc2626;">
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+          
+          <!-- Скрытый контент для удаления -->
+          <div class="about-content" id="deleteContent">
+            <p style="color: #dc2626; font-size: 0.85rem; margin-top: 0; line-height: 1.4;" data-i18n="deleteWarning">Внимание: это действие необратимо. Все ваши данные будут навсегда стерты.</p>
+            <button onclick="deleteAccount()" class="settings-danger-btn" data-i18n="confirmDeleteBtn">Подтвердить удаление</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- ===== Мобильная нижняя панель (Tab Bar) ===== -->
+  <!-- Мобильная нижняя панель -->
   <nav class="mobile-bottom-nav" id="mobileBottomNav">
     <a href="messenger.html" class="nav-item">
       <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -191,6 +201,113 @@
       <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     </a>
   </nav>
+
+  <!-- ЛОКАЛИЗАЦИЯ И СКРИПТЫ -->
+  <script>
+    const settingsTranslations = {
+      en: {
+        pageTitle: "Settings",
+        loading: "Loading...",
+        navProfile: "Profile",
+        navMessenger: "Messenger",
+        navSettings: "Settings",
+        navLogout: "Log out",
+        profileTitle: "Profile",
+        profileDesc: "Change name, tag, and avatar",
+        pwdTitle: "Change password",
+        pwdDesc: "Send a reset link to your email",
+        themeTitle: "Dark theme",
+        themeDesc: "Use dark appearance",
+        langTitle: "Language",
+        langDesc: "Select application language",
+        aboutTitle: "About",
+        aboutDesc: "Version and information",
+        logoutBtn: "Log out",
+        deleteTitle: "Delete account",
+        deleteDesc: "Permanently delete your data",
+        deleteWarning: "Warning: this action is irreversible. All your data will be permanently erased.",
+        confirmDeleteBtn: "Confirm deletion",
+        aboutV: "Version: 1.0.0 (Beta)",
+        aboutP1: "A modern social network with a minimalist design, created for convenient and secure communication.",
+        aboutP2: "Here you can exchange messages, find friends, and enjoy a fast interface without unnecessary distractions.",
+        
+        // Для JS алертов в settings.js
+        alertDelConfirm: "Are you sure you want to delete your account? Your profile will be permanently deleted.",
+        alertDelReauth: "For security reasons, Firebase requires you to verify your login. You will now be logged out — please log in again and click 'Delete' once more.",
+        alertDelErr: "An error occurred during deletion: ",
+        alertPwdConfirm: "Send a password reset link to ",
+        alertPwdSent: "✅ Password reset link sent to ",
+        alertPwdSpam: "\nCheck your «Spam» folder if you don't receive the email.",
+        alertNoNet: "🌐 Internet issue. Please check your connection.",
+        alertTooMany: "⏳ Too many attempts. Please try again later.",
+        alertPwdErr: "❌ Error sending email: "
+      },
+      ru: {
+        pageTitle: "Настройки",
+        loading: "Загрузка...",
+        navProfile: "Профиль",
+        navMessenger: "Мессенджер",
+        navSettings: "Настройки",
+        navLogout: "Выход",
+        profileTitle: "Профиль",
+        profileDesc: "Изменить имя, тег и аватар",
+        pwdTitle: "Смена пароля",
+        pwdDesc: "Отправить ссылку для сброса на почту",
+        themeTitle: "Темная тема",
+        themeDesc: "Использовать темную тему оформления",
+        langTitle: "Язык",
+        langDesc: "Выберите язык приложения",
+        aboutTitle: "О приложении",
+        aboutDesc: "Версия и информация",
+        logoutBtn: "Выйти из аккаунта",
+        deleteTitle: "Удаление аккаунта",
+        deleteDesc: "Безвозвратное удаление данных",
+        deleteWarning: "Внимание: это действие необратимо. Все ваши данные будут навсегда стерты.",
+        confirmDeleteBtn: "Подтвердить удаление",
+        aboutV: "Версия: 1.0.0 (Beta)",
+        aboutP1: "Современная социальная сеть с минималистичным дизайном, созданная для удобного и безопасного общения.",
+        aboutP2: "Здесь вы можете обмениваться сообщениями, находить друзей и наслаждаться быстрым интерфейсом без лишних отвлекающих деталей.",
+        
+        // Для JS алертов в settings.js
+        alertDelConfirm: "Вы уверены, что хотите удалить аккаунт? Профиль будет полностью удален.",
+        alertDelReauth: "В целях безопасности Firebase требует подтвердить вход. Сейчас вы выйдете из системы — войдите заново и сразу нажмите «Удалить» еще раз.",
+        alertDelErr: "Произошла ошибка при удалении: ",
+        alertPwdConfirm: "Отправить ссылку для смены пароля на почту ",
+        alertPwdSent: "✅ Ссылка для смены пароля отправлена на ",
+        alertPwdSpam: "\nПроверьте папку «Спам», если письмо не приходит.",
+        alertNoNet: "🌐 Проблема с интернетом. Проверьте подключение.",
+        alertTooMany: "⏳ Слишком много попыток. Попробуйте позже.",
+        alertPwdErr: "❌ Ошибка при отправке письма: "
+      }
+    };
+
+    // Делаем словарь глобальным, чтобы settings.js мог его использовать
+    window.settingsTranslations = settingsTranslations;
+
+    function applyLanguage(lang) {
+      localStorage.setItem('app_lang', lang);
+      document.documentElement.lang = lang;
+      
+      const t = settingsTranslations[lang];
+      if (!t) return;
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (t[key]) {
+          el.innerHTML = t[key];
+        }
+      });
+      
+      const select = document.getElementById('langSelect');
+      if (select) select.value = lang;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Читаем язык, который был выбран на входе
+      const savedLang = localStorage.getItem('app_lang') || 'en';
+      applyLanguage(savedLang);
+    });
+  </script>
 
   <script src="js/firebase-config.js"></script>
   <script src="js/auth.js"></script>
