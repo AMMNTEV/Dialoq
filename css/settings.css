@@ -333,3 +333,22 @@ a:focus {
 .transition-arrow.open svg {
   transform: rotate(180deg);
 }
+
+/* --- Выбор языка --- */
+.lang-select {
+  background: #f1f5f9;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+  transition: background 0.2s, color 0.2s;
+}
+.dark-theme .lang-select {
+  background: #1e293b;
+  color: #94a3b8;
+}

@@ -259,3 +259,38 @@
   width: 20px;
   height: 20px;
 }
+
+.lang-switcher {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.lang-switcher button {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+  backdrop-filter: blur(4px);
+}
+
+.lang-switcher button:hover {
+  background: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Адаптив для мобильных устройств */
+@media (max-width: 480px) {
+  .lang-switcher {
+    top: 10px;
+    right: 10px;
+  }
+}
