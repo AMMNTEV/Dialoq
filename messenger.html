@@ -49,8 +49,8 @@
       <!-- Блок с информацией о пользователе -->
       <div class="nav-user-box">
         <div class="nav-user-info">
-          <div class="nav-user-name" id="sidebarUserName">Загрузка...</div>
-          <div class="nav-user-tag" id="sidebarUserTag">@загрузка</div>
+          <div class="nav-user-name" id="sidebarUserName">&nbsp;</div>
+          <div class="nav-user-tag" id="sidebarUserTag">&nbsp;</div>
         </div>
         <div class="nav-user-avatar" id="sidebarUserAvatar"></div>
       </div>
@@ -171,7 +171,7 @@
       </div>
       <div class="modal-body">
         <div class="group-avatar-section" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
-          <div class="avatar-large" id="groupInfoAvatar" style="...">👥</div>
+          <div class="avatar-large" id="groupInfoAvatar" style="width: 100px; height: 100px; border-radius: 50%; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; cursor: pointer; overflow: hidden; border: 2px solid #333;" onclick="document.getElementById('groupAvatarInput').click()">
           <input type="file" id="groupAvatarInput" accept="image/png, image/jpeg, image/webp" style="display: none;">
           <span data-i18n="clickToChange" style="font-size: 0.8rem; color: #888; margin-top: 8px; cursor: pointer;" onclick="document.getElementById('groupAvatarInput').click()">
             Нажмите, чтобы изменить
