@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Профиль пользователя</title>
+  <title data-i18n="titleUserProfile">Профиль пользователя</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/><circle cx='12' cy='7' r='4'/></svg>">
   <link rel="stylesheet" href="css/common.css">
-  <!-- Обязательно добавляем стили мессенджера для панелей -->
   <link rel="stylesheet" href="css/messenger.css">
   <link rel="stylesheet" href="css/profile.css">
-<link rel="stylesheet" href="css/dark-theme.css">
+  <link rel="stylesheet" href="css/dark-theme.css">
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -17,43 +16,28 @@
   (function () {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
-      // Моментально красим фон, чтобы не было белой вспышки
       document.documentElement.style.backgroundColor = '#121212';
-      
-      // Добавляем класс на body, как только он появится в DOM
       document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.add('dark-theme');
       });
     }
   })();
 </script>
-<!-- Подключаем сам манифест (без первого слеша) -->
 <link rel="manifest" href="manifest.json">
-
-<!-- Цвет статус-бара для Android -->
 <meta name="theme-color" content="#121212">
-
-<!-- Указываем Safari, что это PWA -->
 <meta name="apple-mobile-web-app-capable" content="yes">
-
-<!-- Настраиваем внешний вид статус-бара на iOS (black-translucent делает его прозрачным поверх приложения) -->
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-<!-- Название приложения на экране "Домой" для iOS (замени TSA на свое короткое название, если нужно) -->
 <meta name="apple-mobile-web-app-title" content="TSA">
-
-<!-- Иконка приложения для iOS (указали правильный путь к твоей картинке) -->
 <link rel="apple-touch-icon" href="img/user.png">
 </head>
 <body>
-  <!-- Обертка для правильной работы Flexbox -->
   <div class="messenger-container">
     
-    <!-- ===== ЛЕВАЯ ПАНЕЛЬ (Сайдбар для ПК) ===== -->
+    <!-- ===== ЛЕВАЯ ПАНЕЛЬ ===== -->
     <div class="nav-sidebar">
       <div class="nav-user-box">
         <div class="nav-user-info">
-          <div class="nav-user-name" id="sidebarUserName">Загрузка...</div>
+          <div class="nav-user-name" id="sidebarUserName" data-i18n="loading">Загрузка...</div>
           <div class="nav-user-tag" id="sidebarUserTag">@загрузка</div>
         </div>
         <div class="nav-user-avatar" id="sidebarUserAvatar"></div>
@@ -62,15 +46,15 @@
       <div class="nav-buttons">
         <a href="profile.html" class="nav-button">
           <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Профиль
+          <span data-i18n="navProfile">Профиль</span>
         </a>
         <a href="messenger.html" class="nav-button active">
           <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          Мессенджер
+          <span data-i18n="navMessenger">Мессенджер</span>
         </a>
         <a href="settings.html" class="nav-button">
           <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          Настройки
+          <span data-i18n="navSettings">Настройки</span>
         </a>
       </div>
 
@@ -78,23 +62,23 @@
 
       <button onclick="logout()" class="nav-button logout-btn">
         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Выход
+        <span data-i18n="navLogout">Выход</span>
       </button>
     </div>
 
     <!-- ===== КОНТЕНТ ПРОФИЛЯ ДРУГОГО ПОЛЬЗОВАТЕЛЯ ===== -->
     <div class="profile-container" style="flex: 1; overflow-y: auto; padding-bottom: 70px;">
       <div class="profile-header">
-        <a href="messenger.html" class="back-btn" id="backButton"><</a>
+        <a href="messenger.html" class="back-btn" id="backButton">&lt;</a>
       </div>
       <div class="profile-two-columns" id="profileContent">
-        <div class="loading" style="width: 100%; align-self: flex-start; margin-top: 10px;">Загрузка профиля...</div>
+        <div class="loading" style="width: 100%; align-self: flex-start; margin-top: 10px;" data-i18n="loadingProfile">Загрузка профиля...</div>
       </div>
     </div>
 
   </div>
 
-  <!-- ===== Мобильная нижняя панель (Tab Bar) ===== -->
+  <!-- ===== Мобильная нижняя панель ===== -->
   <nav class="mobile-bottom-nav" id="mobileBottomNav">
     <a href="messenger.html" class="nav-item active">
       <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -110,5 +94,45 @@
   <script src="js/firebase-config.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/user.js"></script>
+
+<!-- ЛОКАЛИЗАЦИЯ -->
+<script>
+const userTranslations = {
+  en: {
+    titleUserProfile: "User Profile",
+    navProfile: "Profile",
+    navMessenger: "Messenger",
+    navSettings: "Settings",
+    navLogout: "Log out",
+    loading: "Loading...",
+    loadingProfile: "Loading profile..."
+  },
+  ru: {
+    titleUserProfile: "Профиль пользователя",
+    navProfile: "Профиль",
+    navMessenger: "Мессенджер",
+    navSettings: "Настройки",
+    navLogout: "Выход",
+    loading: "Загрузка...",
+    loadingProfile: "Загрузка профиля..."
+  }
+};
+
+function applyUserLanguage(lang) {
+  document.documentElement.lang = lang;
+  const tObj = userTranslations[lang];
+  if (!tObj) return;
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (tObj[key]) el.innerHTML = tObj[key];
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const savedLang = localStorage.getItem('app_lang') || 'en';
+  applyUserLanguage(savedLang);
+});
+</script>
 </body>
 </html>
