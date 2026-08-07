@@ -121,12 +121,20 @@ function updateSidebarUser(userData) {
   const tagEl = document.getElementById('sidebarUserTag');
   const avatarEl = document.getElementById('sidebarUserAvatar');
   
-  if (nameEl) nameEl.textContent = userData.nickname || t('users');
+  if (nameEl) {
+    try {
+      nameEl.textContent = userData.nickname || t('users');
+    } catch (e) {
+      nameEl.textContent = userData.nickname || 'Users';
+    }
+  }
+  
   if (tagEl) tagEl.textContent = userData.tag || '@user';
   
   if (avatarEl) {
     if (userData.avatar) {
-      avatarEl.innerHTML = `<img src="${userData.avatar}" alt="${t('avatarAlt')}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block;">`;
+      // Заменяем t('avatarAlt') на обычную строку, как в messenger.js, чтобы избежать падения скрипта
+      avatarEl.innerHTML = `<img src="${userData.avatar}" alt="Аватар" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block;">`;
       avatarEl.style.background = 'transparent';
     } else {
       avatarEl.innerHTML = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
