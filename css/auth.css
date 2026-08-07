@@ -1,16 +1,23 @@
 /* ========== СТРАНИЦЫ АВТОРИЗАЦИИ ========== */
+html, body.auth-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: #764ba2; /* Страховка */
+}
+
 .auth-page {
-  min-height: 100vh; /* Заменено с height: 100% для корректного расчета высоты */
-  min-height: 100dvh; /* Поддержка мобильных вьюпортов */
   display: flex;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  background-color: #764ba2; /* Страховка: совпадает с нижним цветом градиента */
-  background-attachment: fixed; /* Фиксирует градиент по высоте экрана при скролле */
-  padding: 60px 20px 20px 20px; /* Добавлен верхний отступ (60px) под кнопки языка */
+  padding: 60px 20px 60px 20px; /* Увеличили нижний отступ до 60px для тени */
   box-sizing: border-box;
   overflow-y: auto;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
+
 .auth-card {
   max-width: 420px;
   width: 100%;
@@ -24,6 +31,8 @@
   align-items: center;
   animation: slideUp 0.3s ease;
 }
+
+/* Остальные стили (заголовки, инпуты, кнопки и т.д.) остаются без изменений */
 .auth-card h1 {
   font-size: 2rem;
   font-weight: 700;
@@ -265,12 +274,12 @@
 }
 
 .lang-switcher {
-  position: fixed; /* Зафиксировано относительно экрана */
+  position: fixed;
   top: 16px;
   right: 16px;
   display: flex;
   gap: 8px;
-  z-index: 100; /* Гарантирует отображение поверх карточки */
+  z-index: 100;
 }
 
 .lang-switcher button {
@@ -293,12 +302,14 @@
 
 @media (max-width: 480px) {
   .auth-page {
-    align-items: flex-start; /* На мобильных выравниваем по верху, а не по центру */
-    padding-top: 70px; /* Безопасный отступ сверху для кнопок EN/RU */
+    align-items: flex-start;
+    padding-top: 70px;
+    padding-bottom: 40px; /* Достаточно места снизу, чтобы тень не обрезалась */
   }
 
   .auth-card {
-    padding: 28px 20px; /* Немного уменьшаем внутренние отступы карточки */
+    padding: 28px 20px;
+    margin-bottom: 20px; /* Дополнительный отступ снизу для карточки */
   }
 
   .lang-switcher {
