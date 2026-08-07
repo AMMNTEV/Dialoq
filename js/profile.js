@@ -7,19 +7,15 @@ let isTagValid = true; // Флаг, разрешающий или запреща
 
 // ========== МГНОВЕННАЯ ОТРИСОВКА (ДО ЗАПУСКА FIREBASE) ==========
 document.addEventListener("DOMContentLoaded", () => {
-  // Смотрим, кто был авторизован при последнем открытии приложения
   const lastUid = localStorage.getItem('lastUid');
   
   if (lastUid) {
-    // 1. Мгновенно загружаем данные пользователя
     const cachedUserStr = localStorage.getItem(`cachedCurrentUser_${lastUid}`);
     if (cachedUserStr) {
       currentUserData = JSON.parse(cachedUserStr);
       
-      // Отрисовываем левую панель и аватарку за 0 миллисекунд
       if (typeof updateSidebarUser === 'function') updateSidebarUser(currentUserData);
       
-      // Если мы на странице профиля — мгновенно рисуем инфу профиля
       if (document.getElementById('profileInfo') && typeof loadProfileInfo === 'function') {
         loadProfileInfo();
         const avatarDiv = document.getElementById('profileAvatar');
@@ -31,14 +27,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
     
-    // 2. Мгновенно загружаем список чатов (если мы в мессенджере)
     if (document.getElementById('chatsList')) {
       const cachedChats = localStorage.getItem(`cachedChats_${lastUid}`);
       const cachedUnreads = localStorage.getItem(`cachedUnreads_${lastUid}`);
       if (cachedChats) {
         allChats = JSON.parse(cachedChats);
         if (cachedUnreads) unreadCounts = JSON.parse(cachedUnreads);
-        // Сразу выводим чаты на экран
         if (typeof displayChats === 'function') displayChats(allChats);
       }
     }
@@ -55,68 +49,59 @@ onAuthStateChanged(async (user) => {
 
   localStorage.setItem('lastUid', user.uid);
   
-  // 1. СНАЧАЛА ЧИТАЕМ ИЗ LOCALSTORAGE (Мгновенное отображение)
   const cacheKey = `cachedCurrentUser_${user.uid}`;
   const cachedDataStr = localStorage.getItem(cacheKey);
   
   if (cachedDataStr) {
     currentUserData = JSON.parse(cachedDataStr);
-    updateSidebarUser(currentUserData); // Мгновенно обновляем левую панель
+    updateSidebarUser(currentUserData); 
     
-    // Если мы на странице профиля, тоже сразу отрисовываем данные
     if (document.getElementById('profileInfo')) loadProfileInfo();
     const profileAvatarEl = document.getElementById('profileAvatar');
     if (profileAvatarEl && typeof renderAvatar === 'function') {
         renderAvatar(currentUserData.avatar);
     } else if (profileAvatarEl) {
-        // Запасной вариант для messenger.js
         profileAvatarEl.innerHTML = currentUserData.avatar 
           ? `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">` 
           : (currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?');
     }
   }
 
-  // 2. ЗАТЕМ ИДЕМ В БАЗУ ДАННЫХ (Фоновое обновление)
   try {
     const doc = await db.collection('users').doc(user.uid).get();
     if (!doc.exists) {
-  // Защита от '@undefined': проверяем, есть ли символ '|' в имени
-  let nickname = 'Пользователь';
-  let tag = '';
-  
-  if (user.displayName && user.displayName.includes('|')) {
-    const parts = user.displayName.split('|');
-    nickname = parts[0];
-    tag = '@' + parts[1];
-  } else {
-    nickname = user.displayName || 'Пользователь';
-    // Используем вашу готовую функцию для генерации корректного тега
-    tag = await generateUniqueTag(); 
-  }
+      // Используем t('users') как дефолтное имя, аналогично мессенджеру
+      let nickname = t('users');
+      let tag = '';
+      
+      if (user.displayName && user.displayName.includes('|')) {
+        const parts = user.displayName.split('|');
+        nickname = parts[0];
+        tag = '@' + parts[1];
+      } else {
+        nickname = user.displayName || t('users');
+        tag = await generateUniqueTag(); 
+      }
 
-  // Создаем пользователя
-  await db.collection('users').doc(user.uid).set({
-    nickname: nickname,
-    tag: tag,
-    email: user.email || '',
-    avatar: user.photoURL || '', // Сохраняем аватарку из Google
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
-  
-  // Синхронизируем displayName в Firebase Auth для будущих сессий
-  await user.updateProfile({ displayName: nickname + '|' + tag.replace('@', '') });
-  
-  window.location.reload();
-  return;
-}
+      await db.collection('users').doc(user.uid).set({
+        nickname: nickname,
+        tag: tag,
+        email: user.email || '',
+        avatar: user.photoURL || '',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      
+      await user.updateProfile({ displayName: nickname + '|' + tag.replace('@', '') });
+      
+      window.location.reload();
+      return;
+    }
     
     currentUserData = doc.data();
     
-    // Обновляем кэш в localStorage свежими данными из базы
     localStorage.setItem(cacheKey, JSON.stringify(currentUserData));
     userCache.set(user.uid, currentUserData); 
     
-    // Перерисовываем интерфейс актуальными данными (если они изменились)
     updateSidebarUser(currentUserData);
     if (document.getElementById('profileInfo')) loadProfileInfo();
     if (document.getElementById('postsContainer') && typeof listenForNewPosts === 'function') listenForNewPosts();
@@ -130,17 +115,17 @@ function loadProfileInfo() {
   const profileInfo = document.getElementById('profileInfo');
   profileInfo.innerHTML = `
     <div class="info-row">
-      <label>Никнейм:</label>
-      <span id="nickname">${currentUserData.nickname || 'Не указан'}</span>
+      <label>${t('lblNickname')}</label>
+      <span id="nickname">${currentUserData.nickname || t('notSpecified')}</span>
       <button onclick="editNickname()" class="edit-btn">✎</button>
     </div>
     <div class="info-row">
-      <label>Тег:</label>
-      <span id="tag">${currentUserData.tag || 'Не указан'}</span>
+      <label>${t('lblTag')}</label>
+      <span id="tag">${currentUserData.tag || t('notSpecified')}</span>
       <button onclick="editTag()" class="edit-btn">✎</button>
     </div>
     <div class="info-row">
-      <label>Email:</label>
+      <label>${t('lblEmail')}</label>
       <span>${currentUserData.email}</span>
     </div>
   `;
@@ -156,12 +141,10 @@ function editNickname() {
 
 function editTag() {
   const span = document.getElementById('tag');
-  // Убираем @ из текущего значения, если оно там есть
   const current = (currentUserData.tag || '').replace(/^@+/, '');
   
   span.innerHTML = `
     <div style="display: flex; flex-direction: column; width: 100%;">
-      <!-- Наша новая визуальная обертка -->
       <div class="tag-input-wrapper">
         <span class="tag-prefix">@</span>
         <input type="text" id="editTag" value="${current}" oninput="handleTagInput(this); validateProfileTag(this.value)" placeholder="tag" class="edit-input-borderless" autocomplete="off">
@@ -180,12 +163,11 @@ async function saveChanges() {
   let newNickname = currentUserData.nickname;
   let newTag = currentUserData.tag;
 
-  // 1. Валидация никнейма без алертов (подсветка рамки)
   if (changes.nickname) {
     newNickname = document.getElementById('editNickname').value.trim();
     if (!newNickname) {
       const nickInput = document.getElementById('editNickname');
-      nickInput.style.borderColor = '#dc2626'; // Красная рамка
+      nickInput.style.borderColor = '#dc2626'; 
       setTimeout(() => nickInput.style.borderColor = '#e2e8f0', 2000);
       return;
     }
@@ -193,7 +175,6 @@ async function saveChanges() {
 
   if (changes.tag) {
     if (!isTagValid) {
-      // Привлекаем внимание к тексту ошибки легкой анимацией жирности
       const statusDiv = document.getElementById('tagStatus');
       if (statusDiv) {
         statusDiv.style.fontWeight = 'bold';
@@ -201,14 +182,10 @@ async function saveChanges() {
       }
       return;
     }
-    
-    // Срезаем все @, которые пользователь мог случайно написать в инпут, 
-    // и жестко приклеиваем один единственный @ в начало
     const rawInputTag = document.getElementById('editTag').value.trim().replace(/^@+/, '');
     newTag = '@' + rawInputTag;
   }
 
-  // 3. Сохранение
   isSubmitting = true;
   const user = auth.currentUser;
   const messageDiv = document.createElement('div');
@@ -227,7 +204,7 @@ async function saveChanges() {
     userCache.set(user.uid, currentUserData);
     localStorage.setItem(`cachedCurrentUser_${user.uid}`, JSON.stringify(currentUserData));
     
-    messageDiv.innerHTML = '<div class="success">Изменения сохранены!</div>';
+    messageDiv.innerHTML = `<div class="success">${t('changesSaved')}</div>`;
     document.querySelector('.profile-left').appendChild(messageDiv);
     
     cancelEditing(); 
@@ -235,7 +212,7 @@ async function saveChanges() {
     setTimeout(() => messageDiv.remove(), 2000);
   } catch (error) {
     console.error('Ошибка сохранения:', error);
-    messageDiv.innerHTML = '<div class="error">Ошибка при сохранении</div>';
+    messageDiv.innerHTML = `<div class="error">${t('saveError')}</div>`;
     document.querySelector('.profile-left').appendChild(messageDiv);
     setTimeout(() => messageDiv.remove(), 2000);
   } finally {
@@ -254,7 +231,7 @@ function hideCreatePostModal() {
 async function createPost() {
   if (isSubmitting) return;
   const content = document.getElementById('postContent').value.trim();
-  if (!content) { alert('Введите текст поста'); return; }
+  if (!content) { alert(t('enterPostText')); return; }
   hideCreatePostModal();
   isSubmitting = true;
   try {
@@ -267,18 +244,18 @@ async function createPost() {
     });
   } catch (error) {
     console.error('Ошибка создания поста:', error);
-    alert('Ошибка при создании поста');
+    alert(t('postCreateError'));
   } finally {
     setTimeout(() => { isSubmitting = false; }, 1000);
   }
 }
 async function deletePost(postId) {
-  if (!confirm('Удалить этот пост?')) return;
+  if (!confirm(t('confirmDeletePost'))) return;
   try {
     await db.collection('posts').doc(postId).delete();
   } catch (error) {
     console.error('Ошибка удаления поста:', error);
-    alert('Ошибка при удалении поста');
+    alert(t('postDeleteError'));
   }
 }
 
@@ -290,15 +267,15 @@ function listenForNewPosts() {
     .onSnapshot(snapshot => {
       const postsContainer = document.getElementById('postsContainer');
       if (snapshot.empty) {
-        postsContainer.innerHTML = '<div class="no-posts">У вас пока нет постов. Создайте первый!</div>';
+        postsContainer.innerHTML = `<div class="no-posts">${t('noPostsYet')}</div>`;
         return;
       }
       let postsHTML = '';
       snapshot.forEach(doc => {
         const post = doc.data();
-        let date = 'Только что';
+        let date = t('justNow');
         if (post.createdAt) {
-          try { date = new Date(post.createdAt.toDate()).toLocaleString(); } catch(e) { date = 'Только что'; }
+          try { date = new Date(post.createdAt.toDate()).toLocaleString(); } catch(e) { date = t('justNow'); }
         }
         postsHTML += `
           <div class="post-card" id="post-${doc.id}">
@@ -319,7 +296,6 @@ window.onclick = function(event) {
   if (event.target === modal) modal.style.display = 'none';
 };
 
-// Обработка выбора файла
 document.getElementById('avatarInput')?.addEventListener('change', function(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -328,7 +304,6 @@ document.getElementById('avatarInput')?.addEventListener('change', function(e) {
   reader.onload = function(event) {
     const img = new Image();
     img.onload = function() {
-      // Создаем холст для изменения размера
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       const targetSize = 800;
@@ -336,23 +311,17 @@ document.getElementById('avatarInput')?.addEventListener('change', function(e) {
       canvas.width = targetSize;
       canvas.height = targetSize;
 
-      // Вычисляем координаты для обрезки (crop) по центру в идеальный квадрат
       const minDim = Math.min(img.width, img.height);
       const startX = (img.width - minDim) / 2;
       const startY = (img.height - minDim) / 2;
 
-      // Отрисовываем картинку (сжимаем и обрезаем)
       ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, targetSize, targetSize);
-
-      // Получаем Base64 строку (JPEG, качество 70% для экономии места)
       const base64Avatar = canvas.toDataURL('image/jpeg', 0.7);
 
-      // Проверка на лимит Firestore (1 МБ = 1048576 байт)
       if (base64Avatar.length > 1000000) {
-        alert('Файл слишком большой даже после сжатия. Пожалуйста, выберите другую картинку.');
+        alert(t('fileTooLarge'));
         return;
       }
-
       saveAvatarToFirebase(base64Avatar);
     };
     img.src = event.target.result;
@@ -360,28 +329,22 @@ document.getElementById('avatarInput')?.addEventListener('change', function(e) {
   reader.readAsDataURL(file);
 });
 
-// Сохранение в базу данных
 async function saveAvatarToFirebase(base64String) {
   const user = auth.currentUser;
   try {
-    // Пишем в базу
     await db.collection('users').doc(user.uid).update({ avatar: base64String });
     
-    // Обновляем локальный кэш
     currentUserData.avatar = base64String;
     userCache.set(user.uid, currentUserData);
     localStorage.setItem(`cachedCurrentUser_${user.uid}`, JSON.stringify(currentUserData));
     updateSidebarUser(currentUserData);
-    
-    // Сразу показываем на экране
     renderAvatar(base64String);
   } catch (error) {
     console.error('Ошибка сохранения аватарки:', error);
-    alert('Ошибка при загрузке аватарки');
+    alert(t('avatarUploadError'));
   }
 }
 
-// Функция для красивого отображения аватарки
 function renderAvatar(avatarData) {
   const avatarDiv = document.getElementById('profileAvatar');
   if (avatarData) {
@@ -391,7 +354,6 @@ function renderAvatar(avatarData) {
   }
 }
 
-// Вспомогательная функция для отображения кнопок "Сохранить" и "Отмена"
 function showActionButtons() {
   if (!document.getElementById('profileActionButtons')) {
     const container = document.createElement('div');
@@ -403,14 +365,14 @@ function showActionButtons() {
     const saveBtn = document.createElement('button');
     saveBtn.className = 'save-btn';
     saveBtn.style.marginTop = '0'; 
-    saveBtn.textContent = 'Сохранить';
+    saveBtn.textContent = t('saveBtn');
     saveBtn.onclick = saveChanges;
 
     const cancelBtn = document.createElement('button');
     cancelBtn.className = 'save-btn';
     cancelBtn.style.marginTop = '0';
-    cancelBtn.style.background = '#94a3b8'; // Серый цвет для отмены
-    cancelBtn.textContent = 'Отмена';
+    cancelBtn.style.background = '#94a3b8'; 
+    cancelBtn.textContent = t('cancelBtn');
     cancelBtn.onclick = cancelEditing;
 
     container.appendChild(saveBtn);
@@ -419,12 +381,11 @@ function showActionButtons() {
   }
 }
 
-// Функция отмены редактирования
 function cancelEditing() {
   changes = {};
   const buttons = document.getElementById('profileActionButtons');
   if (buttons) buttons.remove();
-  loadProfileInfo(); // Перерисовываем информацию из кэша (возвращаем span)
+  loadProfileInfo(); 
 }
 
 function validateProfileTag(value) {
@@ -434,48 +395,42 @@ function validateProfileTag(value) {
   
   const trimmedValue = value.trim().replace(/^@+/, '');
 
-  // 1. Проверка на пустоту
   if (!trimmedValue) {
-    statusDiv.textContent = 'Тег не может быть пустым';
-    statusDiv.style.color = '#dc2626'; // Красный
+    statusDiv.textContent = t('tagEmptyError');
+    statusDiv.style.color = '#dc2626'; 
     isTagValid = false;
     return;
   }
 
-  // 2. Проверка на минимальную длину
   if (trimmedValue.length < 3) {
-    statusDiv.textContent = 'Минимальная длина тега — 3 символа';
-    statusDiv.style.color = '#dc2626'; // Красный
+    statusDiv.textContent = t('tagMinLengthError');
+    statusDiv.style.color = '#dc2626'; 
     isTagValid = false;
     return;
   }
 
   const fullTag = '@' + trimmedValue;
   
-  // 3. Проверка, не является ли это текущим тегом пользователя
   if (fullTag === currentUserData.tag) {
-    statusDiv.textContent = 'Это ваш текущий тег';
-    statusDiv.style.color = '#16a34a'; // Зеленый
+    statusDiv.textContent = t('tagCurrentError');
+    statusDiv.style.color = '#16a34a'; 
     isTagValid = true;
     return;
   }
 
-  // Индикация загрузки
-  statusDiv.textContent = 'Проверка...';
+  statusDiv.textContent = t('tagChecking');
   statusDiv.style.color = '#666'; 
   isTagValid = false; 
 
-  // 4. Отложенный запрос в базу
   tagCheckTimeout = setTimeout(async () => {
-    // В базу летим только если тег прошел локальные проверки на длину
     const isUnique = await checkTagUnique(trimmedValue);
     if (isUnique) {
-      statusDiv.textContent = 'Тег свободен';
-      statusDiv.style.color = '#16a34a'; // Зеленый
+      statusDiv.textContent = t('tagAvailable');
+      statusDiv.style.color = '#16a34a'; 
       isTagValid = true;
     } else {
-      statusDiv.textContent = 'Этот тег уже занят';
-      statusDiv.style.color = '#dc2626'; // Красный
+      statusDiv.textContent = t('tagTaken');
+      statusDiv.style.color = '#dc2626'; 
       isTagValid = false;
     }
   }, 500);
@@ -486,12 +441,12 @@ function updateSidebarUser(userData) {
   const tagEl = document.getElementById('sidebarUserTag');
   const avatarEl = document.getElementById('sidebarUserAvatar');
   
-  if (nameEl) nameEl.textContent = userData.nickname || 'Пользователь';
+  if (nameEl) nameEl.textContent = userData.nickname || t('users');
   if (tagEl) tagEl.textContent = userData.tag || '@user';
   
   if (avatarEl) {
     if (userData.avatar) {
-      avatarEl.innerHTML = `<img src="${userData.avatar}" alt="Аватар" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block;">`;
+      avatarEl.innerHTML = `<img src="${userData.avatar}" alt="${t('avatarAlt')}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block;">`;
       avatarEl.style.background = 'transparent';
     } else {
       avatarEl.innerHTML = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';

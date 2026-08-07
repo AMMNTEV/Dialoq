@@ -28,7 +28,6 @@ onAuthStateChanged(async (user) => {
   if (cachedUserStr) {
     updateSidebarUser(JSON.parse(cachedUserStr));
   } else {
-    // Если кэша нет, запрашиваем из базы
     db.collection('users').doc(user.uid).get().then(doc => {
       if(doc.exists) updateSidebarUser(doc.data());
     });
@@ -37,17 +36,15 @@ onAuthStateChanged(async (user) => {
     const userDoc = await db.collection('users').doc(userId).get();
     if (!userDoc.exists) {
       document.getElementById('profileContent').innerHTML = `
-        <div class="error">Пользователь не найден</div>
-        <a href="messenger.html" style="display: block; text-align: center; margin-top: 20px; color: #667eea;">Вернуться в мессенджер</a>
+        <div class="error">${t('userNotFound')}</div>
+        <a href="messenger.html" style="display: block; text-align: center; margin-top: 20px; color: #667eea;">${t('backToMessenger')}</a>
       `;
       return;
     }
     const userData = userDoc.data();
     
-    // Получаем первую букву, если аватарки нет
     const firstLetter = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
 
-    // Формируем HTML для аватарки: если есть Base64 код, выводим картинку, иначе букву
     const avatarHTML = userData.avatar 
       ? `<img src="${userData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">` 
       : firstLetter;
@@ -59,21 +56,21 @@ onAuthStateChanged(async (user) => {
             <div class="avatar-large">${avatarHTML}</div>
           </div>
           <div class="profile-info">
-            <div class="info-row"><label>Никнейм:</label><span>${userData.nickname || 'Не указан'}</span></div>
-            <div class="info-row"><label>Тег:</label><span>${userData.tag || 'Не указан'}</span></div>
+            <div class="info-row"><label>${t('lblNickname')}</label><span>${userData.nickname || t('notSpecified')}</span></div>
+            <div class="info-row"><label>${t('lblTag')}</label><span>${userData.tag || t('notSpecified')}</span></div>
           </div>
         </div>
       </div>
       <div class="profile-right">
-        <div class="posts-header"><h2>Посты пользователя</h2></div>
-        <div class="posts-container" id="postsContainer"><div class="loading">Загрузка постов...</div></div>
+        <div class="posts-header"><h2>${t('userPosts')}</h2></div>
+        <div class="posts-container" id="postsContainer"><div class="loading">${t('loadingPosts')}</div></div>
       </div>
     `;
 
     loadPosts(userId);
   } catch (error) {
     console.error('Ошибка загрузки профиля:', error);
-    document.getElementById('profileContent').innerHTML = '<div class="error">Ошибка загрузки профиля</div>';
+    document.getElementById('profileContent').innerHTML = `<div class="error">${t('profileLoadError')}</div>`;
   }
 });
 
@@ -87,15 +84,15 @@ async function loadPosts(targetUserId) {
       .orderBy('createdAt', 'desc')
       .onSnapshot(snapshot => {
         if (snapshot.empty) {
-          postsContainer.innerHTML = '<div class="no-posts">У пользователя пока нет постов</div>';
+          postsContainer.innerHTML = `<div class="no-posts">${t('noUserPosts')}</div>`;
           return;
         }
         let postsHTML = '';
         snapshot.forEach(doc => {
           const post = doc.data();
-          let date = 'Дата неизвестна';
+          let date = t('unknownDate');
           if (post.createdAt) {
-            try { date = new Date(post.createdAt.toDate()).toLocaleString(); } catch(e) { date = 'Только что'; }
+            try { date = new Date(post.createdAt.toDate()).toLocaleString(); } catch(e) { date = t('justNow'); }
           }
           postsHTML += `
             <div class="post-card">
@@ -108,29 +105,28 @@ async function loadPosts(targetUserId) {
       }, error => {
         console.error('Ошибка загрузки постов:', error);
         if (error.code === 'failed-precondition') {
-          postsContainer.innerHTML = '<div class="error">Требуется создать индекс. Подождите минуту и обновите страницу.</div>';
+          postsContainer.innerHTML = `<div class="error">${t('indexRequired')}</div>`;
         } else {
-          postsContainer.innerHTML = '<div class="error">Ошибка загрузки постов</div>';
+          postsContainer.innerHTML = `<div class="error">${t('postsLoadError')}</div>`;
         }
       });
   } catch (error) {
     console.error('Ошибка:', error);
-    postsContainer.innerHTML = '<div class="error">Ошибка загрузки постов</div>';
+    postsContainer.innerHTML = `<div class="error">${t('postsLoadError')}</div>`;
   }
 }
 
-// Функция для обновления информации текущего пользователя в левом сайдбаре
 function updateSidebarUser(userData) {
   const nameEl = document.getElementById('sidebarUserName');
   const tagEl = document.getElementById('sidebarUserTag');
   const avatarEl = document.getElementById('sidebarUserAvatar');
   
-  if (nameEl) nameEl.textContent = userData.nickname || 'Пользователь';
+  if (nameEl) nameEl.textContent = userData.nickname || t('users');
   if (tagEl) tagEl.textContent = userData.tag || '@user';
   
   if (avatarEl) {
     if (userData.avatar) {
-      avatarEl.innerHTML = `<img src="${userData.avatar}" alt="Аватар" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block;">`;
+      avatarEl.innerHTML = `<img src="${userData.avatar}" alt="${t('avatarAlt')}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block;">`;
       avatarEl.style.background = 'transparent';
     } else {
       avatarEl.innerHTML = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
