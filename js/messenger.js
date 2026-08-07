@@ -464,14 +464,15 @@ function listenForChats() {
           let hasAnyMessage = false;
 
           for (const msgDoc of lastMsgQuery.docs) {
-            const msg = msgDoc.data();
-            hasAnyMessage = true;
-            if (!msg.deletedFor || (!msg.deletedFor.includes('everyone') && !msg.deletedFor.includes(currentUser.uid))) {
-              lastMessage = msg.text;
-              lastMessageTime = msg.timestamp ? msg.timestamp.toDate?.() || new Date(msg.timestamp) : lastMessageTime;
-              break;
-            }
-          }
+  const msg = msgDoc.data();
+  hasAnyMessage = true;
+  if (!msg.deletedFor || (!msg.deletedFor.includes('everyone') && !msg.deletedFor.includes(currentUser.uid))) {
+    // Если сообщение системное, парсим его, иначе берем обычный текст
+    lastMessage = msg.isSystem ? getSystemMessageText(msg) : msg.text; 
+    lastMessageTime = msg.timestamp ? msg.timestamp.toDate?.() || new Date(msg.timestamp) : lastMessageTime;
+    break;
+  }
+}
 
           if (!chat.isGroup && !hasAnyMessage) return;
 
@@ -1481,13 +1482,14 @@ async function updateChatPreviewAfterDelete(chatId, isForEveryone = false) {
   let newLastMessageTime = null;
 
   for (const doc of snapshot.docs) {
-    const msg = doc.data();
-    if (!msg.deletedFor || (!msg.deletedFor.includes('everyone') && !msg.deletedFor.includes(currentUser.uid))) {
-      newLastMessage = msg.text;
-      newLastMessageTime = msg.timestamp ? msg.timestamp.toDate() : null;
-      break;
-    }
+  const msg = doc.data();
+  if (!msg.deletedFor || (!msg.deletedFor.includes('everyone') && !msg.deletedFor.includes(currentUser.uid))) {
+    // Аналогичная проверка
+    newLastMessage = msg.isSystem ? getSystemMessageText(msg) : msg.text;
+    newLastMessageTime = msg.timestamp ? msg.timestamp.toDate() : null;
+    break;
   }
+}
 
   if (isForEveryone) {
     await db.collection('chats').doc(chatId).update({
