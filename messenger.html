@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
@@ -49,7 +49,7 @@
       <!-- Блок с информацией о пользователе -->
       <div class="nav-user-box">
         <div class="nav-user-info">
-          <div class="nav-user-name" id="sidebarUserName" data-i18n="loading">Загрузка...</div>
+          <div class="nav-user-name" id="sidebarUserName">Загрузка...</div>
           <div class="nav-user-tag" id="sidebarUserTag">@загрузка</div>
         </div>
         <div class="nav-user-avatar" id="sidebarUserAvatar"></div>
@@ -91,13 +91,13 @@
         <input type="text" id="searchInput" placeholder="Поиск" onkeyup="searchAll()">
       </div>
       <div class="chats-list" id="chatsList">
-        <div class="loading">Загрузка чатов...</div>
+        <div class="loading" data-i18n="loadingChats">Загрузка чатов...</div>
       </div>
     </div>
 
     <div class="chat-area" id="chatArea">
       <div class="chat-header" id="chatHeader">
-        <div class="no-chat-selected" id="noChatMessage">Выберите чат для начала общения</div>
+        <div class="no-chat-selected" id="noChatMessage" data-i18n="noChatSelected">Выберите чат для начала общения</div>
       </div>
       <div class="messages-container" id="messagesContainer"></div>
       
@@ -237,6 +237,8 @@
       pageTitle: "Messenger",
       navProfile: "Profile",
       navMessenger: "Messenger",
+      loadingChats: "Loading chats...", // Новое
+      noChatSelected: "Select a chat to start messaging" // Новое
       navSettings: "Settings",
       navLogout: "Log out",
       loading: "Loading...",
@@ -260,6 +262,8 @@
       loading: "Загрузка...",
       searchPlaceholder: "Поиск...",
       noChatsText: "У вас пока нет чатов. Найдите пользователя через поиск.",
+      loadingChats: "Загрузка чатов...",
+      noChatSelected: "Выберите чат для начала общения",
       emptyChatList: "Список чатов пуст",
       noMessages: "Нет сообщений. Напишите что-нибудь!",
       loadingMessages: "Загрузка сообщений...",
