@@ -138,26 +138,26 @@
   </a>
 </nav>
 
-  <!-- Модальное окно создания беседы -->
+ <!-- Модальное окно создания беседы -->
   <div id="createGroupModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Создать новую беседу</h3>
+        <h3 data-i18n="createGroupTitle">Создать новую беседу</h3>
         <button onclick="hideCreateGroupModal()" class="modal-close">&times;</button>
       </div>
       <div class="modal-body">
-        <input type="text" id="groupName" placeholder="Название беседы" class="modal-input">
+        <input type="text" id="groupName" data-i18n-placeholder="groupNamePlaceholder" placeholder="Название беседы" class="modal-input">
         <div class="group-participants">
-          <h4>Выберите участников:</h4>
-          <input type="text" id="searchUsersInCreate" placeholder="Поиск пользователей..." class="search-input" onkeyup="searchUsersInCreate()">
+          <h4 data-i18n="selectParticipants">Выберите участников:</h4>
+          <input type="text" id="searchUsersInCreate" data-i18n-placeholder="searchUsersPlaceholder" placeholder="Поиск пользователей..." class="search-input" onkeyup="searchUsersInCreate()">
           <div id="usersListModal" class="users-checkbox-list">
-            <div class="no-users">Начните вводить имя для поиска</div>
+            <div class="no-users" data-i18n="startTypingToSearch">Начните вводить имя для поиска</div>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button onclick="hideCreateGroupModal()" class="modal-cancel-btn">Отмена</button>
-        <button onclick="createGroupChat()" class="modal-save-btn">Создать</button>
+        <button onclick="hideCreateGroupModal()" class="modal-cancel-btn" data-i18n="cancelBtn">Отмена</button>
+        <button onclick="createGroupChat()" class="modal-save-btn" data-i18n="createBtn">Создать</button>
       </div>
     </div>
   </div>
@@ -166,45 +166,37 @@
   <div id="groupInfoModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 id="groupInfoName">Информация о беседе</h3>
+        <h3 id="groupInfoName" data-i18n="groupInfoTitle">Информация о беседе</h3>
         <button onclick="hideGroupInfoModal()" class="modal-close">&times;</button>
       </div>
       <div class="modal-body">
-
-        <!-- НОВЫЙ БЛОК: Аватарка беседы -->
         <div class="group-avatar-section" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
-          <div class="avatar-large" id="groupInfoAvatar" style="width: 100px; height: 100px; border-radius: 50%; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; cursor: pointer; overflow: hidden; border: 2px solid #333;" onclick="document.getElementById('groupAvatarInput').click()">
-            👥
-          </div>
-          <!-- Скрытый инпут для выбора файла -->
+          <div class="avatar-large" id="groupInfoAvatar" style="...">👥</div>
           <input type="file" id="groupAvatarInput" accept="image/png, image/jpeg, image/webp" style="display: none;">
-          <span style="font-size: 0.8rem; color: #888; margin-top: 8px; cursor: pointer;" onclick="document.getElementById('groupAvatarInput').click()">
+          <span data-i18n="clickToChange" style="font-size: 0.8rem; color: #888; margin-top: 8px; cursor: pointer;" onclick="document.getElementById('groupAvatarInput').click()">
             Нажмите, чтобы изменить
           </span>
         </div>
-
         <div class="group-info-section">
-          <h4>Участники:</h4>
+          <h4 data-i18n="participantsTitle">Участники:</h4>
           <div id="groupParticipants" class="group-participants-list"></div>
-          
-          <!-- Кнопка выхода из беседы с иконкой стрелки влево -->
           <button onclick="leaveCurrentGroup()" id="leaveGroupBtn" class="modal-leave-btn" style="display: inline-flex; align-items: center; gap: 8px;">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-            Покинуть беседу
+            <span data-i18n="leaveGroupBtn">Покинуть беседу</span>
           </button>
         </div>
         <div class="group-info-section">
-          <h4>Добавить участников:</h4>
-          <input type="text" id="searchUsersToAdd" placeholder="Поиск пользователей..." class="search-input" onkeyup="searchUsersToAdd()">
+          <h4 data-i18n="addParticipantsTitle">Добавить участников:</h4>
+          <input type="text" id="searchUsersToAdd" data-i18n-placeholder="searchUsersPlaceholder" placeholder="Поиск пользователей..." class="search-input" onkeyup="searchUsersToAdd()">
           <div id="addParticipantsList" class="users-checkbox-list">
-            <div class="no-users">Начните вводить имя для поиска</div>
+            <div class="no-users" data-i18n="startTypingToSearch">Начните вводить имя для поиска</div>
           </div>
-          <button onclick="addSelectedParticipants()" class="modal-save-btn">Добавить выбранных</button>
+          <button onclick="addSelectedParticipants()" class="modal-save-btn" data-i18n="addSelectedBtn">Добавить выбранных</button>
         </div>
       </div>
       <div class="modal-footer">
-        <button onclick="hideGroupInfoModal()" class="modal-cancel-btn">Закрыть</button>
-        <button onclick="deleteCurrentGroup()" id="deleteGroupBtn" class="modal-delete-btn">Удалить беседу</button>
+        <button onclick="hideGroupInfoModal()" class="modal-cancel-btn" data-i18n="closeBtn">Закрыть</button>
+        <button onclick="deleteCurrentGroup()" id="deleteGroupBtn" class="modal-delete-btn" data-i18n="deleteGroupBtn">Удалить беседу</button>
       </div>
     </div>
   </div>
@@ -213,15 +205,15 @@
   <div id="messageOptionsModal" class="modal">
     <div class="modal-content small">
       <div class="modal-header">
-        <h3>Действия с сообщением</h3>
+        <h3 data-i18n="messageActionsTitle">Действия с сообщением</h3>
         <button onclick="hideMessageOptions()" class="modal-close">&times;</button>
       </div>
       <div class="modal-body">
-        <button onclick="deleteMessageForMe()" class="modal-option-btn">Удалить у себя</button>
-        <button onclick="deleteMessageForEveryone()" id="deleteForEveryoneBtn" class="modal-option-btn delete">Удалить у всех</button>
+        <button onclick="deleteMessageForMe()" class="modal-option-btn" data-i18n="deleteForMeBtn">Удалить у себя</button>
+        <button onclick="deleteMessageForEveryone()" id="deleteForEveryoneBtn" class="modal-option-btn delete" data-i18n="deleteForEveryoneBtn">Удалить у всех</button>
       </div>
       <div class="modal-footer">
-        <button onclick="hideMessageOptions()" class="modal-cancel-btn">Отмена</button>
+        <button onclick="hideMessageOptions()" class="modal-cancel-btn" data-i18n="cancelBtn">Отмена</button>
       </div>
     </div>
   </div>
@@ -232,12 +224,12 @@
 
 <!-- ЛОКАЛИЗАЦИЯ МЕССЕНДЖЕРА -->
 <script>
-  const messengerTranslations = {
+const messengerTranslations = {
     en: {
       pageTitle: "Messenger",
       navProfile: "Profile",
       navMessenger: "Messenger",
-      loadingChats: "Loading chats...", // Новое
+      loadingChats: "Loading chats...", 
       noChatSelected: "Select a chat to start messaging",
       navSettings: "Settings",
       navLogout: "Log out",
@@ -252,10 +244,41 @@
       nothingFound: "Nothing found",
       users: "Users:",
       groups: "Groups:",
-      navCreateGroup: "Create group"
+      navCreateGroup: "Create group",
+      // --- НОВЫЕ КЛЮЧИ ---
+      createGroupTitle: "Create new group",
+      groupNamePlaceholder: "Group name",
+      selectParticipants: "Select participants:",
+      searchUsersPlaceholder: "Search users...",
+      cancelBtn: "Cancel",
+      createBtn: "Create",
+      groupInfoTitle: "Group info",
+      clickToChange: "Click to change",
+      participantsTitle: "Participants:",
+      leaveGroupBtn: "Leave group",
+      addParticipantsTitle: "Add participants:",
+      addSelectedBtn: "Add selected",
+      closeBtn: "Close",
+      deleteGroupBtn: "Delete group",
+      messageActionsTitle: "Message actions",
+      deleteForMeBtn: "Delete for me",
+      deleteForEveryoneBtn: "Delete for everyone",
+      startTypingToSearch: "Start typing to search",
+      // --- КЛЮЧИ ДЛЯ JS (Алерты и Системные сообщения) ---
+      sysRemoved: "removed from group",
+      sysAdded: "Added:",
+      sysLeft: "left the group",
+      sysAvatarUpdated: "updated the group avatar",
+      alertEnterGroupName: "Enter a group name",
+      alertSelectParticipant: "Select at least one participant",
+      confirmRemoveUser: "Remove this participant from the group?",
+      confirmLeaveGroup: "Are you sure you want to leave the group?",
+      confirmDeleteGroup: "Are you sure you want to delete this group? This action cannot be undone.",
+      defaultGroupName: "Group chat",
+      participantsCount: "participants"
     },
     ru: {
-      navCreateGroup: "Создвть беседу",
+      navCreateGroup: "Создать беседу",
       pageTitle: "Мессенджер",
       navProfile: "Профиль",
       navMessenger: "Мессенджер",
@@ -273,7 +296,38 @@
       deletedUserStub: "Этот пользователь удалил страницу",
       nothingFound: "Ничего не найдено",
       users: "Пользователи:",
-      groups: "Беседы:"
+      groups: "Беседы:",
+      // --- НОВЫЕ КЛЮЧИ ---
+      createGroupTitle: "Создать новую беседу",
+      groupNamePlaceholder: "Название беседы",
+      selectParticipants: "Выберите участников:",
+      searchUsersPlaceholder: "Поиск пользователей...",
+      cancelBtn: "Отмена",
+      createBtn: "Создать",
+      groupInfoTitle: "Информация о беседе",
+      clickToChange: "Нажмите, чтобы изменить",
+      participantsTitle: "Участники:",
+      leaveGroupBtn: "Покинуть беседу",
+      addParticipantsTitle: "Добавить участников:",
+      addSelectedBtn: "Добавить выбранных",
+      closeBtn: "Закрыть",
+      deleteGroupBtn: "Удалить беседу",
+      messageActionsTitle: "Действия с сообщением",
+      deleteForMeBtn: "Удалить у себя",
+      deleteForEveryoneBtn: "Удалить у всех",
+      startTypingToSearch: "Начните вводить имя для поиска",
+      // --- КЛЮЧИ ДЛЯ JS (Алерты и Системные сообщения) ---
+      sysRemoved: "удален из беседы",
+      sysAdded: "Добавлены:",
+      sysLeft: "покинул беседу",
+      sysAvatarUpdated: "обновил(а) аватарку беседы",
+      alertEnterGroupName: "Введите название беседы",
+      alertSelectParticipant: "Выберите хотя бы одного участника",
+      confirmRemoveUser: "Удалить этого участника из беседы?",
+      confirmLeaveGroup: "Вы уверены, что хотите покинуть беседу?",
+      confirmDeleteGroup: "Вы уверены, что хотите удалить эту беседу? Это действие нельзя отменить.",
+      defaultGroupName: "Беседа",
+      participantsCount: "участников"
     }
   };
 
