@@ -78,7 +78,7 @@ onAuthStateChanged(async (user) => {
     const doc = await db.collection('users').doc(user.uid).get();
     if (!doc.exists) {
   // Защита от '@undefined': проверяем, есть ли символ '|' в имени
-  let nickname = 'Пользователь';
+  let nickname = t('users');
   let tag = '';
   
   if (user.displayName && user.displayName.includes('|')) {
@@ -86,7 +86,7 @@ onAuthStateChanged(async (user) => {
     nickname = parts[0];
     tag = '@' + parts[1];
   } else {
-    nickname = user.displayName || 'Пользователь';
+    nickname = user.displayName || t('users');
     tag = await generateUniqueTag(); 
   }
 
@@ -423,13 +423,13 @@ function listenForChats() {
           let createdAt = chat.createdAt ? chat.createdAt.toDate?.() || new Date(chat.createdAt) : new Date();
 
           if (chat.isGroup) {
-            chatName = chat.name || 'Беседа';
+            chatName = chat.name || t('defaultGroupName');
             chatAvatar = '👥';
             chatImage = chat.avatar || chat.bitmap || chat.photo || chat.profileImage || null;
           } else {
             const otherUserId = chat.participants.find(id => id !== currentUser.uid);
             const otherUser = await getUserById(otherUserId);
-            chatName = otherUser ? otherUser.nickname : 'Пользователь';
+            chatName = otherUser ? otherUser.nickname : t('users');
             chatAvatar = otherUser ? otherUser.tag : '';
             chatImage = otherUser ? (otherUser.avatar || otherUser.bitmap || otherUser.photo || otherUser.profileImage || null) : null;
           }
@@ -610,7 +610,7 @@ function searchAll() {
           <div class="chat-avatar-placeholder" style="overflow:hidden; display:flex; align-items:center; justify-content:center; padding:0;">${avatarContent}</div>
           <div class="chat-info">
             <div class="chat-name">${chat.displayName}</div>
-            <div class="chat-last-message">Беседа</div>
+            <div class="chat-last-message">${t('defaultGroupName')}</div>
           </div>
         </div>
       `;
@@ -645,7 +645,7 @@ function searchUsersInCreate() {
   if (!usersList) return;
 
   if (!searchText) { 
-    usersList.innerHTML = '<div class="no-users">Начните вводить имя для поиска</div>'; 
+    usersList.innerHTML = `<div class="no-users">${t('startTypingToSearch')}</div>`;
     return; 
   }
 
@@ -655,7 +655,7 @@ function searchUsersInCreate() {
   );
 
   if (filtered.length === 0) { 
-    usersList.innerHTML = '<div class="no-users">Ничего не найдено</div>'; 
+    usersList.innerHTML = `<div class="no-users">${t('nothingFound')}</div>`;
     return; 
   }
 
@@ -822,7 +822,7 @@ function updateChatHeader(chat) {
         <div class="chat-avatar-placeholder large" style="overflow:hidden; display:flex; align-items:center; justify-content:center; padding:0;">${avatarContent}</div>
         <div class="chat-info">
           <h3>${chat.displayName}</h3>
-          <p>${participantsCount} участников</p>
+          <p>${participantsCount} ${t('participantsCount')}</p>
         </div>
       </div>
     `;
@@ -1209,9 +1209,9 @@ async function createGroupChat() {
   if (isCreatingGroup) return;
   const groupName = document.getElementById('groupName').value.trim();
   
-  if (!groupName) { alert('Введите название беседы'); return; }
+  if (!groupName) { alert(t('alertEnterGroupName')); return; }
   // Проверяем наличие выбранных людей в нашем глобальном множестве
-  if (selectedUsersForCreate.size === 0) { alert('Выберите хотя бы одного участника'); return; }
+  if (selectedUsersForCreate.size === 0) { alert(t('alertSelectParticipant')); return; }
   
   isCreatingGroup = true;
   hideCreateGroupModal();
@@ -1271,7 +1271,7 @@ async function openChatInfo(chatId) {
     }
     participantsHTML += '</ul>';
 
-    document.getElementById('groupInfoName').textContent = chat.name || 'Беседа';
+    document.getElementById('groupInfoName').textContent = chat.name || t('defaultGroupName');
     document.getElementById('groupParticipants').innerHTML = participantsHTML;
 
     const leaveBtn = document.getElementById('leaveGroupBtn');
@@ -1304,7 +1304,7 @@ function hideGroupInfoModal() {
 // ========== УПРАВЛЕНИЕ УЧАСТНИКАМИ ГРУППЫ ==========
 async function removeParticipant(userId) {
   if (!selectedChat || !selectedChat.isGroup) return;
-  if (!confirm('Удалить этого участника из беседы?')) return;
+  if (!confirm(t('confirmRemoveUser'))) return;
   try {
     await db.collection('chats').doc(selectedChat.id).update({
       participants: firebase.firestore.FieldValue.arrayRemove(userId)
@@ -1314,7 +1314,7 @@ async function removeParticipant(userId) {
       await db.collection('chats').doc(selectedChat.id)
         .collection('messages')
         .add({
-          text: `❌ ${userData.nickname} ${userData.tag} удален из беседы`,
+          text: `❌ ${userData.nickname} ${userData.tag} ${t('sysRemoved')}`,
           senderId: 'system',
           timestamp: firebase.firestore.FieldValue.serverTimestamp(),
           read: false,
@@ -1337,7 +1337,7 @@ async function removeParticipant(userId) {
 async function addSelectedParticipants() {
   if (!selectedChat) return;
   
-  if (selectedUsersForAdd.size === 0) { alert('Выберите пользователей для добавления'); return; }
+  if (selectedUsersForAdd.size === 0) { alert(t('alertSelectParticipant')); return; }
   const newParticipants = Array.from(selectedUsersForAdd);
   
   try {
@@ -1354,7 +1354,7 @@ async function addSelectedParticipants() {
     await db.collection('chats').doc(selectedChat.id)
       .collection('messages')
       .add({
-        text: `✅ Добавлены: ${addedNames.join(', ')}`,
+        text: `✅ ${t('sysAdded')} ${addedNames.join(', ')}`,
         senderId: 'system',
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         read: false,
@@ -1376,12 +1376,12 @@ async function addSelectedParticipants() {
 
 async function leaveCurrentGroup() {
   if (!selectedChat || !selectedChat.isGroup) return;
-  if (!confirm('Вы уверены, что хотите покинуть беседу?')) return;
+  if (!confirm(t('confirmLeaveGroup'))) return;
   try {
     await db.collection('chats').doc(selectedChat.id)
       .collection('messages')
       .add({
-        text: `👋 ${currentUserData.nickname} ${currentUserData.tag} покинул беседу`,
+        text: `👋 ${currentUserData.nickname} ${currentUserData.tag} ${t('sysLeft')}`,
         senderId: 'system',
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         read: false,
@@ -1400,7 +1400,7 @@ async function leaveCurrentGroup() {
 
 async function deleteCurrentGroup() {
   if (!selectedChat || !selectedChat.isGroup) return;
-  if (!confirm('Вы уверены, что хотите удалить эту беседу? Это действие нельзя отменить.')) return;
+  if (!confirm(t('confirmDeleteGroup'))) return;
   try {
     const messagesSnapshot = await db.collection('chats').doc(selectedChat.id)
       .collection('messages')
@@ -1611,7 +1611,7 @@ function updateSidebarUser(userData) {
   const tagEl = document.getElementById('sidebarUserTag');
   const avatarEl = document.getElementById('sidebarUserAvatar');
   
-  if (nameEl) nameEl.textContent = userData.nickname || 'Пользователь';
+  if (nameEl) nameEl.textContent = userData.nickname || t('users');
   if (tagEl) tagEl.textContent = userData.tag || '@user';
   
   if (avatarEl) {
@@ -1674,7 +1674,7 @@ async function saveGroupAvatarToFirebase(base64String) {
     
     // 2. Отправляем системное сообщение об изменении
     await db.collection('chats').doc(selectedChat.id).collection('messages').add({
-      text: `🖼️ ${currentUserData.nickname} обновил(а) аватарку беседы`,
+      text: `🖼️ ${currentUserData.nickname} ${t('sysAvatarUpdated')}`,
       senderId: 'system',
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
       read: false,
