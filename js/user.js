@@ -124,8 +124,10 @@ function updateSidebarUser(userData) {
   if (nameEl) {
     try {
       nameEl.textContent = userData.nickname || t('users');
+      nameEl.removeAttribute('data-i18n'); // <--- ДОБАВИТЬ СЮДА
     } catch (e) {
       nameEl.textContent = userData.nickname || 'Users';
+      nameEl.removeAttribute('data-i18n'); // <--- И СЮДА НА ВСЯКИЙ СЛУЧАЙ
     }
   }
   
