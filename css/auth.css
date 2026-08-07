@@ -1,11 +1,13 @@
 /* ========== СТРАНИЦЫ АВТОРИЗАЦИИ ========== */
 .auth-page {
-  height: 100%;
+  min-height: 100vh; /* Заменено с height: 100% для корректного расчета высоты */
+  min-height: 100dvh; /* Поддержка мобильных вьюпортов */
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
+  padding: 60px 20px 20px 20px; /* Добавлен верхний отступ (60px) под кнопки языка */
+  box-sizing: border-box;
   overflow-y: auto;
 }
 .auth-card {
@@ -261,12 +263,12 @@
 }
 
 .lang-switcher {
-  position: absolute;
-  top: 20px;
-  right: 20px;
+  position: fixed; /* Зафиксировано относительно экрана */
+  top: 16px;
+  right: 16px;
   display: flex;
   gap: 8px;
-  z-index: 10;
+  z-index: 100; /* Гарантирует отображение поверх карточки */
 }
 
 .lang-switcher button {
@@ -287,10 +289,18 @@
   transform: translateY(-1px);
 }
 
-/* Адаптив для мобильных устройств */
 @media (max-width: 480px) {
+  .auth-page {
+    align-items: flex-start; /* На мобильных выравниваем по верху, а не по центру */
+    padding-top: 70px; /* Безопасный отступ сверху для кнопок EN/RU */
+  }
+
+  .auth-card {
+    padding: 28px 20px; /* Немного уменьшаем внутренние отступы карточки */
+  }
+
   .lang-switcher {
-    top: 10px;
-    right: 10px;
+    top: 12px;
+    right: 12px;
   }
 }
