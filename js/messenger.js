@@ -1006,8 +1006,8 @@ async function loadMessages(showLoading = false) {
     if (nonSystemMessages.length === 0) {
       visibleMessages.forEach(msg => {
         if (msg.isSystem) {
-          html += `<div class="message system" id="msg-${msg.id}"><div class="message-content">${msg.text}</div></div>`;
-        }
+  html += `<div class="message system" id="msg-${msg.id}"><div class="message-content">${getSystemMessageText(msg)}</div></div>`;
+}
       });
     } else {
       visibleMessages.forEach(msg => {
@@ -1024,9 +1024,9 @@ async function loadMessages(showLoading = false) {
           lastDate = messageDate;
         }
         if (msg.isSystem) {
-          html += `<div class="message system" id="msg-${msg.id}"><div class="message-content">${msg.text}</div></div>`;
-          return;
-        }
+  html += `<div class="message system" id="msg-${msg.id}"><div class="message-content">${getSystemMessageText(msg)}</div></div>`;
+  return;
+}
         let senderInfo = '';
         if (selectedChat.isGroup && !isMyMessage) {
           const sender = senderCache[msg.senderId];
@@ -1097,11 +1097,11 @@ function listenForNewMessages() {
           }
 
           if (msg.isSystem) {
-            const messageHTML = `<div class="message system" id="msg-${msgId}"><div class="message-content">${msg.text}</div></div>`;
-            messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            return;
-          }
+  const messageHTML = `<div class="message system" id="msg-${msgId}"><div class="message-content">${getSystemMessageText(msg)}</div></div>`;
+  messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  return;
+}
 
           let senderInfo = '';
           if (selectedChat.isGroup && msg.senderId !== currentUser.uid && msg.senderId) {
@@ -1337,15 +1337,15 @@ async function removeParticipant(userId) {
     });
     const userData = await getUserById(userId);
     if (userData) {
-      await db.collection('chats').doc(selectedChat.id)
-        .collection('messages')
-        .add({
-          text: `❌ ${userData.nickname} ${userData.tag} ${t('sysRemoved')}`,
-          senderId: 'system',
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-          read: false,
-          isSystem: true
-        });
+      await db.collection('chats').doc(selectedChat.id).collection('messages').add({
+  text: '', 
+  systemEvent: 'sysRemoved',
+  systemArgs: `${userData.nickname} ${userData.tag}`,
+  senderId: 'system',
+  timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+  read: false,
+  isSystem: true
+});
     }
     const updatedChatDoc = await db.collection('chats').doc(selectedChat.id).get();
     const updatedChat = updatedChatDoc.data();
@@ -1377,15 +1377,15 @@ async function addSelectedParticipants() {
         addedNames.push(`${userData.nickname} ${userData.tag}`);
       }
     }
-    await db.collection('chats').doc(selectedChat.id)
-      .collection('messages')
-      .add({
-        text: `✅ ${t('sysAdded')} ${addedNames.join(', ')}`,
-        senderId: 'system',
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        read: false,
-        isSystem: true
-      });
+    await db.collection('chats').doc(selectedChat.id).collection('messages').add({
+  text: '', 
+  systemEvent: 'sysAdded',
+  systemArgs: addedNames.join(', '),
+  senderId: 'system',
+  timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+  read: false,
+  isSystem: true
+});
     const updatedChatDoc = await db.collection('chats').doc(selectedChat.id).get();
     const updatedChat = updatedChatDoc.data();
     selectedChat = { ...selectedChat, participants: updatedChat.participants };
@@ -1404,15 +1404,15 @@ async function leaveCurrentGroup() {
   if (!selectedChat || !selectedChat.isGroup) return;
   if (!confirm(t('confirmLeaveGroup'))) return;
   try {
-    await db.collection('chats').doc(selectedChat.id)
-      .collection('messages')
-      .add({
-        text: `👋 ${currentUserData.nickname} ${currentUserData.tag} ${t('sysLeft')}`,
-        senderId: 'system',
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        read: false,
-        isSystem: true
-      });
+    await db.collection('chats').doc(selectedChat.id).collection('messages').add({
+  text: '', 
+  systemEvent: 'sysLeft',
+  systemArgs: `${currentUserData.nickname} ${currentUserData.tag}`,
+  senderId: 'system',
+  timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+  read: false,
+  isSystem: true
+});
     await db.collection('chats').doc(selectedChat.id).update({
       participants: firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
     });
@@ -1700,12 +1700,14 @@ async function saveGroupAvatarToFirebase(base64String) {
     
     // 2. Отправляем системное сообщение об изменении
     await db.collection('chats').doc(selectedChat.id).collection('messages').add({
-      text: `🖼️ ${currentUserData.nickname} ${t('sysAvatarUpdated')}`,
-      senderId: 'system',
-      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-      read: false,
-      isSystem: true
-    });
+  text: '', 
+  systemEvent: 'sysAvatarUpdated',
+  systemArgs: currentUserData.nickname,
+  senderId: 'system',
+  timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+  read: false,
+  isSystem: true
+});
 
     // 3. Обновляем UI в модалке мгновенно
     const avatarDiv = document.getElementById('groupInfoAvatar');
@@ -1725,4 +1727,24 @@ async function saveGroupAvatarToFirebase(base64String) {
     console.error('Ошибка сохранения аватарки беседы:', error);
     alert('Ошибка при загрузке аватарки');
   }
+}
+
+function getSystemMessageText(msg) {
+  // Если сообщение использует новый динамический формат
+  if (msg.systemEvent) {
+    const args = msg.systemArgs || '';
+    
+    switch (msg.systemEvent) {
+      case 'sysRemoved': 
+        return `❌ ${args} ${t('sysRemoved')}`;
+      case 'sysAdded': 
+        return `✅ ${t('sysAdded')} ${args}`;
+      case 'sysLeft': 
+        return `👋 ${args} ${t('sysLeft')}`;
+      case 'sysAvatarUpdated': 
+        return `🖼️ ${args} ${t('sysAvatarUpdated')}`;
+    }
+  }
+  // Фоллбэк: для старых системных сообщений, где текст уже жестко записан в БД
+  return msg.text;
 }
