@@ -75,20 +75,20 @@
 
       <button onclick="showCreateGroupModal()" class="nav-button">
         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Создать беседу
+        <span data-i18n="navCreateGroup">Создать беседу</span>
       </button>
 
       <div class="nav-divider"></div>
 
       <button onclick="logout()" class="nav-button logout-btn">
         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Выход
+        <span data-i18n="navLogout">Выход</span>
       </button>
     </div>
 
     <div class="chats-sidebar" id="chatsSidebar">
       <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Поиск" onkeyup="searchAll()">
+        <input type="text" id="searchInput" data-i18n-placeholder="searchPlaceholder" placeholder="Поиск" onkeyup="searchAll()">
       </div>
       <div class="chats-list" id="chatsList">
         <div class="loading" data-i18n="loadingChats">Загрузка чатов...</div>
@@ -102,7 +102,7 @@
       <div class="messages-container" id="messagesContainer"></div>
       
       <!-- Поле ввода с иконкой самолетика для отправки -->
-      <div class="message-input-area" id="messageInputArea">
+      <div class="message-input-area" data-i18n-placeholder="typeMessage" id="messageInputArea">
         <input type="text" id="messageInput" placeholder="Введите сообщение..." onkeypress="if(event.key==='Enter') sendMessage()">
         <button onclick="sendMessage()" id="sendButton" title="Отправить">
           <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -238,7 +238,7 @@
       navProfile: "Profile",
       navMessenger: "Messenger",
       loadingChats: "Loading chats...", // Новое
-      noChatSelected: "Select a chat to start messaging" // Новое
+      noChatSelected: "Select a chat to start messaging",
       navSettings: "Settings",
       navLogout: "Log out",
       loading: "Loading...",
@@ -251,9 +251,11 @@
       deletedUserStub: "This user deleted their account",
       nothingFound: "Nothing found",
       users: "Users:",
-      groups: "Groups:"
+      groups: "Groups:",
+      navCreateGroup: "Create group"
     },
     ru: {
+      navCreateGroup: "Создвть беседу",
       pageTitle: "Мессенджер",
       navProfile: "Профиль",
       navMessenger: "Мессенджер",
