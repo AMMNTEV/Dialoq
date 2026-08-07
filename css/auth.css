@@ -3,9 +3,10 @@
   min-height: 100vh; /* Заменено с height: 100% для корректного расчета высоты */
   min-height: 100dvh; /* Поддержка мобильных вьюпортов */
   display: flex;
-  align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: #764ba2; /* Страховка: совпадает с нижним цветом градиента */
+  background-attachment: fixed; /* Фиксирует градиент по высоте экрана при скролле */
   padding: 60px 20px 20px 20px; /* Добавлен верхний отступ (60px) под кнопки языка */
   box-sizing: border-box;
   overflow-y: auto;
