@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title data-i18n="pageTitle">Мессенджер</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'/></svg>">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/messenger.css">
+<link rel="stylesheet" href="css/dark-theme.css">
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script>
+  (function () {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      // Моментально красим фон, чтобы не было белой вспышки
+      document.documentElement.style.backgroundColor = '#121212';
+      
+      // Добавляем класс на body, как только он появится в DOM
+      document.addEventListener('DOMContentLoaded', () => {
+        document.body.classList.add('dark-theme');
+      });
+    }
+  })();
+</script>
+<!-- Подключаем сам манифест (без первого слеша) -->
+<link rel="manifest" href="manifest.json">
+
+<!-- Цвет статус-бара для Android -->
+<meta name="theme-color" content="#121212">
+
+<!-- Указываем Safari, что это PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<!-- Настраиваем внешний вид статус-бара на iOS (black-translucent делает его прозрачным поверх приложения) -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- Название приложения на экране "Домой" для iOS (замени TSA на свое короткое название, если нужно) -->
+<meta name="apple-mobile-web-app-title" content="TSA">
+
+<!-- Иконка приложения для iOS (указали правильный путь к твоей картинке) -->
+<link rel="apple-touch-icon" href="img/user.png">
+</head>
+<body>
+  <div class="messenger-container">
+    <div class="nav-sidebar">
+      <!-- Блок с информацией о пользователе -->
+      <div class="nav-user-box">
+        <div class="nav-user-info">
+          <div class="nav-user-name" id="sidebarUserName">&nbsp;</div>
+          <div class="nav-user-tag" id="sidebarUserTag">&nbsp;</div>
+        </div>
+        <div class="nav-user-avatar" id="sidebarUserAvatar"></div>
+      </div>
+
+      <!-- Основное меню -->
+      <div class="nav-buttons">
+        <a href="profile.html" class="nav-button">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span data-i18n="navProfile">Профиль</span>
+        </a>
+        <a href="messenger.html" class="nav-button">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span data-i18n="navMessenger">Мессенджер</span>
+        </a>
+        <a href="settings.html" class="nav-button">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span data-i18n="navSettings">Настройки</span>
+        </a>
+      </div>
+
+      <div class="nav-divider"></div>
+
+      <button onclick="showCreateGroupModal()" class="nav-button">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span data-i18n="navCreateGroup">Создать беседу</span>
+      </button>
+
+      <div class="nav-divider"></div>
+
+      <button onclick="logout()" class="nav-button logout-btn">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span data-i18n="navLogout">Выход</span>
+      </button>
+    </div>
+
+    <div class="chats-sidebar" id="chatsSidebar">
+      <div class="search-box">
+        <input type="text" id="searchInput" data-i18n-placeholder="searchPlaceholder" placeholder="Поиск" onkeyup="searchAll()">
+      </div>
+      <div class="chats-list" id="chatsList">
+        <div class="loading" data-i18n="loadingChats">Загрузка чатов...</div>
+      </div>
+    </div>
+
+    <div class="chat-area" id="chatArea">
+      <div class="chat-header" id="chatHeader">
+        <div class="no-chat-selected" id="noChatMessage" data-i18n="noChatSelected">Выберите чат для начала общения</div>
+      </div>
+      <div class="messages-container" id="messagesContainer"></div>
+      
+      <!-- Поле ввода с иконкой самолетика для отправки -->
+      <div class="message-input-area" data-i18n-placeholder="typeMessage" id="messageInputArea">
+        <input type="text" id="messageInput" placeholder="Введите сообщение..." onkeypress="if(event.key==='Enter') sendMessage()">
+        <button onclick="sendMessage()" id="sendButton" title="Отправить">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 2L11 13"/>
+            <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Мобильное меню -->
+  <!-- Новая мобильная нижняя панель (Tab Bar) -->
+<nav class="mobile-bottom-nav" id="mobileBottomNav">
+  <!-- 1. Мессенджер -->
+  <a href="messenger.html" class="nav-item active">
+    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  </a>
+  
+  <!-- 2. Создать беседу -->
+  <button onclick="showCreateGroupModal()" class="nav-item">
+    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+
+  <!-- 3. Настройки -->
+  <a href="settings.html" class="nav-item">
+    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  </a>
+
+  <!-- 4. Профиль -->
+  <a href="profile.html" class="nav-item">
+    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+  </a>
+</nav>
+
+ <!-- Модальное окно создания беседы -->
+  <div id="createGroupModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 data-i18n="createGroupTitle">Создать новую беседу</h3>
+        <button onclick="hideCreateGroupModal()" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="groupName" data-i18n-placeholder="groupNamePlaceholder" placeholder="Название беседы" class="modal-input">
+        <div class="group-participants">
+          <h4 data-i18n="selectParticipants">Выберите участников:</h4>
+          <input type="text" id="searchUsersInCreate" data-i18n-placeholder="searchUsersPlaceholder" placeholder="Поиск пользователей..." class="search-input" onkeyup="searchUsersInCreate()">
+          <div id="usersListModal" class="users-checkbox-list">
+            <div class="no-users" data-i18n="startTypingToSearch">Начните вводить имя для поиска</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="hideCreateGroupModal()" class="modal-cancel-btn" data-i18n="cancelBtn">Отмена</button>
+        <button onclick="createGroupChat()" class="modal-save-btn" data-i18n="createBtn">Создать</button>
+      </div>
+    </div>
+  </div>
+
+<!-- Модальное окно информации о беседе -->
+  <div id="groupInfoModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="groupInfoName" data-i18n="groupInfoTitle">Информация о беседе</h3>
+        <button onclick="hideGroupInfoModal()" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="group-avatar-section" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
+          <div class="avatar-large" id="groupInfoAvatar" style="width: 100px; height: 100px; border-radius: 50%; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; cursor: pointer; overflow: hidden; border: 2px solid #333;" onclick="document.getElementById('groupAvatarInput').click()">
+            👥
+          </div>
+          <input type="file" id="groupAvatarInput" accept="image/png, image/jpeg, image/webp" style="display: none;">
+          <span data-i18n="clickToChange" style="font-size: 0.8rem; color: #888; margin-top: 8px; cursor: pointer;" onclick="document.getElementById('groupAvatarInput').click()">
+            Нажмите, чтобы изменить
+          </span>
+        </div>
+
+        <div class="group-info-section">
+          <h4 data-i18n="participantsTitle">Участники:</h4>
+          <div id="groupParticipants" class="group-participants-list"></div>
+          <button onclick="leaveCurrentGroup()" id="leaveGroupBtn" class="modal-leave-btn" style="display: inline-flex; align-items: center; gap: 8px;">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            <span data-i18n="leaveGroupBtn">Покинуть беседу</span>
+          </button>
+        </div>
+
+        <div class="group-info-section">
+          <h4 data-i18n="addParticipantsTitle">Добавить участников:</h4>
+          <input type="text" id="searchUsersToAdd" data-i18n-placeholder="searchUsersPlaceholder" placeholder="Поиск пользователей..." class="search-input" onkeyup="searchUsersToAdd()">
+          <div id="addParticipantsList" class="users-checkbox-list">
+            <div class="no-users" data-i18n="startTypingToSearch">Начните вводить имя для поиска</div>
+          </div>
+          <button onclick="addSelectedParticipants()" class="modal-save-btn" data-i18n="addSelectedBtn">Добавить выбранных</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="hideGroupInfoModal()" class="modal-cancel-btn" data-i18n="closeBtn">Закрыть</button>
+        <button onclick="deleteCurrentGroup()" id="deleteGroupBtn" class="modal-delete-btn" data-i18n="deleteGroupBtn">Удалить беседу</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно для управления сообщением -->
+  <div id="messageOptionsModal" class="modal">
+    <div class="modal-content small">
+      <div class="modal-header">
+        <h3 data-i18n="messageActionsTitle">Действия с сообщением</h3>
+        <button onclick="hideMessageOptions()" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <button onclick="deleteMessageForMe()" class="modal-option-btn" data-i18n="deleteForMeBtn">Удалить у себя</button>
+        <button onclick="deleteMessageForEveryone()" id="deleteForEveryoneBtn" class="modal-option-btn delete" data-i18n="deleteForEveryoneBtn">Удалить у всех</button>
+      </div>
+      <div class="modal-footer">
+        <button onclick="hideMessageOptions()" class="modal-cancel-btn" data-i18n="cancelBtn">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/messenger.js"></script>
+
+<!-- ЛОКАЛИЗАЦИЯ МЕССЕНДЖЕРА -->
+<script>
+const messengerTranslations = {
+    en: {
+      pageTitle: "Messenger",
+      navProfile: "Profile",
+      navMessenger: "Messenger",
+      loadingChats: "Loading chats...", 
+      noChatSelected: "Select a chat to start messaging",
+      navSettings: "Settings",
+      navLogout: "Log out",
+      loading: "Loading...",
+      searchPlaceholder: "Search...",
+      noChatsText: "No chats yet. Find someone via search.",
+      emptyChatList: "Chat list is empty",
+      noMessages: "No messages. Write something!",
+      loadingMessages: "Loading messages...",
+      typeMessage: "Type a message...",
+      deletedUserStub: "This user deleted their account",
+      nothingFound: "Nothing found",
+      users: "Users:",
+      groups: "Groups:",
+      navCreateGroup: "Create group",
+      // --- НОВЫЕ КЛЮЧИ ---
+      createGroupTitle: "Create new group",
+      groupNamePlaceholder: "Group name",
+      selectParticipants: "Select participants:",
+      searchUsersPlaceholder: "Search users...",
+      cancelBtn: "Cancel",
+      createBtn: "Create",
+      groupInfoTitle: "Group info",
+      clickToChange: "Click to change",
+      participantsTitle: "Participants:",
+      leaveGroupBtn: "Leave group",
+      addParticipantsTitle: "Add participants:",
+      addSelectedBtn: "Add selected",
+      closeBtn: "Close",
+      deleteGroupBtn: "Delete group",
+      messageActionsTitle: "Message actions",
+      deleteForMeBtn: "Delete for me",
+      deleteForEveryoneBtn: "Delete for everyone",
+      startTypingToSearch: "Start typing to search",
+      // --- КЛЮЧИ ДЛЯ JS (Алерты и Системные сообщения) ---
+      sysRemoved: "removed from group",
+      sysAdded: "Added:",
+      sysLeft: "left the group",
+      sysAvatarUpdated: "updated the group avatar",
+      alertEnterGroupName: "Enter a group name",
+      alertSelectParticipant: "Select at least one participant",
+      confirmRemoveUser: "Remove this participant from the group?",
+      confirmLeaveGroup: "Are you sure you want to leave the group?",
+      confirmDeleteGroup: "Are you sure you want to delete this group? This action cannot be undone.",
+      defaultGroupName: "Group chat",
+      participantsCount: "participants"
+    },
+    ru: {
+      navCreateGroup: "Создать беседу",
+      pageTitle: "Мессенджер",
+      navProfile: "Профиль",
+      navMessenger: "Мессенджер",
+      navSettings: "Настройки",
+      navLogout: "Выход",
+      loading: "Загрузка...",
+      searchPlaceholder: "Поиск...",
+      noChatsText: "У вас пока нет чатов. Найдите пользователя через поиск.",
+      loadingChats: "Загрузка чатов...",
+      noChatSelected: "Выберите чат для начала общения",
+      emptyChatList: "Список чатов пуст",
+      noMessages: "Нет сообщений. Напишите что-нибудь!",
+      loadingMessages: "Загрузка сообщений...",
+      typeMessage: "Введите сообщение...",
+      deletedUserStub: "Этот пользователь удалил страницу",
+      nothingFound: "Ничего не найдено",
+      users: "Пользователи:",
+      groups: "Беседы:",
+      // --- НОВЫЕ КЛЮЧИ ---
+      createGroupTitle: "Создать новую беседу",
+      groupNamePlaceholder: "Название беседы",
+      selectParticipants: "Выберите участников:",
+      searchUsersPlaceholder: "Поиск пользователей...",
+      cancelBtn: "Отмена",
+      createBtn: "Создать",
+      groupInfoTitle: "Информация о беседе",
+      clickToChange: "Нажмите, чтобы изменить",
+      participantsTitle: "Участники:",
+      leaveGroupBtn: "Покинуть беседу",
+      addParticipantsTitle: "Добавить участников:",
+      addSelectedBtn: "Добавить выбранных",
+      closeBtn: "Закрыть",
+      deleteGroupBtn: "Удалить беседу",
+      messageActionsTitle: "Действия с сообщением",
+      deleteForMeBtn: "Удалить у себя",
+      deleteForEveryoneBtn: "Удалить у всех",
+      startTypingToSearch: "Начните вводить имя для поиска",
+      // --- КЛЮЧИ ДЛЯ JS (Алерты и Системные сообщения) ---
+      sysRemoved: "удален из беседы",
+      sysAdded: "Добавлены:",
+      sysLeft: "покинул беседу",
+      sysAvatarUpdated: "обновил(а) аватарку беседы",
+      alertEnterGroupName: "Введите название беседы",
+      alertSelectParticipant: "Выберите хотя бы одного участника",
+      confirmRemoveUser: "Удалить этого участника из беседы?",
+      confirmLeaveGroup: "Вы уверены, что хотите покинуть беседу?",
+      confirmDeleteGroup: "Вы уверены, что хотите удалить эту беседу? Это действие нельзя отменить.",
+      defaultGroupName: "Беседа",
+      participantsCount: "участников"
+    }
+  };
+
+  // Делаем функцию глобальной для JS файлов
+  window.t = function(key) {
+    const lang = localStorage.getItem('app_lang') || 'en';
+    if (messengerTranslations[lang] && messengerTranslations[lang][key]) {
+      return messengerTranslations[lang][key];
+    }
+    return key;
+  };
+
+  function applyLanguage(lang) {
+    document.documentElement.lang = lang;
+    const tObj = messengerTranslations[lang];
+    if (!tObj) return;
+
+    // Перевод текста
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (tObj[key]) el.innerHTML = tObj[key];
+    });
+
+    // Перевод плейсхолдеров (если добавите инпутам атрибут data-i18n-placeholder)
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const key = el.getAttribute('data-i18n-placeholder');
+      if (tObj[key]) el.placeholder = tObj[key];
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const savedLang = localStorage.getItem('app_lang') || 'en';
+    applyLanguage(savedLang);
+  });
+</script>
+</body>
+</html>
