@@ -599,7 +599,7 @@ function searchAll() {
 
   let resultsHTML = '';
   if (filteredChats.length > 0) {
-    resultsHTML += '<div class="search-section"><h4>Беседы:</h4></div>';
+    resultsHTML += `<div class="search-section"><h4>${t('groups')}</h4></div>`;
     filteredChats.forEach(chat => {
       let avatarContent = chat.chatImage 
         ? `<img src="${chat.chatImage}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` 
@@ -617,7 +617,7 @@ function searchAll() {
     });
   }
   if (filteredUsers.length > 0) {
-    resultsHTML += '<div class="search-section"><h4>Пользователи:</h4></div>';
+    resultsHTML += `<div class="search-section"><h4>${t('users')}</h4></div>`;
     filteredUsers.forEach(user => {
       let userImage = user.avatar || user.bitmap || user.photo || user.profileImage || null;
       let avatarContent = userImage 
@@ -890,7 +890,7 @@ async function loadMessages(showLoading = false) {
   }
 
   if (showLoading) {
-    messagesContainer.innerHTML = '<div class="loading">Загрузка сообщений...</div>';
+    messagesContainer.innerHTML = `<div class="loading">${t('loadingMessages')}</div>`;
   }
 
   try {
@@ -1552,7 +1552,7 @@ function exitChatMode() {
   if (unsubscribeMessages) { unsubscribeMessages(); unsubscribeMessages = null; }
   selectedChat = null;
   currentChatId = null;
-  document.getElementById('chatHeader').innerHTML = '<div class="no-chat-selected">Выберите чат для начала общения</div>';
+  document.getElementById('chatHeader').innerHTML = `<div class="no-chat-selected">${t('noChatSelected')}</div>`;
   document.getElementById('messagesContainer').innerHTML = '';
   document.getElementById('messageInputArea').style.display = 'none';
   isNewChatPending = false;
