@@ -162,7 +162,7 @@
     </div>
   </div>
 
-  <!-- Модальное окно информации о беседе -->
+<!-- Модальное окно информации о беседе -->
   <div id="groupInfoModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -172,11 +172,14 @@
       <div class="modal-body">
         <div class="group-avatar-section" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
           <div class="avatar-large" id="groupInfoAvatar" style="width: 100px; height: 100px; border-radius: 50%; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; cursor: pointer; overflow: hidden; border: 2px solid #333;" onclick="document.getElementById('groupAvatarInput').click()">
+            👥
+          </div>
           <input type="file" id="groupAvatarInput" accept="image/png, image/jpeg, image/webp" style="display: none;">
           <span data-i18n="clickToChange" style="font-size: 0.8rem; color: #888; margin-top: 8px; cursor: pointer;" onclick="document.getElementById('groupAvatarInput').click()">
             Нажмите, чтобы изменить
           </span>
         </div>
+
         <div class="group-info-section">
           <h4 data-i18n="participantsTitle">Участники:</h4>
           <div id="groupParticipants" class="group-participants-list"></div>
@@ -185,6 +188,7 @@
             <span data-i18n="leaveGroupBtn">Покинуть беседу</span>
           </button>
         </div>
+
         <div class="group-info-section">
           <h4 data-i18n="addParticipantsTitle">Добавить участников:</h4>
           <input type="text" id="searchUsersToAdd" data-i18n-placeholder="searchUsersPlaceholder" placeholder="Поиск пользователей..." class="search-input" onkeyup="searchUsersToAdd()">
