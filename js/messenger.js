@@ -317,13 +317,19 @@ async function loadAllUsers() {
   try {
     const snapshot = await db.collection('users').get();
     allUsers = [];
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      // Исключаем удаленные аккаунты из глобального поиска
-      if (doc.id !== currentUser.uid && data.nickname !== 'Удаленный аккаунт' && !data.deletedAt) {
-        allUsers.push({ id: doc.id, ...data });
-      }
-    });
+snapshot.forEach(doc => {
+  const data = doc.data();
+  const isDeleted = !data.nickname || 
+                    data.nickname === 'Deleted' || 
+                    data.nickname === 'Удаленный аккаунт' || 
+                    data.nickname === 'Users:' || 
+                    data.nickname === 'Users' || 
+                    data.deletedAt;
+
+  if (doc.id !== currentUser.uid && !isDeleted) {
+    allUsers.push({ id: doc.id, ...data });
+  }
+});
   } catch (error) {
     console.error('Ошибка загрузки пользователей:', error);
   }
@@ -335,9 +341,15 @@ async function loadAllUsersForModal() {
     const snapshot = await db.collection('users').get();
     allUsersForModal = [];
     snapshot.forEach(doc => {
-      const data = doc.data();
-      // Исключаем удаленные аккаунты из списков добавления в беседу
-      if (doc.id !== currentUser.uid && data.nickname !== 'Удаленный аккаунт' && !data.deletedAt) {
+  const data = doc.data();
+  const isDeleted = !data.nickname || 
+                    data.nickname === 'Deleted' || 
+                    data.nickname === 'Удаленный аккаунт' || 
+                    data.nickname === 'Users:' || 
+                    data.nickname === 'Users' || 
+                    data.deletedAt;
+
+  if (doc.id !== currentUser.uid && !isDeleted) {
         allUsersForModal.push({ id: doc.id, ...data });
       }
     });
@@ -426,13 +438,20 @@ function listenForChats() {
             chatName = chat.name || t('defaultGroupName');
             chatAvatar = '👥';
             chatImage = chat.avatar || chat.bitmap || chat.photo || chat.profileImage || null;
-          } else {
-            const otherUserId = chat.participants.find(id => id !== currentUser.uid);
-            const otherUser = await getUserById(otherUserId);
-            chatName = otherUser ? otherUser.nickname : t('users');
-            chatAvatar = otherUser ? otherUser.tag : '';
-            chatImage = otherUser ? (otherUser.avatar || otherUser.bitmap || otherUser.photo || otherUser.profileImage || null) : null;
-          }
+          } } else {
+  const otherUserId = chat.participants.find(id => id !== currentUser.uid);
+  const otherUser = await getUserById(otherUserId);
+  
+  const rawName = otherUser ? otherUser.nickname : '';
+  if (!rawName || rawName === 'Users:' || rawName === 'Users' || rawName === 'Удаленный аккаунт') {
+    chatName = 'Deleted';
+  } else {
+    chatName = rawName;
+  }
+
+  chatAvatar = otherUser ? otherUser.tag : '';
+  chatImage = otherUser ? (otherUser.avatar || otherUser.bitmap || otherUser.photo || otherUser.profileImage || null) : null;
+}
 
           const lastMsgQuery = await db.collection('chats').doc(doc.id)
             .collection('messages')
@@ -755,7 +774,14 @@ async function selectChat(chat) {
   const messageInputArea = document.getElementById('messageInputArea');
 
   // Проверяем, является ли собеседник удаленным аккаунтом
-  const isDeletedAccount = !chat.isGroup && (chat.displayName === 'Удаленный аккаунт' || !chat.displayAvatar);
+  // Проверяем, является ли собеседник удаленным аккаунтом
+const isDeletedAccount = !chat.isGroup && (
+  chat.displayName === 'Deleted' || 
+  chat.displayName === 'Удаленный аккаунт' || 
+  chat.displayName === 'Users:' || 
+  chat.displayName === 'Users' || 
+  !chat.displayAvatar
+);
 
   // Отрисовываем поле ввода или заглушку
   if (isDeletedAccount) {

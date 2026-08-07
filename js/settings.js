@@ -156,7 +156,7 @@ async function deleteAccount() {
       await db.collection('users').doc(uid).delete();
     } else {
       await db.collection('users').doc(uid).update({
-        nickname: 'Удаленный аккаунт',
+        nickname: 'Deleted',
         email: '',
         avatar: '',
         tag: '',
