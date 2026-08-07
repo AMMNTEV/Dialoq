@@ -100,7 +100,7 @@ onAuthStateChanged(async (user) => {
     currentUserData = doc.data();
     
     localStorage.setItem(cacheKey, JSON.stringify(currentUserData));
-    userCache.set(user.uid, currentUserData); 
+    if (window.userCache) userCache.set(user.uid, currentUserData);
     
     updateSidebarUser(currentUserData);
     if (document.getElementById('profileInfo')) loadProfileInfo();
@@ -201,7 +201,7 @@ async function saveChanges() {
     await user.updateProfile({ displayName: newDisplayName });
     
     currentUserData = { ...currentUserData, ...updates };
-    userCache.set(user.uid, currentUserData);
+    if (window.userCache) userCache.set(user.uid, currentUserData);
     localStorage.setItem(`cachedCurrentUser_${user.uid}`, JSON.stringify(currentUserData));
     
     messageDiv.innerHTML = `<div class="success">${t('changesSaved')}</div>`;
@@ -335,7 +335,7 @@ async function saveAvatarToFirebase(base64String) {
     await db.collection('users').doc(user.uid).update({ avatar: base64String });
     
     currentUserData.avatar = base64String;
-    userCache.set(user.uid, currentUserData);
+    if (window.userCache) userCache.set(user.uid, currentUserData);
     localStorage.setItem(`cachedCurrentUser_${user.uid}`, JSON.stringify(currentUserData));
     updateSidebarUser(currentUserData);
     renderAvatar(base64String);
@@ -444,8 +444,10 @@ function updateSidebarUser(userData) {
   if (nameEl) {
     try {
       nameEl.textContent = userData.nickname || t('users');
+      nameEl.removeAttribute('data-i18n'); // <--- ДОБАВИТЬ СЮДА
     } catch (e) {
       nameEl.textContent = userData.nickname || 'Users';
+      nameEl.removeAttribute('data-i18n'); // <--- И СЮДА НА ВСЯКИЙ СЛУЧАЙ
     }
   }
   
