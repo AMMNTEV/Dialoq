@@ -400,7 +400,7 @@ function listenForChats() {
       if (!chatsList) return;
 
       if (snapshot.empty) {
-        chatsList.innerHTML = '<div class="no-chats">У вас пока нет чатов. Найдите пользователя через поиск.</div>';
+        chatsList.innerHTML = `<div class="no-chats">${t('noChatsText')}</div>`;
         allChats = [];
         localStorage.removeItem(cacheKeyChats);
         localStorage.removeItem(cacheKeyUnreads);
@@ -545,7 +545,7 @@ function displayChats(chats) {
   
   // Если список чатов пуст, выводим об этом информацию
   if (!chats || chats.length === 0) {
-  	chatsList.innerHTML = '<div class="no-chats">Список чатов пуст</div>';
+  	chatsList.innerHTML = `<div class="no-chats">${t('emptyChatList')}</div>`;
   	return;
   }
 
@@ -593,7 +593,7 @@ function searchAll() {
   );
 
   if (filteredUsers.length === 0 && filteredChats.length === 0) {
-    document.getElementById('chatsList').innerHTML = '<div class="no-users">Ничего не найдено</div>';
+    document.getElementById('chatsList').innerHTML = `<div class="no-users">${t('nothingFound')}</div>`;
     return;
   }
 
@@ -744,7 +744,6 @@ async function createPrivateChat(userId, nickname, tag) {
 }
 
 // ========== ВЫБОР ЧАТА ==========
-// ========== ВЫБОР ЧАТА ==========
 async function selectChat(chat) {
   if (unsubscribeMessages) {
     unsubscribeMessages();
@@ -760,10 +759,10 @@ async function selectChat(chat) {
 
   // Отрисовываем поле ввода или заглушку
   if (isDeletedAccount) {
-  messageInputArea.innerHTML = '<div class="deleted-user-stub">Этот пользователь удалил страницу</div>';
+  messageInputArea.innerHTML = `<div class="deleted-user-stub">${t('deletedUserStub')}</div>`;
 } else {
     messageInputArea.innerHTML = `
-      <input type="text" id="messageInput" placeholder="Введите сообщение..." onkeypress="if(event.key==='Enter') sendMessage()">
+      <input type="text" id="messageInput" placeholder="${t('typeMessage')}" onkeypress="if(event.key==='Enter') sendMessage()">
       <button onclick="sendMessage()" id="sendButton" title="Отправить">
         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <path d="M22 2L11 13"/>
@@ -778,7 +777,7 @@ async function selectChat(chat) {
     selectedChat = chat;
     currentChatId = chat.id;
     updateChatHeader(chat);
-    messagesContainer.innerHTML = '<div class="no-messages">Нет сообщений. Напишите что-нибудь!</div>';
+    messagesContainer.innerHTML = `<div class="no-messages">${t('noMessages')}</div>`;
     if (window.innerWidth <= 768) {
       enterChatMode();
     }
@@ -787,7 +786,7 @@ async function selectChat(chat) {
 
   selectedChat = chat;
   currentChatId = chat.id;
-  messagesContainer.innerHTML = '<div class="loading">Загрузка сообщений...</div>';
+  messagesContainer.innerHTML = `<div class="loading">${t('loadingMessages')}</div>`;
   updateChatHeader(chat);
 
   await loadMessages(true);
@@ -910,7 +909,7 @@ async function loadMessages(showLoading = false) {
     });
 
     if (visibleMessages.length === 0) {
-      messagesContainer.innerHTML = '<div class="no-messages">Нет сообщений. Напишите что-нибудь!</div>';
+      messagesContainer.innerHTML = `<div class="no-messages">${t('noMessages')}</div>`;
       listenForNewMessages();
       return;
     }
