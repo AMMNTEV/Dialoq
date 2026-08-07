@@ -1,27 +1,18 @@
 /* ========== СТРАНИЦЫ АВТОРИЗАЦИИ ========== */
-html, body.auth-page {
-  min-height: 100vh;
-  min-height: 100dvh;
-  margin: 0;
-  padding: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  background-color: #764ba2; /* Страховка */
-}
-
 .auth-page {
+  min-height: 100vh; /* Заменено с height: 100% для корректного расчета высоты */
+  min-height: 100dvh; /* Поддержка мобильных вьюпортов */
   display: flex;
+  align-items: center;
   justify-content: center;
-  padding: 60px 20px 60px 20px; /* Увеличили нижний отступ до 60px для тени */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 60px 20px 20px 20px; /* Добавлен верхний отступ (60px) под кнопки языка */
   box-sizing: border-box;
   overflow-y: auto;
-  min-height: 100vh;
-  min-height: 100dvh;
 }
-
 .auth-card {
   max-width: 420px;
   width: 100%;
-  margin: auto 0; /* Безопасное вертикальное центрирование */
   background: white;
   border-radius: 24px;
   padding: 40px 32px;
@@ -31,8 +22,6 @@ html, body.auth-page {
   align-items: center;
   animation: slideUp 0.3s ease;
 }
-
-/* Остальные стили (заголовки, инпуты, кнопки и т.д.) остаются без изменений */
 .auth-card h1 {
   font-size: 2rem;
   font-weight: 700;
@@ -274,12 +263,12 @@ html, body.auth-page {
 }
 
 .lang-switcher {
-  position: fixed;
-  top: 16px;
-  right: 16px;
+  position: absolute;
+  top: 20px;
+  right: 20px;
   display: flex;
   gap: 8px;
-  z-index: 100;
+  z-index: 10;
 }
 
 .lang-switcher button {
@@ -300,20 +289,10 @@ html, body.auth-page {
   transform: translateY(-1px);
 }
 
+/* Адаптив для мобильных устройств */
 @media (max-width: 480px) {
-  .auth-page {
-    align-items: flex-start;
-    padding-top: 70px;
-    padding-bottom: 40px; /* Достаточно места снизу, чтобы тень не обрезалась */
-  }
-
-  .auth-card {
-    padding: 28px 20px;
-    margin-bottom: 20px; /* Дополнительный отступ снизу для карточки */
-  }
-
   .lang-switcher {
-    top: 12px;
-    right: 12px;
+    top: 10px;
+    right: 10px;
   }
 }
