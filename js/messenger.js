@@ -676,9 +676,9 @@ function searchUsersToAdd() {
   if (!addList) return;
 
   if (!searchText) { 
-    addList.innerHTML = '<div class="no-users">Начните вводить имя для поиска</div>'; 
-    return; 
-  }
+  addList.innerHTML = `<div class="no-users">${t('startTypingToSearch')}</div>`; 
+  return; 
+}
 
   const nonParticipants = allUsersForModal.filter(user => !selectedChat.participants.includes(user.id));
   const filtered = nonParticipants.filter(user =>
@@ -687,9 +687,9 @@ function searchUsersToAdd() {
   );
 
   if (filtered.length === 0) { 
-    addList.innerHTML = '<div class="no-users">Ничего не найдено</div>'; 
-    return; 
-  }
+  addList.innerHTML = `<div class="no-users">${t('nothingFound')}</div>`; 
+  return; 
+}
 
   let html = '';
   filtered.forEach(user => {
@@ -1199,7 +1199,7 @@ function showCreateGroupModal() {
   const usersList = document.getElementById('usersListModal');
   if (!usersList) return;
   document.getElementById('searchUsersInCreate').value = '';
-  usersList.innerHTML = '<div class="no-users">Начните вводить имя для поиска</div>';
+  usersList.innerHTML = `<div class="no-users">${t('startTypingToSearch')}</div>`;
   document.getElementById('createGroupModal').style.display = 'flex';
 }
 function hideCreateGroupModal() {
@@ -1282,7 +1282,7 @@ async function openChatInfo(chatId) {
     }
 
     document.getElementById('searchUsersToAdd').value = '';
-    document.getElementById('addParticipantsList').innerHTML = '<div class="no-users">Начните вводить имя для поиска</div>';
+    document.getElementById('addParticipantsList').innerHTML = `<div class="no-users">${t('startTypingToSearch')}</div>`;
     selectedUsersForAdd.clear(); // Очищаем список добавления
 
     const deleteBtn = document.getElementById('deleteGroupBtn');
