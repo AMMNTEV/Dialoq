@@ -438,7 +438,7 @@ function listenForChats() {
             chatName = chat.name || t('defaultGroupName');
             chatAvatar = '👥';
             chatImage = chat.avatar || chat.bitmap || chat.photo || chat.profileImage || null;
-          } } else {
+          } else {
   const otherUserId = chat.participants.find(id => id !== currentUser.uid);
   const otherUser = await getUserById(otherUserId);
   
