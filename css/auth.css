@@ -3,7 +3,6 @@
   min-height: 100vh; /* Заменено с height: 100% для корректного расчета высоты */
   min-height: 100dvh; /* Поддержка мобильных вьюпортов */
   display: flex;
-  align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 60px 20px 20px 20px; /* Добавлен верхний отступ (60px) под кнопки языка */
@@ -13,6 +12,7 @@
 .auth-card {
   max-width: 420px;
   width: 100%;
+  margin: auto 0; /* Безопасное вертикальное центрирование */
   background: white;
   border-radius: 24px;
   padding: 40px 32px;
