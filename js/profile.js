@@ -41,6 +41,7 @@ if (document.getElementById('profileInfo') && typeof loadProfileInfo === 'functi
       }
     }
   }
+}
 });
 
 onAuthStateChanged(async (user) => {
@@ -73,6 +74,7 @@ onAuthStateChanged(async (user) => {
       profileAvatarEl.innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
       profileAvatarEl.style.background = '#1a1a1a';
     }
+}
 }
 
   try {
