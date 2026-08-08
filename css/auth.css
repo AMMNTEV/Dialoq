@@ -322,6 +322,7 @@
   }
   .auth-card {
     padding: 28px 20px;
+    margin: 0 0 20px 0;
   }
   .lang-switcher {
     top: 12px;
