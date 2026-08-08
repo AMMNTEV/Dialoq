@@ -585,7 +585,7 @@ function displayChats(chats) {
     if (chat.chatImage) {
       avatarContent = `<img src="${chat.chatImage}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
     } else {
-      avatarContent = chat.isGroup ? '👥 ' + (chat.displayName ? chat.displayName.charAt(0).toUpperCase() : '?') : (chat.displayName ? chat.displayName.charAt(0).toUpperCase() : '?');
+      avatarContent = chat.displayName ? chat.displayName.charAt(0).toUpperCase() : '?';
     }
 
     const lastMessage = chat.lastMessage || 'Нет сообщений';
@@ -631,7 +631,7 @@ function searchAll() {
     filteredChats.forEach(chat => {
       let avatarContent = chat.chatImage 
         ? `<img src="${chat.chatImage}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` 
-        : '👥 ' + (chat.displayName.charAt(0).toUpperCase() || '?');
+        : (chat.displayName.charAt(0).toUpperCase() || '?');
       const chatJson = JSON.stringify(chat).replace(/'/g, "\\'").replace(/"/g, '&quot;');
       resultsHTML += `
         <div class="chat-item" onclick='selectChat(${chatJson})'>
@@ -843,7 +843,7 @@ function updateChatHeader(chat) {
   if (chat.chatImage) {
     avatarContent = `<img src="${chat.chatImage}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
   } else {
-    avatarContent = chat.isGroup ? '👥 ' + (chat.displayName ? chat.displayName.charAt(0).toUpperCase() : '?') : (chat.displayName ? chat.displayName.charAt(0).toUpperCase() : '?');
+    avatarContent = chat.displayName ? chat.displayName.charAt(0).toUpperCase() : '?';
   }
 
   // Общий SVG-код стрелки "Назад" для мобильных и десктопов
