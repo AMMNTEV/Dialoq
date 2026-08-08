@@ -71,7 +71,7 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: #1a1a1a;
+  background: #3b82f6;
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -233,24 +233,29 @@
   color: #0f172a;
 }
 
+/* 2. Исправляем центрирование цифр и даем им чуть больше места */
 .unread-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   background-color: #3b82f6;
   color: #ffffff;
-  font-size: 0.7rem;
+  font-size: 0.75rem;  /* Чуть увеличили шрифт для баланса */
   font-weight: 600;
-  min-width: 20px;
-  height: 20px;
-  border-radius: 10px;
-  padding: 0 5px;
+  min-width: 22px;     /* Увеличили на 2px, чтобы числам вроде "10" не было тесно */
+  height: 22px;        /* Увеличили на 2px пропорционально ширине */
+  border-radius: 11px; /* Половина от 22px для идеального круга */
+  padding: 0 6px;
   margin-left: 8px;
-  text-align: center;
-  line-height: 1;
+  
+  /* Убираем жесткий line-height: 1, чтобы flex-центрирование сработало идеально */
+  line-height: normal; 
+  /* Запрещаем счетчику сплющиваться, если имя собеседника слишком длинное */
+  flex-shrink: 0; 
+  
   box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
   animation: pulse 2s infinite;
-}
+} 
 
 /* ==========================================
    3. ЕДИНЫЕ СТИЛИ ДЛЯ АВАТАРОВ И ТЕКСТА
@@ -287,15 +292,18 @@
   overflow: hidden;
 }
 
-/* Единый стиль никнейма для всех карточек */
 .chat-name,
 .user-name,
 .chat-info h3 {
   font-size: 1.1rem;
   font-weight: 600;
   color: #1a1a1a;
-  margin: 0 0 2px 0;
-  line-height: 1.2;
+  /* Увеличиваем высоту строки, чтобы вместить анимацию */
+  line-height: 1.5; 
+  /* Добавляем небольшие отступы, чтобы тень тоже не срезалась */
+  padding: 2px 0;
+  /* Компенсируем отступы отрицательным margin, чтобы текст визуально не уехал вниз */
+  margin: -2px 0 0 0; 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1120,4 +1128,23 @@ a:focus {
   .chat-header {
     padding-left: 4px !important;
   }
+}
+
+/* Исправление цвета большой аватарки в модальном окне управления беседой */
+.group-avatar,
+.modal-avatar,
+#groupAvatar,
+#groupInfoAvatar, /* <--- Добавили нужный ID */
+.group-avatar-placeholder {
+  background: #3b82f6 !important;
+  color: #ffffff !important;
+}
+
+/* Автоматически делаем фон прозрачным, если в аватарку загружена картинка */
+.group-avatar:has(img),
+.modal-avatar:has(img),
+#groupAvatar:has(img),
+#groupInfoAvatar:has(img), /* <--- Добавили нужный ID */
+.group-avatar-placeholder:has(img) {
+  background: transparent !important;
 }
