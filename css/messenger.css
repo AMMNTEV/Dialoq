@@ -403,7 +403,14 @@
   flex: 1;
   overflow-y: auto;
   padding: 14px 24px 24px 24px;
-  background: #fafbff;
+  
+  /* Обновленный фон для светлой темы */
+  background-color: #fafbff;
+  background-image: url('../img/white_messenger.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  
   display: flex;
   flex-direction: column;
   gap: 8px;
