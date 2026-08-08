@@ -26,7 +26,7 @@ if (document.getElementById('profileInfo') && typeof loadProfileInfo === 'functi
       avatarDiv.style.background = 'transparent'; // Делаем прозрачным
     } else {
       avatarDiv.innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
-      avatarDiv.style.background = '#1a1a1a'; // Возвращаем фон для буквы
+      avatarDiv.style.background = '#3b82f6'; // Возвращаем фон для буквы
     }
   }
 }
@@ -72,7 +72,7 @@ onAuthStateChanged(async (user) => {
       profileAvatarEl.style.background = 'transparent';
     } else {
       profileAvatarEl.innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
-      profileAvatarEl.style.background = '#1a1a1a';
+      profileAvatarEl.style.background = '#3b82f6';
     }
 }
 }
@@ -470,7 +470,7 @@ function updateSidebarUser(userData) {
       avatarEl.style.background = 'transparent';
     } else {
       avatarEl.innerHTML = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
-      avatarEl.style.background = '#1a1a1a';
+      avatarEl.style.background = '#3b82f6';
       avatarEl.style.color = 'white';
     }
   }
