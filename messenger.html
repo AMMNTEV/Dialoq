@@ -103,14 +103,14 @@
       
       <!-- Поле ввода с иконкой самолетика для отправки -->
       <div class="message-input-area" data-i18n-placeholder="typeMessage" id="messageInputArea">
-        <input type="text" id="messageInput" placeholder="Введите сообщение..." onkeypress="if(event.key==='Enter') sendMessage()">
-        <button onclick="sendMessage()" id="sendButton" title="Отправить">
-          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 2L11 13"/>
-            <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
-          </svg>
-        </button>
-      </div>
+  <textarea id="messageInput" placeholder="Введите сообщение..." rows="1" oninput="autoResize(this)" onkeydown="handleEnter(event)"></textarea>
+  <button onclick="sendMessage()" id="sendButton" title="Отправить">
+    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 2L11 13"/>
+      <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
+    </svg>
+  </button>
+</div>
     </div>
   </div>
 

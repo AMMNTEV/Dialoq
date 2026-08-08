@@ -317,12 +317,22 @@
 
 @media (max-width: 480px) {
   .auth-page {
-    padding-top: 65px;
-    padding-bottom: 30px;
+    padding-top: 40px;
+    /* Увеличиваем базовый отступ и добавляем поддержку безопасной зоны iOS/Android */
+    padding-bottom: calc(60px + env(safe-area-inset-bottom)); 
+    justify-content: flex-start;
+    min-height: 100vh;
+    min-height: 100dvh;
   }
+  
   .auth-card {
     padding: 28px 20px;
+    /* Заменяем margin: auto 0; на margin: auto 0 20px 0; чтобы гарантировать зазор снизу */
+    margin: auto 0 20px 0; 
+    width: 100%;
+    box-sizing: border-box;
   }
+  
   .lang-switcher {
     top: 12px;
     right: 12px;

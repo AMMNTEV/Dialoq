@@ -797,14 +797,14 @@ const isDeletedAccount = !chat.isGroup && (
   messageInputArea.innerHTML = `<div class="deleted-user-stub">${t('deletedUserStub')}</div>`;
 } else {
     messageInputArea.innerHTML = `
-      <input type="text" id="messageInput" placeholder="${t('typeMessage')}" onkeypress="if(event.key==='Enter') sendMessage()">
-      <button onclick="sendMessage()" id="sendButton" title="Отправить">
-        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 2L11 13"/>
-          <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
-        </svg>
-      </button>
-    `;
+  <textarea id="messageInput" placeholder="${t('typeMessage')}" rows="1" oninput="autoResize(this)" onkeydown="handleEnter(event)"></textarea>
+  <button onclick="sendMessage()" id="sendButton" title="Отправить">
+    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 2L11 13"/>
+      <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
+    </svg>
+  </button>
+`;
   }
   messageInputArea.style.display = 'flex';
 
@@ -1167,6 +1167,7 @@ async function sendMessage() {
   const text = input.value.trim();
   if (!text || !selectedChat) return;
   input.value = '';
+  input.style.height = 'auto';
 
   try {
     if (selectedChat.isNew) {
@@ -1757,4 +1758,25 @@ function getSystemMessageText(msg) {
   }
   // Фоллбэк: для старых системных сообщений, где текст уже жестко записан в БД
   return msg.text;
+}
+
+function autoResize(el) {
+  el.style.height = 'auto'; // Сбрасываем высоту для точного перерасчета
+  el.style.height = el.scrollHeight + 'px'; // Задаем высоту по контенту
+  
+  // Если высота достигла максимума (120px), включаем скроллинг
+  if (el.scrollHeight >= 120) {
+    el.style.overflowY = 'auto';
+  } else {
+    el.style.overflowY = 'hidden';
+  }
+}
+
+function handleEnter(e) {
+  // Отправляем сообщение по нажатию Enter (без зажатого Shift)
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault(); // Предотвращаем переход на новую строку
+    sendMessage(); 
+    e.target.style.height = 'auto'; // Схлопываем поле обратно после отправки
+  }
 }
