@@ -298,15 +298,21 @@
   font-size: 1.1rem;
   font-weight: 600;
   color: #1a1a1a;
-  /* Увеличиваем высоту строки, чтобы вместить анимацию */
   line-height: 1.5; 
-  /* Добавляем небольшие отступы, чтобы тень тоже не срезалась */
   padding: 2px 0;
-  /* Компенсируем отступы отрицательным margin, чтобы текст визуально не уехал вниз */
   margin: -2px 0 0 0; 
+  display: flex;
+  align-items: center;
+}
+
+
+.chat-info h3 span,
+.chat-name span,
+.user-name span {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 /* Единый стиль тэга для всех карточек */

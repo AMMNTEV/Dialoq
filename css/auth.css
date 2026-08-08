@@ -317,13 +317,18 @@
 
 @media (max-width: 480px) {
   .auth-page {
-    padding-top: 65px;
-    padding-bottom: 30px;
+    padding-top: 40px;
+    padding-bottom: 40px;
+    justify-content: center; /* Центрируем карточку по вертикали на экранах телефонов */
+    min-height: 100vh;
+    min-height: 100dvh;
   }
+  
   .auth-card {
     padding: 28px 20px;
-    margin: 0 0 20px 0;
+    margin: auto; /* Меняем margin: 0 0 20px 0 на auto, чтобы она всегда была по центру */
   }
+  
   .lang-switcher {
     top: 12px;
     right: 12px;
