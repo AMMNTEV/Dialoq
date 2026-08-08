@@ -562,7 +562,7 @@ a:focus {
   flex-shrink: 0;
 }
 
-/* Стили для кнопки "Назад" в профиле под стиль мессенджера */
+/* Исправленный блок для кнопки назад в профиле */
 .profile-header .back-btn {
   display: flex;
   align-items: center;
@@ -570,14 +570,13 @@ a:focus {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: transparent !important;
+  background: transparent !important; /* Убираем фон */
   color: #1a1a1a;
   border: none !important;
   box-shadow: none !important;
   cursor: pointer;
-  text-decoration: none;
   transition: background 0.2s ease;
-  margin-left: -4px !important; /* Визуальное выравнивание по левому краю */
+  margin-left: -8px !important; /* Сдвигаем левее для совпадения с отступом чата */
   padding: 0;
 }
 
