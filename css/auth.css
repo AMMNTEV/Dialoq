@@ -318,15 +318,17 @@
 @media (max-width: 480px) {
   .auth-page {
     padding-top: 40px;
-    padding-bottom: 60px; /* Чуть увеличили отступ снизу, чтобы элементы не прилипали к системным панелям PWA */
-    justify-content: flex-start; /* Исправляет баг с обрезкой невлезающей карточки */
+    /* Увеличиваем базовый отступ и добавляем поддержку безопасной зоны iOS/Android */
+    padding-bottom: calc(60px + env(safe-area-inset-bottom)); 
+    justify-content: flex-start;
     min-height: 100vh;
     min-height: 100dvh;
   }
   
   .auth-card {
     padding: 28px 20px;
-    margin: auto 0; /* Авто-отступы отцентрируют форму, если места на экране достаточно */
+    /* Заменяем margin: auto 0; на margin: auto 0 20px 0; чтобы гарантировать зазор снизу */
+    margin: auto 0 20px 0; 
     width: 100%;
     box-sizing: border-box;
   }
