@@ -1154,3 +1154,26 @@ a:focus {
 .group-avatar-placeholder:has(img) {
   background: transparent !important;
 }
+
+/* Делаем карточку чата относительным контейнером для абсолютного позиционирования счетчика */
+.chat-item,
+.user-item {
+  position: relative;
+}
+
+/* Абсолютно позиционируем счетчик справа в карточке, исключая любые влияния текста и обрезки */
+.chat-item .unread-badge,
+.user-item .unread-badge {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 0;
+  z-index: 5;
+}
+
+/* Добавляем справа у текста небольшой отступ, чтобы длинные сообщения или имена не залезали под счетчик */
+.chat-info,
+.user-info {
+  padding-right: 32px;
+}
