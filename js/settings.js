@@ -230,7 +230,7 @@ function updateSidebarUser(userData) {
       sidebarAvatarEl.style.background = 'transparent';
     } else {
       sidebarAvatarEl.innerHTML = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
-      sidebarAvatarEl.style.background = '#1a1a1a';
+      sidebarAvatarEl.style.background = '#3b82f6';
       sidebarAvatarEl.style.color = 'white';
     }
   }
