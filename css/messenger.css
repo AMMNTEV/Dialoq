@@ -298,11 +298,13 @@
   font-size: 1.1rem;
   font-weight: 600;
   color: #1a1a1a;
-  line-height: 1.5; 
+  line-height: 1.5;
   padding: 2px 0;
-  margin: -2px 0 0 0; 
-  display: flex;
-  align-items: center;
+  margin: -2px 0 0 0;
+  display: block; 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
 }
 
 
@@ -493,17 +495,23 @@
   flex-shrink: 0;
 }
 
-.message-input-area input {
+.message-input-area textarea {
   flex: 1;
-  padding: 10px 20px; /* Уменьшаем внутренние отступы (было 14px 20px) */
-  height: 44px; /* Фиксируем высоту как у поиска */
+  padding: 11px 20px; /* Слегка корректируем отступ для многострочного текста */
+  min-height: 44px; /* Стартовая высота как у поиска */
+  max-height: 120px; /* Ограничение, после которого появится внутренний скролл */
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 22px; /* Округляем края пропорционально новой высоте */
+  border-radius: 22px; /* Оставляем красивое закругление */
   font-size: 0.95rem;
+  resize: none; /* Запрещаем пользователю растягивать поле вручную за уголок */
+  overflow-y: hidden; /* Скрываем скролл, пока не достигнет max-height */
+  line-height: 20px;
+  font-family: inherit;
+  box-sizing: border-box;
 }
 
-.message-input-area input:focus {
+.message-input-area textarea:focus {
   outline: none;
   border-color: #3b82f6;
   background: #ffffff;
