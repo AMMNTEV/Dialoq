@@ -16,16 +16,20 @@ document.addEventListener("DOMContentLoaded", () => {
       
       if (typeof updateSidebarUser === 'function') updateSidebarUser(currentUserData);
       
-      if (document.getElementById('profileInfo') && typeof loadProfileInfo === 'function') {
-        loadProfileInfo();
-        const avatarDiv = document.getElementById('profileAvatar');
-        if (avatarDiv) {
-          avatarDiv.innerHTML = currentUserData.avatar 
-            ? `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">` 
-            : (currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?');
-        }
-      }
+      // Если мы на странице профиля — мгновенно рисуем инфу профиля
+if (document.getElementById('profileInfo') && typeof loadProfileInfo === 'function') {
+  loadProfileInfo();
+  const avatarDiv = document.getElementById('profileAvatar');
+  if (avatarDiv) {
+    if (currentUserData.avatar) {
+      avatarDiv.innerHTML = `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
+      avatarDiv.style.background = 'transparent'; // Делаем прозрачным
+    } else {
+      avatarDiv.innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
+      avatarDiv.style.background = '#1a1a1a'; // Возвращаем фон для буквы
     }
+  }
+}
     
     if (document.getElementById('chatsList')) {
       const cachedChats = localStorage.getItem(`cachedChats_${lastUid}`);
@@ -61,11 +65,15 @@ onAuthStateChanged(async (user) => {
     if (profileAvatarEl && typeof renderAvatar === 'function') {
         renderAvatar(currentUserData.avatar);
     } else if (profileAvatarEl) {
-        profileAvatarEl.innerHTML = currentUserData.avatar 
-          ? `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">` 
-          : (currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?');
+    // Запасной вариант для messenger.js
+    if (currentUserData.avatar) {
+      profileAvatarEl.innerHTML = `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
+      profileAvatarEl.style.background = 'transparent';
+    } else {
+      profileAvatarEl.innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
+      profileAvatarEl.style.background = '#1a1a1a';
     }
-  }
+}
 
   try {
     const doc = await db.collection('users').doc(user.uid).get();
