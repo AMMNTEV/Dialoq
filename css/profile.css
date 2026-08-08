@@ -548,3 +548,52 @@ button:focus,
 a:focus {
   outline: none !important;
 }
+
+/* Делаем шапку профиля идентичной по высоте и отступам шапке чата */
+.profile-header {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px !important; /* Ровно как у .chat-header */
+  height: 70px !important;       /* Фиксированная высота карточки чата */
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eef2f6 !important;
+  background: #ffffff;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+/* Стили для кнопки "Назад" в профиле под стиль мессенджера */
+.profile-header .back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: transparent !important;
+  color: #1a1a1a;
+  border: none !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s ease;
+  margin-left: -4px !important; /* Визуальное выравнивание по левому краю */
+  padding: 0;
+}
+
+.profile-header .back-btn:hover {
+  background: #f1f5f9 !important;
+  color: #3b82f6;
+}
+
+.profile-header .back-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* Мобильная адаптация шапки профиля */
+@media (max-width: 768px) {
+  .profile-header {
+    padding: 10px 4px !important; /* Соответствует мобильным отступам чата */
+  }
+}
