@@ -9,11 +9,13 @@
 }
 .profile-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding-bottom: 20px;
+  padding: 10px 4px !important; /* Синхронизировано с шапкой чата */
+  height: 70px !important;       /* Фиксированная высота карточки чата */
   margin-bottom: 20px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #eef2f6 !important;
+  background: #ffffff;
+  box-sizing: border-box;
   flex-shrink: 0;
 }
 .profile-two-columns {
@@ -570,14 +572,15 @@ a:focus {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: transparent !important; /* Убираем фон */
+  background: transparent !important;
   color: #1a1a1a;
   border: none !important;
   box-shadow: none !important;
   cursor: pointer;
   transition: background 0.2s ease;
-  margin-left: -8px !important; /* Сдвигаем левее для совпадения с отступом чата */
+  margin-left: -4px !important; /* Синхронизировано с чатом */
   padding: 0;
+  flex-shrink: 0;
 }
 
 .profile-header .back-btn:hover {
@@ -590,9 +593,26 @@ a:focus {
   height: 22px;
 }
 
-/* Мобильная адаптация шапки профиля */
 @media (max-width: 768px) {
   .profile-header {
-    padding: 10px 4px !important; /* Соответствует мобильным отступам чата */
+    padding: 10px 4px !important;
+    height: 70px !important;
+    margin-bottom: 0 !important;
+    border-bottom: 1px solid #eef2f6 !important;
+    background: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    width: 100%;
+  }
+  
+  .profile-header .back-btn {
+    margin-left: -4px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-two-columns {
+    padding-top: 0 !important;
   }
 }
