@@ -313,6 +313,12 @@
           </div>
         `;
         document.getElementById('registerForm').style.display = 'none';
+        // Скрываем кнопку Google
+        document.getElementById('googleRegBtn').style.display = 'none';
+        // Скрываем разделитель "or"
+        document.querySelector('.auth-divider').style.display = 'none';
+        // Скрываем ссылку "Уже есть аккаунт?"
+        document.querySelector('.auth-footer').style.display = 'none';
 
       } catch (error) {
         console.error('Ошибка регистрации:', error);
