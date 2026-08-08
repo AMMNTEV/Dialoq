@@ -16,20 +16,16 @@ document.addEventListener("DOMContentLoaded", () => {
       
       if (typeof updateSidebarUser === 'function') updateSidebarUser(currentUserData);
       
-      // Если мы на странице профиля — мгновенно рисуем инфу профиля
-if (document.getElementById('profileInfo') && typeof loadProfileInfo === 'function') {
-  loadProfileInfo();
-  const avatarDiv = document.getElementById('profileAvatar');
-  if (avatarDiv) {
-    if (currentUserData.avatar) {
-      avatarDiv.innerHTML = `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
-      avatarDiv.style.background = 'transparent'; // Делаем прозрачным
-    } else {
-      avatarDiv.innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
-      avatarDiv.style.background = '#3b82f6'; // Возвращаем фон для буквы
+      if (document.getElementById('profileInfo') && typeof loadProfileInfo === 'function') {
+        loadProfileInfo();
+        const avatarDiv = document.getElementById('profileAvatar');
+        if (avatarDiv) {
+          avatarDiv.innerHTML = currentUserData.avatar 
+            ? `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">` 
+            : (currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?');
+        }
+      }
     }
-  }
-}
     
     if (document.getElementById('chatsList')) {
       const cachedChats = localStorage.getItem(`cachedChats_${lastUid}`);
@@ -41,7 +37,6 @@ if (document.getElementById('profileInfo') && typeof loadProfileInfo === 'functi
       }
     }
   }
-}
 });
 
 onAuthStateChanged(async (user) => {
@@ -66,16 +61,11 @@ onAuthStateChanged(async (user) => {
     if (profileAvatarEl && typeof renderAvatar === 'function') {
         renderAvatar(currentUserData.avatar);
     } else if (profileAvatarEl) {
-    // Запасной вариант для messenger.js
-    if (currentUserData.avatar) {
-      profileAvatarEl.innerHTML = `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
-      profileAvatarEl.style.background = 'transparent';
-    } else {
-      profileAvatarEl.innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
-      profileAvatarEl.style.background = '#3b82f6';
+        profileAvatarEl.innerHTML = currentUserData.avatar 
+          ? `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">` 
+          : (currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?');
     }
-}
-}
+  }
 
   try {
     const doc = await db.collection('users').doc(user.uid).get();
@@ -110,7 +100,7 @@ onAuthStateChanged(async (user) => {
     currentUserData = doc.data();
     
     localStorage.setItem(cacheKey, JSON.stringify(currentUserData));
-    if (window.userCache) userCache.set(user.uid, currentUserData);
+    userCache.set(user.uid, currentUserData); 
     
     updateSidebarUser(currentUserData);
     if (document.getElementById('profileInfo')) loadProfileInfo();
@@ -211,7 +201,7 @@ async function saveChanges() {
     await user.updateProfile({ displayName: newDisplayName });
     
     currentUserData = { ...currentUserData, ...updates };
-    if (window.userCache) userCache.set(user.uid, currentUserData);
+    userCache.set(user.uid, currentUserData);
     localStorage.setItem(`cachedCurrentUser_${user.uid}`, JSON.stringify(currentUserData));
     
     messageDiv.innerHTML = `<div class="success">${t('changesSaved')}</div>`;
@@ -345,7 +335,7 @@ async function saveAvatarToFirebase(base64String) {
     await db.collection('users').doc(user.uid).update({ avatar: base64String });
     
     currentUserData.avatar = base64String;
-    if (window.userCache) userCache.set(user.uid, currentUserData);
+    userCache.set(user.uid, currentUserData);
     localStorage.setItem(`cachedCurrentUser_${user.uid}`, JSON.stringify(currentUserData));
     updateSidebarUser(currentUserData);
     renderAvatar(base64String);
@@ -454,10 +444,8 @@ function updateSidebarUser(userData) {
   if (nameEl) {
     try {
       nameEl.textContent = userData.nickname || t('users');
-      nameEl.removeAttribute('data-i18n'); // <--- ДОБАВИТЬ СЮДА
     } catch (e) {
       nameEl.textContent = userData.nickname || 'Users';
-      nameEl.removeAttribute('data-i18n'); // <--- И СЮДА НА ВСЯКИЙ СЛУЧАЙ
     }
   }
   
@@ -470,7 +458,7 @@ function updateSidebarUser(userData) {
       avatarEl.style.background = 'transparent';
     } else {
       avatarEl.innerHTML = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
-      avatarEl.style.background = '#3b82f6';
+      avatarEl.style.background = '#1a1a1a';
       avatarEl.style.color = 'white';
     }
   }

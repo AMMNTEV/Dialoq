@@ -18,16 +18,19 @@ document.addEventListener("DOMContentLoaded", () => {
       if (typeof updateSidebarUser === 'function') updateSidebarUser(currentUserData);
       
       // Если мы на странице профиля — мгновенно рисуем инфу профиля
-      if (document.getElementById('profileInfo') && typeof loadProfileInfo === 'function') {
-        loadProfileInfo();
-        const avatarDiv = document.getElementById('profileAvatar');
-        if (avatarDiv) {
-          avatarDiv.innerHTML = currentUserData.avatar 
-            ? `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">` 
-            : (currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?');
-        }
-      }
+if (document.getElementById('profileInfo') && typeof loadProfileInfo === 'function') {
+  loadProfileInfo();
+  const avatarDiv = document.getElementById('profileAvatar');
+  if (avatarDiv) {
+    if (currentUserData.avatar) {
+      avatarDiv.innerHTML = `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
+      avatarDiv.style.background = 'transparent'; // Делаем прозрачным
+    } else {
+      avatarDiv.innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
+      avatarDiv.style.background = '#3b82f6'; // Возвращаем фон для буквы
     }
+  }
+}
     
     // 2. Мгновенно загружаем список чатов (если мы в мессенджере)
     if (document.getElementById('chatsList')) {
@@ -41,6 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   }
+}
 });
 
 onAuthStateChanged(async (user) => {
@@ -66,19 +70,23 @@ onAuthStateChanged(async (user) => {
     if (profileAvatarEl && typeof renderAvatar === 'function') {
         renderAvatar(currentUserData.avatar);
     } else if (profileAvatarEl) {
-        // Запасной вариант для messenger.js
-        profileAvatarEl.innerHTML = currentUserData.avatar 
-          ? `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">` 
-          : (currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?');
+    // Запасной вариант для messenger.js
+    if (currentUserData.avatar) {
+      profileAvatarEl.innerHTML = `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
+      profileAvatarEl.style.background = 'transparent';
+    } else {
+      profileAvatarEl.innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
+      profileAvatarEl.style.background = '#3b82f6';
     }
-  }
+}
+}
 
   // 2. ЗАТЕМ ИДЕМ В БАЗУ ДАННЫХ (Фоновое обновление)
   try {
     const doc = await db.collection('users').doc(user.uid).get();
     if (!doc.exists) {
   // Защита от '@undefined': проверяем, есть ли символ '|' в имени
-  let nickname = 'Пользователь';
+  let nickname = t('users');
   let tag = '';
   
   if (user.displayName && user.displayName.includes('|')) {
@@ -86,7 +94,7 @@ onAuthStateChanged(async (user) => {
     nickname = parts[0];
     tag = '@' + parts[1];
   } else {
-    nickname = user.displayName || 'Пользователь';
+    nickname = user.displayName || t('users');
     tag = await generateUniqueTag(); 
   }
 
@@ -317,13 +325,19 @@ async function loadAllUsers() {
   try {
     const snapshot = await db.collection('users').get();
     allUsers = [];
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      // Исключаем удаленные аккаунты из глобального поиска
-      if (doc.id !== currentUser.uid && data.nickname !== 'Удаленный аккаунт' && !data.deletedAt) {
-        allUsers.push({ id: doc.id, ...data });
-      }
-    });
+snapshot.forEach(doc => {
+  const data = doc.data();
+  const isDeleted = !data.nickname || 
+                    data.nickname === 'Deleted' || 
+                    data.nickname === 'Удаленный аккаунт' || 
+                    data.nickname === 'Users:' || 
+                    data.nickname === 'Users' || 
+                    data.deletedAt;
+
+  if (doc.id !== currentUser.uid && !isDeleted) {
+    allUsers.push({ id: doc.id, ...data });
+  }
+});
   } catch (error) {
     console.error('Ошибка загрузки пользователей:', error);
   }
@@ -335,9 +349,15 @@ async function loadAllUsersForModal() {
     const snapshot = await db.collection('users').get();
     allUsersForModal = [];
     snapshot.forEach(doc => {
-      const data = doc.data();
-      // Исключаем удаленные аккаунты из списков добавления в беседу
-      if (doc.id !== currentUser.uid && data.nickname !== 'Удаленный аккаунт' && !data.deletedAt) {
+  const data = doc.data();
+  const isDeleted = !data.nickname || 
+                    data.nickname === 'Deleted' || 
+                    data.nickname === 'Удаленный аккаунт' || 
+                    data.nickname === 'Users:' || 
+                    data.nickname === 'Users' || 
+                    data.deletedAt;
+
+  if (doc.id !== currentUser.uid && !isDeleted) {
         allUsersForModal.push({ id: doc.id, ...data });
       }
     });
@@ -400,7 +420,7 @@ function listenForChats() {
       if (!chatsList) return;
 
       if (snapshot.empty) {
-        chatsList.innerHTML = '<div class="no-chats">У вас пока нет чатов. Найдите пользователя через поиск.</div>';
+        chatsList.innerHTML = `<div class="no-chats">${t('noChatsText')}</div>`;
         allChats = [];
         localStorage.removeItem(cacheKeyChats);
         localStorage.removeItem(cacheKeyUnreads);
@@ -423,16 +443,23 @@ function listenForChats() {
           let createdAt = chat.createdAt ? chat.createdAt.toDate?.() || new Date(chat.createdAt) : new Date();
 
           if (chat.isGroup) {
-            chatName = chat.name || 'Беседа';
+            chatName = chat.name || t('defaultGroupName');
             chatAvatar = '👥';
             chatImage = chat.avatar || chat.bitmap || chat.photo || chat.profileImage || null;
           } else {
-            const otherUserId = chat.participants.find(id => id !== currentUser.uid);
-            const otherUser = await getUserById(otherUserId);
-            chatName = otherUser ? otherUser.nickname : 'Пользователь';
-            chatAvatar = otherUser ? otherUser.tag : '';
-            chatImage = otherUser ? (otherUser.avatar || otherUser.bitmap || otherUser.photo || otherUser.profileImage || null) : null;
-          }
+  const otherUserId = chat.participants.find(id => id !== currentUser.uid);
+  const otherUser = await getUserById(otherUserId);
+  
+  const rawName = otherUser ? otherUser.nickname : '';
+  if (!rawName || rawName === 'Users:' || rawName === 'Users' || rawName === 'Удаленный аккаунт') {
+    chatName = 'Deleted';
+  } else {
+    chatName = rawName;
+  }
+
+  chatAvatar = otherUser ? otherUser.tag : '';
+  chatImage = otherUser ? (otherUser.avatar || otherUser.bitmap || otherUser.photo || otherUser.profileImage || null) : null;
+}
 
           const lastMsgQuery = await db.collection('chats').doc(doc.id)
             .collection('messages')
@@ -445,14 +472,15 @@ function listenForChats() {
           let hasAnyMessage = false;
 
           for (const msgDoc of lastMsgQuery.docs) {
-            const msg = msgDoc.data();
-            hasAnyMessage = true;
-            if (!msg.deletedFor || (!msg.deletedFor.includes('everyone') && !msg.deletedFor.includes(currentUser.uid))) {
-              lastMessage = msg.text;
-              lastMessageTime = msg.timestamp ? msg.timestamp.toDate?.() || new Date(msg.timestamp) : lastMessageTime;
-              break;
-            }
-          }
+  const msg = msgDoc.data();
+  hasAnyMessage = true;
+  if (!msg.deletedFor || (!msg.deletedFor.includes('everyone') && !msg.deletedFor.includes(currentUser.uid))) {
+    // Если сообщение системное, парсим его, иначе берем обычный текст
+    lastMessage = msg.isSystem ? getSystemMessageText(msg) : msg.text; 
+    lastMessageTime = msg.timestamp ? msg.timestamp.toDate?.() || new Date(msg.timestamp) : lastMessageTime;
+    break;
+  }
+}
 
           if (!chat.isGroup && !hasAnyMessage) return;
 
@@ -545,7 +573,7 @@ function displayChats(chats) {
   
   // Если список чатов пуст, выводим об этом информацию
   if (!chats || chats.length === 0) {
-  	chatsList.innerHTML = '<div class="no-chats">Список чатов пуст</div>';
+  	chatsList.innerHTML = `<div class="no-chats">${t('emptyChatList')}</div>`;
   	return;
   }
 
@@ -557,7 +585,7 @@ function displayChats(chats) {
     if (chat.chatImage) {
       avatarContent = `<img src="${chat.chatImage}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
     } else {
-      avatarContent = chat.isGroup ? '👥 ' + (chat.displayName ? chat.displayName.charAt(0).toUpperCase() : '?') : (chat.displayName ? chat.displayName.charAt(0).toUpperCase() : '?');
+      avatarContent = chat.displayName ? chat.displayName.charAt(0).toUpperCase() : '?';
     }
 
     const lastMessage = chat.lastMessage || 'Нет сообщений';
@@ -593,31 +621,31 @@ function searchAll() {
   );
 
   if (filteredUsers.length === 0 && filteredChats.length === 0) {
-    document.getElementById('chatsList').innerHTML = '<div class="no-users">Ничего не найдено</div>';
+    document.getElementById('chatsList').innerHTML = `<div class="no-users">${t('nothingFound')}</div>`;
     return;
   }
 
   let resultsHTML = '';
   if (filteredChats.length > 0) {
-    resultsHTML += '<div class="search-section"><h4>Беседы:</h4></div>';
+    resultsHTML += `<div class="search-section"><h4>${t('groups')}</h4></div>`;
     filteredChats.forEach(chat => {
       let avatarContent = chat.chatImage 
         ? `<img src="${chat.chatImage}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` 
-        : '👥 ' + (chat.displayName.charAt(0).toUpperCase() || '?');
+        : (chat.displayName.charAt(0).toUpperCase() || '?');
       const chatJson = JSON.stringify(chat).replace(/'/g, "\\'").replace(/"/g, '&quot;');
       resultsHTML += `
         <div class="chat-item" onclick='selectChat(${chatJson})'>
           <div class="chat-avatar-placeholder" style="overflow:hidden; display:flex; align-items:center; justify-content:center; padding:0;">${avatarContent}</div>
           <div class="chat-info">
             <div class="chat-name">${chat.displayName}</div>
-            <div class="chat-last-message">Беседа</div>
+            <div class="chat-last-message">${t('defaultGroupName')}</div>
           </div>
         </div>
       `;
     });
   }
   if (filteredUsers.length > 0) {
-    resultsHTML += '<div class="search-section"><h4>Пользователи:</h4></div>';
+    resultsHTML += `<div class="search-section"><h4>${t('users')}</h4></div>`;
     filteredUsers.forEach(user => {
       let userImage = user.avatar || user.bitmap || user.photo || user.profileImage || null;
       let avatarContent = userImage 
@@ -645,7 +673,7 @@ function searchUsersInCreate() {
   if (!usersList) return;
 
   if (!searchText) { 
-    usersList.innerHTML = '<div class="no-users">Начните вводить имя для поиска</div>'; 
+    usersList.innerHTML = `<div class="no-users">${t('startTypingToSearch')}</div>`;
     return; 
   }
 
@@ -655,7 +683,7 @@ function searchUsersInCreate() {
   );
 
   if (filtered.length === 0) { 
-    usersList.innerHTML = '<div class="no-users">Ничего не найдено</div>'; 
+    usersList.innerHTML = `<div class="no-users">${t('nothingFound')}</div>`;
     return; 
   }
 
@@ -676,9 +704,9 @@ function searchUsersToAdd() {
   if (!addList) return;
 
   if (!searchText) { 
-    addList.innerHTML = '<div class="no-users">Начните вводить имя для поиска</div>'; 
-    return; 
-  }
+  addList.innerHTML = `<div class="no-users">${t('startTypingToSearch')}</div>`; 
+  return; 
+}
 
   const nonParticipants = allUsersForModal.filter(user => !selectedChat.participants.includes(user.id));
   const filtered = nonParticipants.filter(user =>
@@ -687,9 +715,9 @@ function searchUsersToAdd() {
   );
 
   if (filtered.length === 0) { 
-    addList.innerHTML = '<div class="no-users">Ничего не найдено</div>'; 
-    return; 
-  }
+  addList.innerHTML = `<div class="no-users">${t('nothingFound')}</div>`; 
+  return; 
+}
 
   let html = '';
   filtered.forEach(user => {
@@ -744,7 +772,6 @@ async function createPrivateChat(userId, nickname, tag) {
 }
 
 // ========== ВЫБОР ЧАТА ==========
-// ========== ВЫБОР ЧАТА ==========
 async function selectChat(chat) {
   if (unsubscribeMessages) {
     unsubscribeMessages();
@@ -756,14 +783,21 @@ async function selectChat(chat) {
   const messageInputArea = document.getElementById('messageInputArea');
 
   // Проверяем, является ли собеседник удаленным аккаунтом
-  const isDeletedAccount = !chat.isGroup && (chat.displayName === 'Удаленный аккаунт' || !chat.displayAvatar);
+  // Проверяем, является ли собеседник удаленным аккаунтом
+const isDeletedAccount = !chat.isGroup && (
+  chat.displayName === 'Deleted' || 
+  chat.displayName === 'Удаленный аккаунт' || 
+  chat.displayName === 'Users:' || 
+  chat.displayName === 'Users' || 
+  !chat.displayAvatar
+);
 
   // Отрисовываем поле ввода или заглушку
   if (isDeletedAccount) {
-  messageInputArea.innerHTML = '<div class="deleted-user-stub">Этот пользователь удалил страницу</div>';
+  messageInputArea.innerHTML = `<div class="deleted-user-stub">${t('deletedUserStub')}</div>`;
 } else {
     messageInputArea.innerHTML = `
-      <input type="text" id="messageInput" placeholder="Введите сообщение..." onkeypress="if(event.key==='Enter') sendMessage()">
+      <input type="text" id="messageInput" placeholder="${t('typeMessage')}" onkeypress="if(event.key==='Enter') sendMessage()">
       <button onclick="sendMessage()" id="sendButton" title="Отправить">
         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <path d="M22 2L11 13"/>
@@ -778,7 +812,7 @@ async function selectChat(chat) {
     selectedChat = chat;
     currentChatId = chat.id;
     updateChatHeader(chat);
-    messagesContainer.innerHTML = '<div class="no-messages">Нет сообщений. Напишите что-нибудь!</div>';
+    messagesContainer.innerHTML = `<div class="no-messages">${t('noMessages')}</div>`;
     if (window.innerWidth <= 768) {
       enterChatMode();
     }
@@ -787,7 +821,7 @@ async function selectChat(chat) {
 
   selectedChat = chat;
   currentChatId = chat.id;
-  messagesContainer.innerHTML = '<div class="loading">Загрузка сообщений...</div>';
+  messagesContainer.innerHTML = `<div class="loading">${t('loadingMessages')}</div>`;
   updateChatHeader(chat);
 
   await loadMessages(true);
@@ -809,7 +843,7 @@ function updateChatHeader(chat) {
   if (chat.chatImage) {
     avatarContent = `<img src="${chat.chatImage}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
   } else {
-    avatarContent = chat.isGroup ? '👥 ' + (chat.displayName ? chat.displayName.charAt(0).toUpperCase() : '?') : (chat.displayName ? chat.displayName.charAt(0).toUpperCase() : '?');
+    avatarContent = chat.displayName ? chat.displayName.charAt(0).toUpperCase() : '?';
   }
 
   // Общий SVG-код стрелки "Назад" для мобильных и десктопов
@@ -823,7 +857,7 @@ function updateChatHeader(chat) {
         <div class="chat-avatar-placeholder large" style="overflow:hidden; display:flex; align-items:center; justify-content:center; padding:0;">${avatarContent}</div>
         <div class="chat-info">
           <h3>${chat.displayName}</h3>
-          <p>${participantsCount} участников</p>
+          <p>${participantsCount} ${t('participantsCount')}</p>
         </div>
       </div>
     `;
@@ -891,7 +925,7 @@ async function loadMessages(showLoading = false) {
   }
 
   if (showLoading) {
-    messagesContainer.innerHTML = '<div class="loading">Загрузка сообщений...</div>';
+    messagesContainer.innerHTML = `<div class="loading">${t('loadingMessages')}</div>`;
   }
 
   try {
@@ -910,7 +944,7 @@ async function loadMessages(showLoading = false) {
     });
 
     if (visibleMessages.length === 0) {
-      messagesContainer.innerHTML = '<div class="no-messages">Нет сообщений. Напишите что-нибудь!</div>';
+      messagesContainer.innerHTML = `<div class="no-messages">${t('noMessages')}</div>`;
       listenForNewMessages();
       return;
     }
@@ -981,8 +1015,8 @@ async function loadMessages(showLoading = false) {
     if (nonSystemMessages.length === 0) {
       visibleMessages.forEach(msg => {
         if (msg.isSystem) {
-          html += `<div class="message system" id="msg-${msg.id}"><div class="message-content">${msg.text}</div></div>`;
-        }
+  html += `<div class="message system" id="msg-${msg.id}"><div class="message-content">${getSystemMessageText(msg)}</div></div>`;
+}
       });
     } else {
       visibleMessages.forEach(msg => {
@@ -999,9 +1033,9 @@ async function loadMessages(showLoading = false) {
           lastDate = messageDate;
         }
         if (msg.isSystem) {
-          html += `<div class="message system" id="msg-${msg.id}"><div class="message-content">${msg.text}</div></div>`;
-          return;
-        }
+  html += `<div class="message system" id="msg-${msg.id}"><div class="message-content">${getSystemMessageText(msg)}</div></div>`;
+  return;
+}
         let senderInfo = '';
         if (selectedChat.isGroup && !isMyMessage) {
           const sender = senderCache[msg.senderId];
@@ -1072,11 +1106,11 @@ function listenForNewMessages() {
           }
 
           if (msg.isSystem) {
-            const messageHTML = `<div class="message system" id="msg-${msgId}"><div class="message-content">${msg.text}</div></div>`;
-            messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            return;
-          }
+  const messageHTML = `<div class="message system" id="msg-${msgId}"><div class="message-content">${getSystemMessageText(msg)}</div></div>`;
+  messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  return;
+}
 
           let senderInfo = '';
           if (selectedChat.isGroup && msg.senderId !== currentUser.uid && msg.senderId) {
@@ -1200,7 +1234,7 @@ function showCreateGroupModal() {
   const usersList = document.getElementById('usersListModal');
   if (!usersList) return;
   document.getElementById('searchUsersInCreate').value = '';
-  usersList.innerHTML = '<div class="no-users">Начните вводить имя для поиска</div>';
+  usersList.innerHTML = `<div class="no-users">${t('startTypingToSearch')}</div>`;
   document.getElementById('createGroupModal').style.display = 'flex';
 }
 function hideCreateGroupModal() {
@@ -1210,9 +1244,9 @@ async function createGroupChat() {
   if (isCreatingGroup) return;
   const groupName = document.getElementById('groupName').value.trim();
   
-  if (!groupName) { alert('Введите название беседы'); return; }
+  if (!groupName) { alert(t('alertEnterGroupName')); return; }
   // Проверяем наличие выбранных людей в нашем глобальном множестве
-  if (selectedUsersForCreate.size === 0) { alert('Выберите хотя бы одного участника'); return; }
+  if (selectedUsersForCreate.size === 0) { alert(t('alertSelectParticipant')); return; }
   
   isCreatingGroup = true;
   hideCreateGroupModal();
@@ -1272,7 +1306,7 @@ async function openChatInfo(chatId) {
     }
     participantsHTML += '</ul>';
 
-    document.getElementById('groupInfoName').textContent = chat.name || 'Беседа';
+    document.getElementById('groupInfoName').textContent = chat.name || t('defaultGroupName');
     document.getElementById('groupParticipants').innerHTML = participantsHTML;
 
     const leaveBtn = document.getElementById('leaveGroupBtn');
@@ -1283,7 +1317,7 @@ async function openChatInfo(chatId) {
     }
 
     document.getElementById('searchUsersToAdd').value = '';
-    document.getElementById('addParticipantsList').innerHTML = '<div class="no-users">Начните вводить имя для поиска</div>';
+    document.getElementById('addParticipantsList').innerHTML = `<div class="no-users">${t('startTypingToSearch')}</div>`;
     selectedUsersForAdd.clear(); // Очищаем список добавления
 
     const deleteBtn = document.getElementById('deleteGroupBtn');
@@ -1305,22 +1339,22 @@ function hideGroupInfoModal() {
 // ========== УПРАВЛЕНИЕ УЧАСТНИКАМИ ГРУППЫ ==========
 async function removeParticipant(userId) {
   if (!selectedChat || !selectedChat.isGroup) return;
-  if (!confirm('Удалить этого участника из беседы?')) return;
+  if (!confirm(t('confirmRemoveUser'))) return;
   try {
     await db.collection('chats').doc(selectedChat.id).update({
       participants: firebase.firestore.FieldValue.arrayRemove(userId)
     });
     const userData = await getUserById(userId);
     if (userData) {
-      await db.collection('chats').doc(selectedChat.id)
-        .collection('messages')
-        .add({
-          text: `❌ ${userData.nickname} ${userData.tag} удален из беседы`,
-          senderId: 'system',
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-          read: false,
-          isSystem: true
-        });
+      await db.collection('chats').doc(selectedChat.id).collection('messages').add({
+  text: '', 
+  systemEvent: 'sysRemoved',
+  systemArgs: `${userData.nickname} ${userData.tag}`,
+  senderId: 'system',
+  timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+  read: false,
+  isSystem: true
+});
     }
     const updatedChatDoc = await db.collection('chats').doc(selectedChat.id).get();
     const updatedChat = updatedChatDoc.data();
@@ -1338,7 +1372,7 @@ async function removeParticipant(userId) {
 async function addSelectedParticipants() {
   if (!selectedChat) return;
   
-  if (selectedUsersForAdd.size === 0) { alert('Выберите пользователей для добавления'); return; }
+  if (selectedUsersForAdd.size === 0) { alert(t('alertSelectParticipant')); return; }
   const newParticipants = Array.from(selectedUsersForAdd);
   
   try {
@@ -1352,15 +1386,15 @@ async function addSelectedParticipants() {
         addedNames.push(`${userData.nickname} ${userData.tag}`);
       }
     }
-    await db.collection('chats').doc(selectedChat.id)
-      .collection('messages')
-      .add({
-        text: `✅ Добавлены: ${addedNames.join(', ')}`,
-        senderId: 'system',
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        read: false,
-        isSystem: true
-      });
+    await db.collection('chats').doc(selectedChat.id).collection('messages').add({
+  text: '', 
+  systemEvent: 'sysAdded',
+  systemArgs: addedNames.join(', '),
+  senderId: 'system',
+  timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+  read: false,
+  isSystem: true
+});
     const updatedChatDoc = await db.collection('chats').doc(selectedChat.id).get();
     const updatedChat = updatedChatDoc.data();
     selectedChat = { ...selectedChat, participants: updatedChat.participants };
@@ -1377,17 +1411,17 @@ async function addSelectedParticipants() {
 
 async function leaveCurrentGroup() {
   if (!selectedChat || !selectedChat.isGroup) return;
-  if (!confirm('Вы уверены, что хотите покинуть беседу?')) return;
+  if (!confirm(t('confirmLeaveGroup'))) return;
   try {
-    await db.collection('chats').doc(selectedChat.id)
-      .collection('messages')
-      .add({
-        text: `👋 ${currentUserData.nickname} ${currentUserData.tag} покинул беседу`,
-        senderId: 'system',
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        read: false,
-        isSystem: true
-      });
+    await db.collection('chats').doc(selectedChat.id).collection('messages').add({
+  text: '', 
+  systemEvent: 'sysLeft',
+  systemArgs: `${currentUserData.nickname} ${currentUserData.tag}`,
+  senderId: 'system',
+  timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+  read: false,
+  isSystem: true
+});
     await db.collection('chats').doc(selectedChat.id).update({
       participants: firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
     });
@@ -1401,7 +1435,7 @@ async function leaveCurrentGroup() {
 
 async function deleteCurrentGroup() {
   if (!selectedChat || !selectedChat.isGroup) return;
-  if (!confirm('Вы уверены, что хотите удалить эту беседу? Это действие нельзя отменить.')) return;
+  if (!confirm(t('confirmDeleteGroup'))) return;
   try {
     const messagesSnapshot = await db.collection('chats').doc(selectedChat.id)
       .collection('messages')
@@ -1456,13 +1490,14 @@ async function updateChatPreviewAfterDelete(chatId, isForEveryone = false) {
   let newLastMessageTime = null;
 
   for (const doc of snapshot.docs) {
-    const msg = doc.data();
-    if (!msg.deletedFor || (!msg.deletedFor.includes('everyone') && !msg.deletedFor.includes(currentUser.uid))) {
-      newLastMessage = msg.text;
-      newLastMessageTime = msg.timestamp ? msg.timestamp.toDate() : null;
-      break;
-    }
+  const msg = doc.data();
+  if (!msg.deletedFor || (!msg.deletedFor.includes('everyone') && !msg.deletedFor.includes(currentUser.uid))) {
+    // Аналогичная проверка
+    newLastMessage = msg.isSystem ? getSystemMessageText(msg) : msg.text;
+    newLastMessageTime = msg.timestamp ? msg.timestamp.toDate() : null;
+    break;
   }
+}
 
   if (isForEveryone) {
     await db.collection('chats').doc(chatId).update({
@@ -1553,7 +1588,7 @@ function exitChatMode() {
   if (unsubscribeMessages) { unsubscribeMessages(); unsubscribeMessages = null; }
   selectedChat = null;
   currentChatId = null;
-  document.getElementById('chatHeader').innerHTML = '<div class="no-chat-selected">Выберите чат для начала общения</div>';
+  document.getElementById('chatHeader').innerHTML = `<div class="no-chat-selected">${t('noChatSelected')}</div>`;
   document.getElementById('messagesContainer').innerHTML = '';
   document.getElementById('messageInputArea').style.display = 'none';
   isNewChatPending = false;
@@ -1612,7 +1647,7 @@ function updateSidebarUser(userData) {
   const tagEl = document.getElementById('sidebarUserTag');
   const avatarEl = document.getElementById('sidebarUserAvatar');
   
-  if (nameEl) nameEl.textContent = userData.nickname || 'Пользователь';
+  if (nameEl) nameEl.textContent = userData.nickname || t('users');
   if (tagEl) tagEl.textContent = userData.tag || '@user';
   
   if (avatarEl) {
@@ -1621,7 +1656,7 @@ function updateSidebarUser(userData) {
       avatarEl.style.background = 'transparent';
     } else {
       avatarEl.innerHTML = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
-      avatarEl.style.background = '#1a1a1a';
+      avatarEl.style.background = '#3b82f6';
       avatarEl.style.color = 'white';
     }
   }
@@ -1675,12 +1710,14 @@ async function saveGroupAvatarToFirebase(base64String) {
     
     // 2. Отправляем системное сообщение об изменении
     await db.collection('chats').doc(selectedChat.id).collection('messages').add({
-      text: `🖼️ ${currentUserData.nickname} обновил(а) аватарку беседы`,
-      senderId: 'system',
-      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-      read: false,
-      isSystem: true
-    });
+  text: '', 
+  systemEvent: 'sysAvatarUpdated',
+  systemArgs: currentUserData.nickname,
+  senderId: 'system',
+  timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+  read: false,
+  isSystem: true
+});
 
     // 3. Обновляем UI в модалке мгновенно
     const avatarDiv = document.getElementById('groupInfoAvatar');
@@ -1700,4 +1737,24 @@ async function saveGroupAvatarToFirebase(base64String) {
     console.error('Ошибка сохранения аватарки беседы:', error);
     alert('Ошибка при загрузке аватарки');
   }
+}
+
+function getSystemMessageText(msg) {
+  // Если сообщение использует новый динамический формат
+  if (msg.systemEvent) {
+    const args = msg.systemArgs || '';
+    
+    switch (msg.systemEvent) {
+      case 'sysRemoved': 
+        return `❌ ${args} ${t('sysRemoved')}`;
+      case 'sysAdded': 
+        return `✅ ${t('sysAdded')} ${args}`;
+      case 'sysLeft': 
+        return `👋 ${args} ${t('sysLeft')}`;
+      case 'sysAvatarUpdated': 
+        return `🖼️ ${args} ${t('sysAvatarUpdated')}`;
+    }
+  }
+  // Фоллбэк: для старых системных сообщений, где текст уже жестко записан в БД
+  return msg.text;
 }

@@ -128,17 +128,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ========== УДАЛЕНИЕ АККАУНТА ==========
-// ========== УДАЛЕНИЕ АККАУНТА ==========
 async function deleteAccount() {
   if (!currentUser) return;
   
-  const isConfirmed = confirm("Вы уверены, что хотите удалить аккаунт? Профиль будет полностью удален.");
+  const isConfirmed = confirm(t('alertDelConfirm'));
   if (!isConfirmed) return;
 
   const uid = currentUser.uid;
   let oldData = null;
 
-  // Функция для полной очистки локального кэша
   const clearLocalCache = (userId) => {
     localStorage.removeItem(`cachedCurrentUser_${userId}`);
     localStorage.removeItem(`cachedChats_${userId}`);
@@ -148,26 +146,17 @@ async function deleteAccount() {
   };
 
   try {
-    // 1. Сохраняем текущие данные пользователя для возможного "отката"
     const docSnap = await db.collection('users').doc(uid).get();
-    if (docSnap.exists) {
-      oldData = docSnap.data();
-    }
+    if (docSnap.exists) oldData = docSnap.data();
     
-    // 2. Проверяем, есть ли у пользователя активные чаты в Firestore
-    const chatsSnapshot = await db.collection('chats')
-      .where('participants', 'array-contains', uid)
-      .get();
-
+    const chatsSnapshot = await db.collection('chats').where('participants', 'array-contains', uid).get();
     const hasChats = !chatsSnapshot.empty;
 
     if (!hasChats) {
-      // ЕСПИ ЧАТОВ НЕТ: полностью удаляем документ пользователя из Firestore
       await db.collection('users').doc(uid).delete();
     } else {
-      // ЕСЛИ ЧАТЫ ЕСТЬ: делаем «мягкое удаление» (анти-краш для чужих чатов)
       await db.collection('users').doc(uid).update({
-        nickname: 'Удаленный аккаунт',
+        nickname: 'Deleted',
         email: '',
         avatar: '',
         tag: '',
@@ -175,22 +164,14 @@ async function deleteAccount() {
       });
     }
 
-    // 3. Удаляем пользователя из Authentication
     await currentUser.delete();
-    
-    // 4. Очищаем локальный кэш
     clearLocalCache(uid);
-    
-    // 5. Перенаправляем на главную
     window.location.href = 'index.html';
     
   } catch (error) {
     console.error('Ошибка при удалении аккаунта:', error);
-    
     if (error.code === 'auth/requires-recent-login') {
-      // ЕСЛИ ОШИБКА СЕССИИ — ОТКАТЫВАЕМ ДАННЫЕ В БАЗЕ НАЗАД (если они там вообще оставались)
       if (oldData) {
-        // Проверяем, существовал ли документ до удаления (на случай если чатов не было)
         const checkDoc = await db.collection('users').doc(uid).get();
         if (!checkDoc.exists) {
           await db.collection('users').doc(uid).set(oldData);
@@ -198,16 +179,12 @@ async function deleteAccount() {
           await db.collection('users').doc(uid).set(oldData);
         }
       }
-      
-      alert("В целях безопасности Firebase требует подтвердить вход. Сейчас вы выйдете из системы — войдите заново и сразу нажмите «Удалить» еще раз.");
-      
-      // Очищаем кэш ПЕРЕД тем, как выкинуть пользователя из аккаунта
+      alert(t('alertDelReauth'));
       clearLocalCache(uid);
-      
       await auth.signOut();
       window.location.href = 'index.html';
     } else {
-      alert("Произошла ошибка при удалении: " + error.message);
+      alert(t('alertDelErr') + error.message);
     }
   }
 }
@@ -215,11 +192,14 @@ async function deleteAccount() {
 // Функция обновления карточки пользователя в настройках И в левом сайдбаре
 function updateSidebarUser(userData) {
   // 1. Обновление центральной карточки настроек
-  const nameEl = document.getElementById('userName'); 
+  const nameEl = document.getElementById('userName'); // Сначала находим элементы
   const tagEl = document.getElementById('userTag');
   const avatarEl = document.getElementById('userAvatar');
   
-  if (nameEl) nameEl.textContent = userData.nickname || 'Пользователь';
+  if (nameEl) { // Затем работаем с ними
+    nameEl.textContent = userData.nickname || 'Пользователь';
+    nameEl.removeAttribute('data-i18n'); // Удаляем атрибут перевода
+  }
   if (tagEl) tagEl.textContent = userData.tag || '@user';
   
   if (avatarEl) {
@@ -238,7 +218,10 @@ function updateSidebarUser(userData) {
   const sidebarTagEl = document.getElementById('sidebarUserTag');
   const sidebarAvatarEl = document.getElementById('sidebarUserAvatar');
   
-  if (sidebarNameEl) sidebarNameEl.textContent = userData.nickname || 'Пользователь';
+  if (sidebarNameEl) {
+    sidebarNameEl.textContent = userData.nickname || 'Пользователь';
+    sidebarNameEl.removeAttribute('data-i18n'); // Удаляем атрибут перевода
+  }
   if (sidebarTagEl) sidebarTagEl.textContent = userData.tag || '@user';
   
   if (sidebarAvatarEl) {
@@ -247,7 +230,7 @@ function updateSidebarUser(userData) {
       sidebarAvatarEl.style.background = 'transparent';
     } else {
       sidebarAvatarEl.innerHTML = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
-      sidebarAvatarEl.style.background = '#1a1a1a';
+      sidebarAvatarEl.style.background = '#3b82f6';
       sidebarAvatarEl.style.color = 'white';
     }
   }
@@ -273,25 +256,30 @@ function toggleDelete() {
 
 // ========== СМЕНА ПАРОЛЯ ==========
 async function changePassword() {
-  if (!currentUser || !currentUser.email) {
-    alert("Не удалось определить email текущего пользователя.");
-    return;
-  }
+  if (!currentUser || !currentUser.email) return;
 
-  const isConfirmed = confirm(`Отправить ссылку для смены пароля на почту ${currentUser.email}?`);
+  const isConfirmed = confirm(t('alertPwdConfirm') + currentUser.email + '?');
   if (!isConfirmed) return;
 
   try {
     await resetPassword(currentUser.email);
-    alert(`✅ Ссылка для смены пароля отправлена на ${currentUser.email}.\nПроверьте папку «Спам», если письмо не приходит.`);
+    alert(t('alertPwdSent') + currentUser.email + '.' + t('alertPwdSpam'));
   } catch (error) {
     console.error('Ошибка при отправке письма для смены пароля:', error);
     if (error.code === 'auth/network-request-failed') {
-      alert('🌐 Проблема с интернетом. Проверьте подключение.');
+      alert(t('alertNoNet'));
     } else if (error.code === 'auth/too-many-requests') {
-      alert('⏳ Слишком много попыток. Попробуйте позже.');
+      alert(t('alertTooMany'));
     } else {
-      alert('❌ Ошибка при отправке письма: ' + error.message);
+      alert(t('alertPwdErr') + error.message);
     }
   }
+}
+// Функция-помощник для перевода в JS файлах
+function t(key) {
+  const lang = localStorage.getItem('app_lang') || 'en';
+  if (window.settingsTranslations && window.settingsTranslations[lang] && window.settingsTranslations[lang][key]) {
+    return window.settingsTranslations[lang][key];
+  }
+  return key; // Если не найдено
 }

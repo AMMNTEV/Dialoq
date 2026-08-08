@@ -1,14 +1,13 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Регистрация</title>
+  <title>Sign Up</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='11' width='18' height='11' rx='2' ry='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>">
   <link rel="stylesheet" href="css/common.css">
   <link rel="stylesheet" href="css/auth.css">
-<link rel="stylesheet" href="css/dark-theme.css">
-  <!-- Дополнительные стили для поля тега (уже есть в auth.css, поэтому не дублируем) -->
+  <link rel="stylesheet" href="css/dark-theme.css">
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -16,38 +15,30 @@
   (function () {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
-      // Моментально красим фон, чтобы не было белой вспышки
       document.documentElement.style.backgroundColor = '#121212';
-      
-      // Добавляем класс на body, как только он появится в DOM
       document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.add('dark-theme');
       });
     }
   })();
 </script>
-<!-- Подключаем сам манифест (без первого слеша) -->
 <link rel="manifest" href="manifest.json">
-
-<!-- Цвет статус-бара для Android -->
 <meta name="theme-color" content="#121212">
-
-<!-- Указываем Safari, что это PWA -->
 <meta name="apple-mobile-web-app-capable" content="yes">
-
-<!-- Настраиваем внешний вид статус-бара на iOS (black-translucent делает его прозрачным поверх приложения) -->
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-<!-- Название приложения на экране "Домой" для iOS (замени TSA на свое короткое название, если нужно) -->
 <meta name="apple-mobile-web-app-title" content="TSA">
-
-<!-- Иконка приложения для iOS (указали правильный путь к твоей картинке) -->
 <link rel="apple-touch-icon" href="img/user.png">
 </head>
 <body class="auth-page">
+  <!-- Переключатель языков -->
+  <div class="lang-switcher">
+    <button onclick="setLanguage('en')">EN</button>
+    <button onclick="setLanguage('ru')">RU</button>
+  </div>
+
   <div class="auth-card">
-    <h1>Регистрация</h1>
-    <p class="auth-subtitle">Создайте аккаунт чтобы начать общение</p>
+    <h1 data-i18n="regTitle">Sign Up</h1>
+    <p class="auth-subtitle" data-i18n="regSubtitle">Create an account to start chatting</p>
     <button type="button" class="oauth-btn" id="googleRegBtn" style="margin-bottom: 0;">
       <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
         <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -55,18 +46,18 @@
         <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
         <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
       </svg>
-      Continue with Google
+      <span data-i18n="googleBtn">Continue with Google</span>
     </button>
     
-    <div class="auth-divider">или</div>
+    <div class="auth-divider" data-i18n="or">or</div>
 
     <form id="registerForm">
       <div class="auth-input-group">
-        <label>Никнейм</label>
-        <input type="text" id="nickname" placeholder="Например: Anna" required>
+        <label data-i18n="nicknameLabel">Nickname</label>
+        <input type="text" id="nickname" placeholder="e.g. Anna" required>
       </div>
       <div class="auth-input-group">
-        <label>Тег</label>
+        <label data-i18n="tagLabel">Tag</label>
         <div class="tag-input-wrapper">
           <span>@</span>
           <input type="text" id="tag" placeholder="username" required
@@ -76,17 +67,17 @@
         <div id="tagStatus" class="tag-status"></div>
       </div>
       <div class="auth-input-group">
-        <label>Email</label>
+        <label data-i18n="emailLabel">Email</label>
         <input type="email" id="email" placeholder="your@email.com" required>
       </div>
       <div class="auth-input-group">
-        <label>Пароль</label>
-        <input type="password" id="password" placeholder="Минимум 6 символов" required minlength="6">
+        <label data-i18n="passwordLabel">Password</label>
+        <input type="password" id="password" placeholder="Minimum 6 characters" required minlength="6">
       </div>
-      <button type="submit" class="auth-button" id="registerBtn" disabled>Зарегистрироваться</button>
+      <button type="submit" class="auth-button" id="registerBtn" disabled data-i18n="registerBtn">Sign Up</button>
     </form>
     <div class="auth-footer">
-      Уже есть аккаунт? <a href="index.html">Войти</a>
+      <span data-i18n="alreadyHaveAccount">Already have an account?</span> <a href="index.html" data-i18n="signInLink">Sign in</a>
     </div>
     <div id="message" class="message"></div>
   </div>
@@ -94,19 +85,115 @@
   <script src="js/firebase-config.js"></script>
   <script src="js/auth.js"></script>
   <script>
+    // ========== ЛОКАЛИЗАЦИЯ ==========
+    const translations = {
+      en: {
+        regTitle: "Sign Up",
+        regSubtitle: "Create an account to start chatting",
+        googleBtn: "Continue with Google",
+        or: "or",
+        nicknameLabel: "Nickname",
+        tagLabel: "Tag",
+        emailLabel: "Email",
+        passwordLabel: "Password",
+        registerBtn: "Sign Up",
+        alreadyHaveAccount: "Already have an account?",
+        signInLink: "Sign in",
+        nicknamePlaceholder: "e.g. Anna",
+        passwordPlaceholder: "Minimum 6 characters",
+        tagMin: "⚠️ Minimum 3 characters",
+        tagChecking: "⏳ Checking...",
+        tagAvailable: "✅ Tag is available",
+        tagTaken: "❌ This tag is already taken",
+        tagError: "❌ Verification error",
+        googleCancel: "Registration cancelled",
+        authError: "Authorization error",
+        selectTagAlert: "Please choose another tag",
+        registering: "Signing up...",
+        regSuccessTitle: "✅ Registration successful!",
+        regSuccessMsg: "A confirmation email has been sent to ",
+        regImportant: "Important: Data will be saved only after email confirmation.",
+        goToLogin: "Go to Sign In →",
+        netError: "🌐 Internet connection issue. Please check and try again.",
+        emailInUse: "❌ This email is already registered. <a href='index.html'>Sign In</a>",
+        invalidEmail: "📧 Invalid email format",
+        weakPassword: "🔒 Password must be at least 6 characters long",
+        tooManyReq: "⏳ Too many attempts. Please wait a few minutes.",
+        defaultError: "❌ Registration error. Please try again later."
+      },
+      ru: {
+        regTitle: "Регистрация",
+        regSubtitle: "Создайте аккаунт чтобы начать общение",
+        googleBtn: "Продолжить с Google",
+        or: "или",
+        nicknameLabel: "Никнейм",
+        tagLabel: "Тег",
+        emailLabel: "Email",
+        passwordLabel: "Пароль",
+        registerBtn: "Зарегистрироваться",
+        alreadyHaveAccount: "Уже есть аккаунт?",
+        signInLink: "Войти",
+        nicknamePlaceholder: "Например: Anna",
+        passwordPlaceholder: "Минимум 6 символов",
+        tagMin: "⚠️ Минимум 3 символа",
+        tagChecking: "⏳ Проверка...",
+        tagAvailable: "✅ Тег доступен",
+        tagTaken: "❌ Этот тег уже занят",
+        tagError: "❌ Ошибка проверки",
+        googleCancel: "Регистрация отменена",
+        authError: "Ошибка авторизации",
+        selectTagAlert: "Пожалуйста, выберите другой тег",
+        registering: "Регистрация...",
+        regSuccessTitle: "✅ Регистрация успешна!",
+        regSuccessMsg: "На почту ",
+        regImportant: "Важно: Данные будут сохранены только после подтверждения email.",
+        goToLogin: "Перейти ко входу →",
+        netError: "🌐 Проблема с интернетом. Проверьте подключение и попробуйте снова.",
+        emailInUse: "❌ Этот email уже зарегистрирован. <a href='index.html'>Войти</a>",
+        invalidEmail: "📧 Некорректный email",
+        weakPassword: "🔒 Пароль должен быть минимум 6 символов",
+        tooManyReq: "⏳ Слишком много попыток. Подождите несколько минут.",
+        defaultError: "❌ Ошибка при регистрации. Попробуйте позже."
+      }
+    };
+
+    let currentLang = 'en';
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('app_lang', lang);
+      document.documentElement.lang = lang;
+
+      document.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        if (translations[lang] && translations[lang][key]) {
+          element.textContent = translations[lang][key];
+        }
+      });
+
+      const nickInput = document.getElementById('nickname');
+      if (nickInput) nickInput.placeholder = translations[lang].nicknamePlaceholder;
+
+      const passInput = document.getElementById('password');
+      if (passInput) passInput.placeholder = translations[lang].passwordPlaceholder;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedLang = localStorage.getItem('app_lang') || 'en';
+      setLanguage(savedLang);
+    });
+
     // ========== ЛОГИКА РЕГИСТРАЦИИ ==========
     let tagCheckTimeout = null;
     let isTagAvailable = false;
     let currentTagValue = '';
 
-    // Обработка ввода тега (удаляем @, ограничиваем символы)
     function handleTagInput(input) {
       let value = input.value.replace(/@/g, '').slice(0, 20);
       value = value.replace(/[^a-zA-Z0-9_]/g, '');
       input.value = value;
     }
 
-    // Защита от удаления @
     function preventAtSymbolDeletion(event, input) {
       if (event.key === 'Backspace' && input.selectionStart === 0 && input.selectionEnd === 0) {
         event.preventDefault();
@@ -119,11 +206,11 @@
       }
     }
 
-    // Проверка уникальности тега (с задержкой)
     async function checkTagUnique(input) {
       const tagValue = input.value.trim();
       const tagStatus = document.getElementById('tagStatus');
       const registerBtn = document.getElementById('registerBtn');
+      const t = translations[currentLang];
 
       if (!tagValue) {
         tagStatus.innerHTML = '';
@@ -133,14 +220,14 @@
         return;
       }
       if (tagValue.length < 3) {
-        tagStatus.innerHTML = '⚠️ Минимум 3 символа';
+        tagStatus.innerHTML = t.tagMin;
         tagStatus.className = 'tag-status unavailable';
         isTagAvailable = false;
         registerBtn.disabled = true;
         return;
       }
 
-      tagStatus.innerHTML = '⏳ Проверка...';
+      tagStatus.innerHTML = t.tagChecking;
       tagStatus.className = 'tag-status loading';
       if (tagCheckTimeout) clearTimeout(tagCheckTimeout);
       currentTagValue = tagValue;
@@ -149,26 +236,26 @@
         if (currentTagValue !== tagValue) return;
         try {
           if (typeof db === 'undefined') {
-            throw new Error('Firestore не инициализирован. Проверьте путь к firebase-config.js');
+            throw new Error('Firestore is not initialized');
           }
 
           const fullTag = '@' + tagValue;
           const snapshot = await db.collection('users').where('tag', '==', fullTag).get();
 
           if (snapshot.empty) {
-            tagStatus.innerHTML = '✅ Тег доступен';
+            tagStatus.innerHTML = t.tagAvailable;
             tagStatus.className = 'tag-status available';
             isTagAvailable = true;
             registerBtn.disabled = false;
           } else {
-            tagStatus.innerHTML = '❌ Этот тег уже занят';
+            tagStatus.innerHTML = t.tagTaken;
             tagStatus.className = 'tag-status unavailable';
             isTagAvailable = false;
             registerBtn.disabled = true;
           }
         } catch (error) {
           console.error('Ошибка проверки тега:', error);
-          tagStatus.innerHTML = '❌ Ошибка проверки';
+          tagStatus.innerHTML = t.tagError;
           tagStatus.className = 'tag-status unavailable';
           isTagAvailable = false;
           registerBtn.disabled = true;
@@ -176,28 +263,28 @@
       }, 500);
     }
 
-    // Обработка регистрации через Google
     document.getElementById('googleRegBtn').addEventListener('click', async () => {
       const btn = document.getElementById('googleRegBtn');
       const messageDiv = document.getElementById('message');
+      const t = translations[currentLang];
       btn.disabled = true;
       try {
         await continueWithGoogle();
-        window.location.href = 'messenger.html'; // Успех -> идем в мессенджер
+        window.location.href = 'messenger.html';
       } catch (error) {
         console.error('Ошибка Google:', error);
-        let errorMsg = error.code === 'auth/popup-closed-by-user' ? 'Регистрация отменена' : 'Ошибка авторизации';
+        let errorMsg = error.code === 'auth/popup-closed-by-user' ? t.googleCancel : t.authError;
         messageDiv.innerHTML = `<div class="error">❌ ${errorMsg}</div>`;
         btn.disabled = false;
       }
     });
 
-    // Обработка отправки формы
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      const t = translations[currentLang];
 
       if (!isTagAvailable) {
-        alert('Пожалуйста, выберите другой тег');
+        alert(t.selectTagAlert);
         return;
       }
 
@@ -212,51 +299,52 @@
       const messageDiv = document.getElementById('message');
 
       registerBtn.disabled = true;
-      registerBtn.textContent = 'Регистрация...';
+      registerBtn.textContent = t.registering;
 
       try {
         await register(email, password, nickname, tag);
 
         messageDiv.innerHTML = `
           <div class="success">
-            <h3>✅ Регистрация успешна!</h3>
-            <p>На почту ${email} отправлено письмо с подтверждением.</p>
-            <p><strong>Важно:</strong> Данные будут сохранены только после подтверждения email.</p>
-            <p><a href="index.html" style="color: #667eea;">Перейти ко входу →</a></p>
+            <h3>${t.regSuccessTitle}</h3>
+            <p>${t.regSuccessMsg}${email}</p>
+            <p><strong>${t.regImportant}</strong></p>
+            <p><a href="index.html" style="color: #667eea;">${t.goToLogin}</a></p>
           </div>
         `;
         document.getElementById('registerForm').style.display = 'none';
+        // Скрываем кнопку Google
+        document.getElementById('googleRegBtn').style.display = 'none';
+        // Скрываем разделитель "or"
+        document.querySelector('.auth-divider').style.display = 'none';
+        // Скрываем ссылку "Уже есть аккаунт?"
+        document.querySelector('.auth-footer').style.display = 'none';
 
       } catch (error) {
         console.error('Ошибка регистрации:', error);
         registerBtn.disabled = false;
-        registerBtn.textContent = 'Зарегистрироваться';
+        registerBtn.textContent = t.registerBtn;
 
         let errorMessage = '';
 
-        // Обработка ошибок Firebase
         switch (error.code) {
           case 'auth/network-request-failed':
-            errorMessage = '🌐 Проблема с интернетом. Проверьте подключение и попробуйте снова.';
+            errorMessage = t.netError;
             break;
           case 'auth/email-already-in-use':
-            errorMessage = '❌ Этот email уже зарегистрирован. <a href="index.html">Войти</a>';
+            errorMessage = t.emailInUse;
             break;
           case 'auth/invalid-email':
-            errorMessage = '📧 Некорректный email';
+            errorMessage = t.invalidEmail;
             break;
           case 'auth/weak-password':
-            errorMessage = '🔒 Пароль должен быть минимум 6 символов';
+            errorMessage = t.weakPassword;
             break;
           case 'auth/too-many-requests':
-            errorMessage = '⏳ Слишком много попыток. Подождите несколько минут.';
-            break;
-          case 'auth/unauthorized-continue-uri':
-            errorMessage = '❌ Ошибка при регистрации. Попробуйте позже.';
+            errorMessage = t.tooManyReq;
             break;
           default:
-            // Убираем технические детали ошибки
-            errorMessage = '❌ Ошибка при регистрации. Попробуйте позже.';
+            errorMessage = t.defaultError;
         }
 
         messageDiv.innerHTML = `<div class="error">${errorMessage}</div>`;
