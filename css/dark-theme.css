@@ -903,11 +903,6 @@ a:focus {
   color: var(--text-primary) !important;
 }
 
-body.dark-theme .messages-container {
-  background-color: #121212;
-  background-image: url('../img/dark_messenger.jpg');
-}
-
 /* ==========================================
    КОНЕЦ DARK THEME
    ========================================== */
