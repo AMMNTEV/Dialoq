@@ -922,6 +922,32 @@ a:focus {
   color: var(--text-muted) !important;
 }
 
+/* --- Ссылки внутри сообщений и карточек для темной темы --- */
+.dark-theme .message a,
+.dark-theme .post-content a,
+.dark-theme .about-content a,
+.dark-theme .chat-last-message a {
+  color: var(--accent-hover) !important;
+  text-decoration: underline;
+}
+
+.dark-theme .message a:hover,
+.dark-theme .post-content a:hover,
+.dark-theme .about-content a:hover,
+.dark-theme .chat-last-message a:hover {
+  color: #ffffff !important;
+}
+
+/* Если ссылки находятся внутри вашего сообщения (.my-message фон синий): */
+.dark-theme .my-message a {
+  color: #ffffff !important;
+  text-decoration: underline;
+}
+
+.dark-theme .my-message a:hover {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
 /* ==========================================
    КОНЕЦ DARK THEME
    ========================================== */
