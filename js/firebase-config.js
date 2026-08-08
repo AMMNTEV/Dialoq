@@ -1,13 +1,22 @@
 // Конфигурация Firebase - замените на свои данные из консоли Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyAqzIbV2Uly03MbjpyNP9RQQx-0uDYnJdY",
-  authDomain: "yttg-3b587.firebaseapp.com",
-  projectId: "yttg-3b587",
-  storageBucket: "yttg-3b587.firebasestorage.app",
-  messagingSenderId: "77409665832",
-  appId: "1:77409665832:web:b63c780592b3dfc82a061d",
-  measurementId: "G-5VHQ23S2PP"
+
+  apiKey: "AIzaSyD6MPCkQ2nDpiyimGTEnacxxIg84v-FlnU",
+
+  authDomain: "dial0q.firebaseapp.com",
+
+  projectId: "dial0q",
+
+  storageBucket: "dial0q.firebasestorage.app",
+
+  messagingSenderId: "959232097004",
+
+  appId: "1:959232097004:web:b2da69dfb6a40c2bf983c9",
+
+  measurementId: "G-ZBGMG33BCD"
+
 };
+
 
 // Инициализация Firebase
 firebase.initializeApp(firebaseConfig);
