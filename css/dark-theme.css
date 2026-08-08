@@ -903,6 +903,25 @@ a:focus {
   color: var(--text-primary) !important;
 }
 
+/* --- Исправление фона поля ввода и заглушки в тёмной теме --- */
+.dark-theme .message-input-area textarea {
+  background: var(--bg-input) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .message-input-area textarea:focus {
+  background: var(--bg-secondary) !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 4px var(--accent-glow) !important;
+}
+
+.dark-theme .deleted-user-stub {
+  background: var(--bg-input) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-muted) !important;
+}
+
 /* ==========================================
    КОНЕЦ DARK THEME
    ========================================== */
