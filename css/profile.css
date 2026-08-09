@@ -582,7 +582,7 @@ a:focus {
   
   .profile-header .back-btn {
     /* Убираем отрицательный сдвиг влево (было -4px) */
-    margin-left: -4px !important;
+    margin-left: -6px !important;
   }
 }
 
