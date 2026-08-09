@@ -560,7 +560,7 @@ a:focus {
 .profile-header .back-btn svg {
   width: 24px !important;
   height: 24px !important;
-  stroke-width: 1.5 !important;
+
 }
 
 @media (max-width: 768px) {
