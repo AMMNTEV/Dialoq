@@ -551,37 +551,6 @@ a:focus {
   outline: none !important;
 }
 
-/* Делаем шапку профиля идентичной по высоте и отступам шапке чата */
-.profile-header {
-  display: flex;
-  align-items: center;
-  padding: 14px 16px !important; /* Ровно как у .chat-header */
-  height: 70px !important;       /* Фиксированная высота карточки чата */
-  margin-bottom: 20px;
-  border-bottom: 1px solid #eef2f6 !important;
-  background: #ffffff;
-  box-sizing: border-box;
-  flex-shrink: 0;
-}
-
-/* Исправленный блок для кнопки назад в профиле */
-.profile-header .back-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: transparent !important;
-  color: #1a1a1a;
-  border: none !important;
-  box-shadow: none !important;
-  cursor: pointer;
-  transition: background 0.2s ease;
-  margin-left: -4px !important; /* Синхронизировано с чатом */
-  padding: 0;
-  flex-shrink: 0;
-}
 
 .profile-header .back-btn:hover {
   background: #f1f5f9 !important;
@@ -595,8 +564,12 @@ a:focus {
 
 @media (max-width: 768px) {
   .profile-header {
-    padding: 10px 4px !important;
-    height: 70px !important;
+    /* 10px (верхний отступ) + 70px (контент) + 10px (нижний отступ) = 90px */
+    height: 90px !important;
+    
+    /* 10px сверху/снизу. Слева 8px (собираем 4px от chat-header и 4px от selected-chat) */
+    padding: 10px 16px 10px 8px !important; 
+    
     margin-bottom: 0 !important;
     border-bottom: 1px solid #eef2f6 !important;
     background: #ffffff;
@@ -604,9 +577,11 @@ a:focus {
     top: 0;
     z-index: 10;
     width: 100%;
+    box-sizing: border-box;
   }
   
   .profile-header .back-btn {
+    /* Сдвиг влево на 4px, как у кнопки в мессенджере. Итоговый отступ от края: 8px - 4px = 4px */
     margin-left: -4px !important;
   }
 }
