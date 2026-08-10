@@ -591,3 +591,86 @@ a:focus {
     padding-top: 0 !important;
   }
 }
+
+/* ===== ПАРЯЩАЯ СТЕКЛЯННАЯ ШАПКА (LIQUID GLASS) ===== */
+
+/* Единый стиль для шапки профиля и шапки чата */
+.profile-header,
+.chat-header {
+  position: sticky !important;
+  top: 14px !important; /* Выравниваем по высоте с поиском */
+  margin: 0 16px 16px 16px !important; /* Отрываем от краев экрана */
+  height: 56px !important; /* Делаем шапку чуть изящнее */
+  width: auto !important; /* Важно, чтобы margin работал по бокам */
+  
+  /* Эффект Liquid Glass (Светлая тема) */
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 28px !important; /* Скругляем как нижнюю панель */
+  
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04) !important;
+  z-index: 1000 !important;
+  
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 16px !important;
+  box-sizing: border-box !important;
+}
+
+/* Темная тема для стеклянной шапки */
+.dark-theme .profile-header,
+.dark-theme .chat-header {
+  background: rgba(22, 25, 32, 0.85) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* --- Адаптация внутренних элементов под новую шапку --- */
+
+/* Идеально центрируем круглую кнопку "Назад" */
+.back-btn, 
+.mobile-back-btn {
+  margin-left: -6px !important; /* Чуть сдвигаем к левому краю */
+  height: 40px !important;
+  width: 40px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important; /* Строгий круг для эффекта нажатия */
+}
+
+/* Ужимаем карточку собеседника, чтобы она красиво сидела внутри 56px шапки */
+.selected-chat {
+  height: auto !important;
+  padding: 4px 8px !important;
+  margin-bottom: 0 !important;
+  background: transparent !important; /* Убираем фон, так как шапка сама по себе выделяется */
+}
+
+/* Делаем аватарку в шапке чата чуть меньше */
+.selected-chat .chat-avatar-placeholder, 
+.selected-chat .user-avatar-placeholder {
+  width: 36px !important;
+  height: 36px !important;
+  font-size: 1rem !important;
+  margin-right: 10px !important;
+}
+
+/* --- Мобильный адаптив --- */
+@media (max-width: 768px) {
+  .profile-header,
+  .chat-header {
+    top: 12px !important; /* Чуть выше на мобилках */
+    margin: 0 12px 16px 12px !important;
+    padding: 0 12px !important;
+  }
+  
+  /* Компенсируем высоту парящей шапки, чтобы сообщения не прятались под ней */
+  .messages-container {
+     padding-top: 16px !important;
+  }
+}
