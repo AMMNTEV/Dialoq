@@ -1185,3 +1185,72 @@ a:focus {
 .user-info {
   padding-right: 32px;
 }
+
+/* 1. Делаем контейнер чата относительным, чтобы шапка позиционировалась внутри него */
+.chat-area {
+  position: relative;
+}
+
+/* 2. Делаем саму шапку полностью прозрачной, парящей и пропускающей клики сквозь пустые места */
+.chat-header {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: transparent !important;
+  border-bottom: none !important;
+  padding: 12px 16px !important;
+  display: flex;
+  align-items: center;
+  gap: 12px !important; /* Разделяем кнопку и карточку профиля */
+  pointer-events: none; /* Отключаем клики по пустому прозрачному пространству шапки */
+}
+
+/* 3. Оформляем кнопку "Назад" как самостоятельную круглую стеклянную кнопку */
+.mobile-back-btn, 
+.back-btn {
+  pointer-events: auto; /* Возвращаем кликабельность самой кнопке */
+  width: 44px !important;
+  height: 44px !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin: 0 !important;
+  box-shadow: none !important;
+  flex-shrink: 0;
+}
+
+/* 4. Оформляем блок информации о собеседнике в стиле панелей навигации */
+.selected-chat {
+  pointer-events: auto; /* Возвращаем кликабельность профилю */
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 28px !important; /* Овальная форма */
+  padding: 4px 16px 4px 4px !important; /* Минимальный отступ слева, чтобы аватар был впритык к краю */
+  height: 48px !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  flex: 0 1 auto;
+  max-width: 100%;
+}
+
+/* 5. Уменьшаем аватар в шапке для идеальной центровки внутри 48px */
+.selected-chat .chat-avatar-placeholder,
+.selected-chat .user-avatar-placeholder {
+  width: 40px !important;
+  height: 40px !important;
+  margin-right: 10px !important;
+}
+
+/* 6. Сдвигаем контейнер с сообщениями вниз, чтобы они скроллились под парящей шапкой */
+.messages-container {
+  padding-top: 80px !important; 
+}
