@@ -1262,6 +1262,7 @@ a:focus {
   background: rgba(255, 255, 255, 0.85) !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important; /* Добавлена граница */
 }
 
 .mobile-back-btn, 
