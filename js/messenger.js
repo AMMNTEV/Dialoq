@@ -852,8 +852,8 @@ function updateChatHeader(chat) {
   if (chat.isGroup) {
     const participantsCount = chat.participants ? chat.participants.length : 2;
     headerContent = `
+      <button class="mobile-back-btn" onclick="exitChatMode()">${backIconSvg}</button>
       <div class="selected-chat" onclick="openChatInfo('${chat.id}')">
-        <button class="mobile-back-btn" onclick="event.stopPropagation(); exitChatMode()">${backIconSvg}</button>
         <div class="chat-avatar-placeholder large" style="overflow:hidden; display:flex; align-items:center; justify-content:center; padding:0;">${avatarContent}</div>
         <div class="chat-info">
           <h3>${chat.displayName}</h3>
@@ -864,8 +864,8 @@ function updateChatHeader(chat) {
   } else {
     const otherUserId = chat.participants.find(id => id !== currentUser.uid);
     headerContent = `
+      <button class="mobile-back-btn" onclick="exitChatMode()">${backIconSvg}</button>
       <div class="selected-chat" onclick="openUserProfile('${otherUserId}')">
-        <button class="mobile-back-btn" onclick="event.stopPropagation(); exitChatMode()">${backIconSvg}</button>
         <div class="chat-avatar-placeholder large" style="overflow:hidden; display:flex; align-items:center; justify-content:center; padding:0;">${avatarContent}</div>
         <div class="chat-info">
           <h3>${chat.displayName}</h3>
