@@ -1330,3 +1330,56 @@ a:focus {
   line-height: 1.1 !important;
   margin: 0 !important;
 }
+
+/* ==========================================
+   ФИНАЛЬНЫЕ КОРРЕКТИРОВКИ ДИЗАЙНА
+   ========================================== */
+
+/* 1. Отлепляем тэг от низа шапки (даем больше воздуха) */
+.selected-chat {
+  height: 52px !important; /* Немного увеличили высоту для баланса */
+  padding: 6px 16px 6px 6px !important; 
+}
+
+.selected-chat .chat-info,
+.selected-chat .user-info {
+  padding-bottom: 2px !important; /* Искусственно приподнимаем весь текстовый блок */
+  gap: 1px !important;
+}
+
+.selected-chat .chat-name,
+.selected-chat .user-name {
+  font-size: 1rem !important; /* Делаем шрифт чуть компактнее */
+  line-height: 1.2 !important;
+}
+
+.selected-chat .chat-tag,
+.selected-chat .user-tag {
+  font-size: 0.8rem !important;
+  line-height: 1.2 !important;
+}
+
+/* 2. Приводим поиск к единому плоскому "стеклянному" стилю */
+.search-box input {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: none !important; /* Убираем тени, делаем плоским как кнопки */
+}
+
+.search-box input:focus {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: #3b82f6 !important;
+  /* Меняем массивную тень на аккуратное свечение */
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.3) !important; 
+}
+
+/* 3. Приводим нижнюю мобильную панель навигации к тому же стилю */
+.mobile-bottom-nav {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: none !important; /* Убираем грубую тень, оставляем чистое стекло с легкой рамкой */
+}
