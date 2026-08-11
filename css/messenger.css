@@ -1283,3 +1283,50 @@ a:focus {
     padding-top: 80px !important; 
   }
 }
+
+/* --- ВЫРАВНИВАНИЕ ШАПКИ ЧАТА С ПОИСКОМ --- */
+.chat-header {
+  position: absolute !important;
+  top: 14px !important; /* Опускаем на уровень поиска */
+  left: 0;
+  right: 0;
+  height: 70px !important; /* Высота контейнера как у поиска */
+  z-index: 100;
+  background: transparent !important;
+  border-bottom: none !important;
+  padding: 0 16px !important; /* Убираем вертикальные отступы, центрируем через flex */
+  display: flex;
+  align-items: center;
+  gap: 12px !important;
+  pointer-events: none; 
+}
+
+/* На мобильных устройствах возвращаем шапку на самый верх, так как там нет боковых панелей */
+@media (max-width: 768px) {
+  .chat-header {
+    top: 0 !important;
+    height: auto !important;
+    padding: 10px 16px 10px 4px !important; 
+  }
+}
+
+/* --- КОМПАКТНОЕ ОФОРМЛЕНИЕ ИМЕНИ И ТЭГА --- */
+.selected-chat .chat-info,
+.selected-chat .user-info {
+  padding-right: 8px !important; /* Убираем отступ для счетчика непрочитанных (его тут нет) */
+  justify-content: center;
+  gap: 2px; /* Задаем минимальное расстояние между именем и тэгом */
+}
+
+.selected-chat .chat-name,
+.selected-chat .user-name {
+  line-height: 1.1 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.selected-chat .chat-tag,
+.selected-chat .user-tag {
+  line-height: 1.1 !important;
+  margin: 0 !important;
+}
