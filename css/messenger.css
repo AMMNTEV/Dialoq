@@ -50,7 +50,7 @@
 }
 
 .nav-user-name {
-  font-size: 1.1rem;
+  font-size: 0.95rem !important; /* Было 1.1rem */
   font-weight: 600;
   color: #1a1a1a;
   white-space: nowrap;
@@ -61,7 +61,7 @@
 }
 
 .nav-user-tag {
-  font-size: 0.85rem;
+  font-size: 0.75rem !important; /* Было 0.85rem */
   font-weight: 400;
   color: #888888;
   line-height: 1.2;
@@ -1253,4 +1253,32 @@ a:focus {
 /* 6. Сдвигаем контейнер с сообщениями вниз, чтобы они скроллились под парящей шапкой */
 .messages-container {
   padding-top: 80px !important; 
+}
+
+/* --- ИСПРАВЛЕНИЕ СТЕКЛА ДЛЯ КНОПКИ НАЗАД (СВЕТЛАЯ ТЕМА) --- */
+.mobile-back-btn:not(:hover), 
+.back-btn:not(:hover) {
+  /* Перезаписываем прозрачный фон на полупрозрачный белый */
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+
+.mobile-back-btn, 
+.back-btn {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+/* --- ПЛАВНЫЙ СКРОЛЛ СООБЩЕНИЙ ПОД ШАПКОЙ --- */
+@media (max-width: 768px) {
+  .messages-container {
+    /* Снимаем жесткое ограничение высоты, чтобы блок тянулся до самого верха */
+    height: auto !important; 
+    flex: 1 1 auto !important;
+    /* Отступ сверху сохраняем, чтобы самые первые сообщения не прятались навсегда под кнопками */
+    padding-top: 80px !important; 
+  }
 }
