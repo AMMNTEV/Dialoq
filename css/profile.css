@@ -591,3 +591,69 @@ a:focus {
     padding-top: 0 !important;
   }
 }
+
+/* ===== ПРОЗРАЧНАЯ ШАПКА И ПАРЯЩАЯ КНОПКА "НАЗАД" ===== */
+
+.profile-container {
+  position: relative !important;
+}
+
+/* Переводим шапку в прозрачный контейнер с точным позиционированием как у поиска/чата */
+.profile-header {
+  position: absolute !important;
+  top: 14px !important;
+  left: 0;
+  right: 0;
+  height: 70px !important;
+  z-index: 100;
+  background: transparent !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  padding: 0 16px !important;
+  display: flex !important;
+  align-items: center;
+  pointer-events: none; /* Пропускаем клики сквозь пустое пространство */
+}
+
+/* Стеклянная круглая кнопка "Назад" (1:1 как в messenger.css) */
+.profile-header .back-btn {
+  pointer-events: auto !important;
+  width: 44px !important;
+  height: 44px !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin: 0 !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  color: #1a1a1a;
+  transition: all 0.2s ease;
+}
+
+.profile-header .back-btn:hover {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #3b82f6 !important;
+}
+
+/* Компенсируем верхний отступ колонок профиля под парящую кнопку */
+.profile-two-columns {
+  padding-top: 70px !important;
+}
+
+/* Мобильная адаптация позиционирования */
+@media (max-width: 768px) {
+  .profile-header {
+    top: 0 !important;
+    height: auto !important;
+    padding: 10px 16px 10px 4px !important;
+  }
+
+  .profile-two-columns {
+    padding-top: 52px !important;
+  }
+}

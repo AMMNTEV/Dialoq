@@ -970,6 +970,20 @@ a:focus {
   background: rgba(32, 36, 45, 0.9) !important;
 }
 
+/* Тёмное стекло кнопки "Назад" в профиле */
+.dark-theme .profile-header .back-btn {
+  background: rgba(22, 25, 32, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .profile-header .back-btn:hover {
+  background: rgba(32, 36, 45, 0.9) !important;
+  color: var(--accent) !important;
+}
+
 /* ==========================================
    КОНЕЦ DARK THEME
    ========================================== */
