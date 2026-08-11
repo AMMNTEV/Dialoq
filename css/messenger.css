@@ -1383,3 +1383,67 @@ a:focus {
   border: 1px solid rgba(0, 0, 0, 0.08) !important;
   box-shadow: none !important; /* Убираем грубую тень, оставляем чистое стекло с легкой рамкой */
 }
+
+/* ==========================================
+   УНИФИКАЦИЯ КНОПОК "НАЗАД" (ПРОФИЛЬ И МЕССЕНДЖЕР)
+   ========================================== */
+
+@media (max-width: 768px) {
+  /* 1. Синхронизируем шапки (контейнеры кнопок) */
+  .chat-header,
+  .profile-header {
+    min-height: 64px !important; /* Одинаковая минимальная высота */
+    height: auto !important;
+    padding: 10px 16px !important; /* Строго одинаковые отступы со всех сторон */
+    display: flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Прижимаем шапку профиля к самому верху, если она позиционируется абсолютно */
+  .profile-header {
+    top: 0 !important;
+  }
+
+  /* 2. Делаем сами кнопки абсолютно идентичными */
+  .mobile-back-btn,
+  .profile-header .back-btn {
+    width: 44px !important;
+    height: 44px !important;
+    margin: 0 !important; /* Убираем все старые сдвиги (margin-left: -6px и т.д.) */
+    margin-right: 12px !important; /* Единый отступ справа до аватарки/текста */
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    border-radius: 50% !important;
+    
+    /* Единый стеклянный эффект для светлой темы */
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    color: #1a1a1a !important;
+    box-shadow: none !important;
+    transition: all 0.2s ease !important;
+  }
+
+  /* 3. Одинаковый размер иконок внутри кнопок */
+  .mobile-back-btn svg,
+  .profile-header .back-btn svg {
+    width: 24px !important;
+    height: 24px !important;
+    stroke-width: 1.8 !important;
+  }
+}
+
+/* 4. Синхронизация цветов для Темной Темы */
+@media (max-width: 768px) {
+  .dark-theme .mobile-back-btn,
+  .dark-theme .profile-header .back-btn {
+    background: rgba(22, 25, 32, 0.85) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: var(--text-primary) !important;
+  }
+}
