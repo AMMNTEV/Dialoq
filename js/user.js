@@ -189,7 +189,12 @@ window.toggleLike = async function(postId) {
 };
 
 function goToUserChat() {
-  if (userId) {
+  // Если мы перешли на профиль из мессенджера, возвращаемся на шаг назад без перезагрузки
+  if (document.referrer && document.referrer.includes('messenger.html')) {
+    window.history.back();
+  } 
+  // Если профиль был открыт по прямой ссылке (без истории), используем ваш старый метод
+  else if (userId) {
     window.location.href = `messenger.html?openUser=${userId}`;
   } else {
     window.location.href = 'messenger.html';
