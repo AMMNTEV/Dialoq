@@ -18,7 +18,6 @@ if (!userId) window.location.href = 'messenger.html';
 
 let unsubscribePosts = null;
 
-
 onAuthStateChanged(async (user) => {
   if (!user || !user.emailVerified) {
     window.location.href = 'index.html';
@@ -43,7 +42,6 @@ onAuthStateChanged(async (user) => {
       return;
     }
     const userData = userDoc.data();
-    localStorage.setItem(`cachedUser_${userId}`, JSON.stringify(userData));
     
     const firstLetter = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
 
@@ -188,11 +186,3 @@ window.toggleLike = async function(postId) {
     console.error('Ошибка при переключении лайка:', error);
   }
 };
-
-function goToUserChat() {
-  if (userId) {
-    window.location.href = `messenger.html?openUser=${userId}`;
-  } else {
-    window.location.href = 'messenger.html';
-  }
-}
