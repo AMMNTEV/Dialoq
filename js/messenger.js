@@ -46,10 +46,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   } else if (lastUid && window.innerWidth > 768) {
-    // 3. Если нет ссылки, но мы на ПК — достаем последний активный чат!
-    const lastActiveChatStr = localStorage.getItem(`lastOpenedChat_${lastUid}`);
-    if (lastActiveChatStr) {
-      try { chatToRestore = JSON.parse(lastActiveChatStr); } catch(e) {}
+    // === НЕ ВОССТАНАВЛИВАЕМ ЧАТ, ЕСЛИ ПОЛЬЗОВАТЕЛЬ ВЫШЕЛ ===
+    if (!userExited) {
+      const lastActiveChatStr = localStorage.getItem(`lastOpenedChat_${lastUid}`);
+      if (lastActiveChatStr) {
+        try { chatToRestore = JSON.parse(lastActiveChatStr); } catch(e) {}
+      }
     }
   }
 
@@ -400,6 +402,7 @@ let selectedMessageId = null;
 let unreadCounts = {};
 let isCreatingGroup = false;
 let isNewChatPending = false;
+let userExitedChat = false;
 
 // Глобальные множества для хранения выбранных ID пользователей
 let selectedUsersForCreate = new Set();
@@ -870,8 +873,12 @@ async function createPrivateChat(userId, nickname, tag) {
 
 // ========== ВЫБОР ЧАТА ==========
 async function selectChat(chat) {
-  const lastUid = currentUser?.uid || localStorage.getItem('lastUid');
-  if (lastUid) localStorage.setItem(`lastOpenedChat_${lastUid}`, JSON.stringify(chat));
+    const lastUid = currentUser?.uid || localStorage.getItem('lastUid');
+  if (lastUid) {
+    // Очищаем флаг выхода из чата, так как пользователь заходит в чат
+    localStorage.removeItem(`userExitedChat_${lastUid}`);
+    localStorage.setItem(`lastOpenedChat_${lastUid}`, JSON.stringify(chat));
+  }
 
   if (unsubscribeMessages) {
     unsubscribeMessages();
@@ -1680,7 +1687,8 @@ function exitChatMode() {
 
   const lastUid = currentUser?.uid || localStorage.getItem('lastUid');
   if (lastUid) {
-    // Очищаем информацию о последнем открытом чате, чтобы при обновлении страницы он не восстанавливался
+    userExitedChat = true;
+    localStorage.setItem(`userExitedChat_${lastUid}`, 'true');
     localStorage.removeItem(`lastOpenedChat_${lastUid}`);
   }
 
