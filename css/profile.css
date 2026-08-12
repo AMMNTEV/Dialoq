@@ -766,3 +766,51 @@ a:focus {
     flex: none !important;
   }
 }
+
+/* ========== ЛАЙКИ ========== */
+.post-footer {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+}
+
+.like-btn {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #999;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  margin-left: -6px; /* Компенсируем padding для ровного края */
+}
+
+.like-btn:hover {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.like-btn svg {
+  transition: all 0.2s ease;
+}
+
+/* Состояние, когда лайк поставлен */
+.like-btn.liked {
+  color: #ef4444; 
+}
+
+.like-btn.liked:hover {
+  background: #fee2e2;
+}
+
+.like-btn.liked svg {
+  fill: #ef4444;     /* Заливаем сердечко красным */
+  stroke: #ef4444;   /* Красная обводка */
+}
