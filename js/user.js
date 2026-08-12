@@ -94,10 +94,27 @@ async function loadPosts(targetUserId) {
           if (post.createdAt) {
             try { date = new Date(post.createdAt.toDate()).toLocaleString(); } catch(e) { date = t('justNow'); }
           }
+          
+          // Логика лайков
+          const likedBy = post.likedBy || [];
+          const likesCount = likedBy.length;
+          const isLiked = currentUser && likedBy.includes(currentUser.uid);
+          const heartClass = isLiked ? 'like-btn liked' : 'like-btn';
+
           postsHTML += `
             <div class="post-card">
               <div class="post-header"><span class="post-date">${date}</span></div>
               <div class="post-content">${post.content ? post.content.replace(/\n/g, '<br>') : ''}</div>
+              
+              <!-- Подвал поста с лайком -->
+              <div class="post-footer">
+                <button class="${heartClass}" onclick="toggleLike('${doc.id}')">
+                  <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                  </svg>
+                  <span class="like-count">${likesCount > 0 ? likesCount : ''}</span>
+                </button>
+              </div>
             </div>
           `;
         });
@@ -145,3 +162,28 @@ function updateSidebarUser(userData) {
     }
   }
 }
+
+window.toggleLike = async function(postId) {
+  if (!currentUser) return;
+  const postRef = db.collection('posts').doc(postId);
+  
+  try {
+    const doc = await postRef.get();
+    if (!doc.exists) return;
+    
+    const postData = doc.data();
+    const likedBy = postData.likedBy || [];
+    
+    if (likedBy.includes(currentUser.uid)) {
+      await postRef.update({
+        likedBy: firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
+      });
+    } else {
+      await postRef.update({
+        likedBy: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+      });
+    }
+  } catch (error) {
+    console.error('Ошибка при переключении лайка:', error);
+  }
+};
