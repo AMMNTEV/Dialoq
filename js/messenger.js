@@ -5,16 +5,57 @@ let changes = {};
 
 // ========== МГНОВЕННАЯ ОТРИСОВКА (ДО ЗАПУСКА FIREBASE) ==========
 document.addEventListener("DOMContentLoaded", () => {
-  // Смотрим, кто был авторизован при последнем открытии приложения
   const lastUid = localStorage.getItem('lastUid');
-
-  // === МГНОВЕННЫЙ ПЕРЕХОД В ЧАТ ПО URL ===
+  
+  // === МГНОВЕННЫЙ ПЕРЕХОД В ЧАТ ПО URL ИЛИ ИЗ КЭША ===
   const urlParams = new URLSearchParams(window.location.search);
   const openUserId = urlParams.get('openUser');
+  const chatHeader = document.getElementById('chatHeader');
+  const messagesContainer = document.getElementById('messagesContainer');
+  const messageInputArea = document.getElementById('messageInputArea');
+
+  let chatToRestore = null;
 
   if (openUserId) {
-    // Включаем мобильный режим чата моментально, если экран маленький
-    if (window.innerWidth <= 768) {
+    // 1. Ищем в кэше профиля юзера
+    const cachedUserStr = localStorage.getItem(`cachedUser_${openUserId}`);
+    if (cachedUserStr) {
+      try {
+        const uData = JSON.parse(cachedUserStr);
+        chatToRestore = {
+          id: 'temp_' + openUserId,
+          participants: [lastUid || '', openUserId],
+          isGroup: false,
+          displayName: uData.nickname || 'Пользователь',
+          displayAvatar: uData.tag || '',
+          chatImage: uData.avatar || uData.bitmap || uData.photo || null,
+          isNew: true
+        };
+      } catch(e) {}
+    }
+    
+    // 2. ИДЕЯ РЕАЛИЗОВАНА: Если нет в профиле, ищем в кэшированном СПИСКЕ ЧАТОВ
+    if (!chatToRestore && lastUid) {
+      const cachedChatsStr = localStorage.getItem(`cachedChats_${lastUid}`);
+      if (cachedChatsStr) {
+        try {
+          const chats = JSON.parse(cachedChatsStr);
+          const found = chats.find(c => !c.isGroup && c.participants && c.participants.includes(openUserId));
+          if (found) chatToRestore = found;
+        } catch(e) {}
+      }
+    }
+  } else if (lastUid && window.innerWidth > 768) {
+    // 3. Если нет ссылки, но мы на ПК — достаем последний активный чат!
+    const lastActiveChatStr = localStorage.getItem(`lastOpenedChat_${lastUid}`);
+    if (lastActiveChatStr) {
+      try { chatToRestore = JSON.parse(lastActiveChatStr); } catch(e) {}
+    }
+  }
+
+  // === ЕСЛИ НАШЛИ ЧАТ ДЛЯ ОТРИСОВКИ — РИСУЕМ ЕГО ЗА 0 МС ===
+  if (chatToRestore && chatHeader) {
+    if (window.innerWidth <= 768 && openUserId) {
       document.body.classList.add('chat-mode');
       const bottomNav = document.getElementById('mobileBottomNav');
       const chatsSidebar = document.getElementById('chatsSidebar');
@@ -22,76 +63,85 @@ document.addEventListener("DOMContentLoaded", () => {
       if (chatsSidebar) chatsSidebar.style.display = 'none';
     }
 
-    const chatHeader = document.getElementById('chatHeader');
-    // Пытаемся достать данные пользователя из кэша для моментальной отрисовки
-    const cachedTargetUser = localStorage.getItem(`cachedUser_${openUserId}`);
+    let avatarContent = chatToRestore.chatImage 
+      ? `<img src="${chatToRestore.chatImage}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` 
+      : (chatToRestore.displayName ? chatToRestore.displayName.charAt(0).toUpperCase() : '?');
     
-    if (cachedTargetUser && chatHeader) {
-      try {
-        const user = JSON.parse(cachedTargetUser);
-        let avatarContent = user.avatar 
-          ? `<img src="${user.avatar}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` 
-          : (user.nickname ? user.nickname.charAt(0).toUpperCase() : '?');
-        
-        const backIconSvg = `<svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>`;
-        
-        chatHeader.innerHTML = `
-          <button class="mobile-back-btn" onclick="exitChatMode()">${backIconSvg}</button>
-          <div class="selected-chat">
-            <div class="chat-avatar-placeholder large" style="overflow:hidden; display:flex; align-items:center; justify-content:center; padding:0;">${avatarContent}</div>
-            <div class="chat-info">
-              <h3>${user.nickname || 'Пользователь'}</h3>
-              <p>${user.tag || ''}</p>
-            </div>
-          </div>
-        `;
-      } catch(e) {
-        // Если кэш сломан, просто пишем "Загрузка..."
-        chatHeader.innerHTML = `<div class="loading">Загрузка чата...</div>`;
-      }
-    } else if (chatHeader) {
-      // Если кэша нет, убираем надпись "Выберите чат" и показываем загрузку
-      chatHeader.innerHTML = `<div class="loading">Загрузка чата...</div>`;
+    const backIconSvg = `<svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>`;
+    
+    const pCount = chatToRestore.isGroup && chatToRestore.participants ? chatToRestore.participants.length : 2;
+    const subtitle = chatToRestore.isGroup ? `${pCount} участников` : (chatToRestore.displayAvatar || '');
+
+    // Рисуем шапку
+    chatHeader.innerHTML = `
+      <button class="mobile-back-btn" onclick="exitChatMode()">${backIconSvg}</button>
+      <div class="selected-chat">
+        <div class="chat-avatar-placeholder large" style="overflow:hidden; display:flex; align-items:center; justify-content:center; padding:0;">${avatarContent}</div>
+        <div class="chat-info">
+          <h3>${chatToRestore.displayName || 'Пользователь'}</h3>
+          <p>${subtitle}</p>
+        </div>
+      </div>
+    `;
+
+    // Рисуем лоадер сообщений и инпут
+    if (messagesContainer) {
+      const loadingText = typeof t === 'function' ? t('loadingMessages') : 'Загрузка сообщений...';
+      messagesContainer.innerHTML = `<div class="loading">${loadingText}</div>`;
     }
+    if (messageInputArea) {
+      const placeholderText = typeof t === 'function' ? t('typeMessage') : 'Напишите сообщение...';
+      messageInputArea.innerHTML = `
+        <textarea id="messageInput" placeholder="${placeholderText}" rows="1" oninput="autoResize(this)" onkeydown="handleEnter(event)"></textarea>
+        <button onclick="sendMessage()" id="sendButton">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        </button>
+      `;
+      messageInputArea.style.display = 'flex';
+    }
+
+    // Восстанавливаем глобальные переменные для логики мессенджера
+    selectedChat = chatToRestore;
+    currentChatId = chatToRestore.id;
+    if (chatToRestore.id.startsWith('temp_') || chatToRestore.isNew) {
+        isNewChatPending = true;
+    }
+  } else if (chatHeader && openUserId) {
+    chatHeader.innerHTML = `<div class="loading">Загрузка чата...</div>`;
   }
-  
+
+  // === ДАЛЕЕ МГНОВЕННАЯ ОТРИСОВКА ПРОФИЛЯ И СПИСКА ЧАТОВ ===
   if (lastUid) {
-    // 1. Мгновенно загружаем данные пользователя
     const cachedUserStr = localStorage.getItem(`cachedCurrentUser_${lastUid}`);
     if (cachedUserStr) {
       currentUserData = JSON.parse(cachedUserStr);
-      
-      // Отрисовываем левую панель и аватарку за 0 миллисекунд
       if (typeof updateSidebarUser === 'function') updateSidebarUser(currentUserData);
       
-      // Если мы на странице профиля — мгновенно рисуем инфу профиля
-if (document.getElementById('profileInfo') && typeof loadProfileInfo === 'function') {
-  loadProfileInfo();
-  const avatarDiv = document.getElementById('profileAvatar');
-  if (avatarDiv) {
-    if (currentUserData.avatar) {
-      avatarDiv.innerHTML = `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
-      avatarDiv.style.background = 'transparent'; // Делаем прозрачным
-    } else {
-      avatarDiv.innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
-      avatarDiv.style.background = '#3b82f6'; // Возвращаем фон для буквы
-    }
-  }
-}
-    
-    // 2. Мгновенно загружаем список чатов (если мы в мессенджере)
-    if (document.getElementById('chatsList')) {
-      const cachedChats = localStorage.getItem(`cachedChats_${lastUid}`);
-      const cachedUnreads = localStorage.getItem(`cachedUnreads_${lastUid}`);
-      if (cachedChats) {
-        allChats = JSON.parse(cachedChats);
-        if (cachedUnreads) unreadCounts = JSON.parse(cachedUnreads);
-        // Сразу выводим чаты на экран
-        if (typeof displayChats === 'function') displayChats(allChats);
+      if (document.getElementById('profileInfo') && typeof loadProfileInfo === 'function') {
+        loadProfileInfo();
+        const avatarDiv = document.getElementById('profileAvatar');
+        if (avatarDiv) {
+          if (currentUserData.avatar) {
+            avatarDiv.innerHTML = `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
+            avatarDiv.style.background = 'transparent';
+          } else {
+            avatarDiv.innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
+            avatarDiv.style.background = '#3b82f6';
+          }
+        }
+      }
+      
+      if (document.getElementById('chatsList')) {
+        const cachedChats = localStorage.getItem(`cachedChats_${lastUid}`);
+        const cachedUnreads = localStorage.getItem(`cachedUnreads_${lastUid}`);
+        if (cachedChats) {
+          allChats = JSON.parse(cachedChats);
+          if (cachedUnreads) unreadCounts = JSON.parse(cachedUnreads);
+          if (typeof displayChats === 'function') displayChats(allChats);
+        }
       }
     }
   }
-}
 });
 
 onAuthStateChanged(async (user) => {
@@ -820,6 +870,9 @@ async function createPrivateChat(userId, nickname, tag) {
 
 // ========== ВЫБОР ЧАТА ==========
 async function selectChat(chat) {
+  const lastUid = currentUser?.uid || localStorage.getItem('lastUid');
+  if (lastUid) localStorage.setItem(`lastOpenedChat_${lastUid}`, JSON.stringify(chat));
+
   if (unsubscribeMessages) {
     unsubscribeMessages();
     unsubscribeMessages = null;
@@ -1625,6 +1678,9 @@ function exitChatMode() {
   isChatMode = false;
   document.body.classList.remove('chat-mode');
 
+  const lastUid = currentUser?.uid || localStorage.getItem('lastUid');
+  if (lastUid) localStorage.removeItem(`lastOpenedChat_${lastUid}`);
+
   // Возвращаем нижнюю панель ТОЛЬКО на мобильных устройствах и в неактивном режиме чата
   const bottomNav = document.getElementById('mobileBottomNav');
   if (bottomNav) {
@@ -1868,95 +1924,3 @@ function formatMessageText(text) {
   // Заменяем переносы строк на теги <br>
   return linkedText.replace(/\n/g, '<br>');
 }
-
-
-// ========== МГНОВЕННОЕ ОТКРЫТИЕ КОСТЯКА ЧАТА ПО URL (ДО FIREBASE) ==========
-function checkAndOpenUrlChat() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const openUserId = urlParams.get('openUser');
-  if (!openUserId) return;
-
-  // 1. Пытаемся достать данные пользователя из кэша
-  let nickname = 'Загрузка...';
-  let tag = '';
-  let avatar = null;
-
-  const cachedUserStr = localStorage.getItem(`cachedUser_${openUserId}`);
-  if (cachedUserStr) {
-    try {
-      const uData = JSON.parse(cachedUserStr);
-      nickname = uData.nickname || nickname;
-      tag = uData.tag || tag;
-      avatar = uData.avatar || uData.bitmap || uData.photo || uData.profileImage || null;
-    } catch(e) {}
-  }
-
-  // Если данных в cachedUser нет, ищем в кэше чатов
-  const lastUid = localStorage.getItem('lastUid');
-  let existingChatId = null;
-  if (lastUid) {
-    const cachedChatsStr = localStorage.getItem(`cachedChats_${lastUid}`);
-    if (cachedChatsStr) {
-      try {
-        const chats = JSON.parse(cachedChatsStr);
-        const found = chats.find(c => !c.isGroup && c.participants && c.participants.includes(openUserId));
-        if (found) {
-          existingChatId = found.id;
-          if (nickname === 'Загрузка...') nickname = found.displayName || nickname;
-          if (!tag) tag = found.displayAvatar || '';
-          if (!avatar) avatar = found.chatImage || null;
-        }
-      } catch(e) {}
-    }
-  }
-
-  // 2. Создаем временный объект чата
-  const tempChat = {
-    id: existingChatId || ('temp_' + openUserId),
-    participants: [lastUid || '', openUserId],
-    isGroup: false,
-    displayName: nickname,
-    displayAvatar: tag,
-    chatImage: avatar,
-    isNew: !existingChatId
-  };
-
-  selectedChat = tempChat;
-  currentChatId = tempChat.id;
-
-  // 3. Мгновенно отрисовываем UI
-  const messagesContainer = document.getElementById('messagesContainer');
-  const messageInputArea = document.getElementById('messageInputArea');
-
-  // Лоадер в контейнере сообщений
-  if (messagesContainer) {
-    const loadingText = typeof t === 'function' ? t('loadingMessages') : 'Загрузка сообщений...';
-    messagesContainer.innerHTML = `<div class="loading">${loadingText}</div>`;
-  }
-
-  // Поле ввода сообщения
-  if (messageInputArea) {
-    const placeholderText = typeof t === 'function' ? t('typeMessage') : 'Напишите сообщение...';
-    messageInputArea.innerHTML = `
-      <textarea id="messageInput" placeholder="${placeholderText}" rows="1" oninput="autoResize(this)" onkeydown="handleEnter(event)"></textarea>
-      <button onclick="sendMessage()" id="sendButton" title="Отправить">
-        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 2L11 13"/>
-          <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
-        </svg>
-      </button>
-    `;
-    messageInputArea.style.display = 'flex';
-  }
-
-  // Шапка чата
-  updateChatHeader(tempChat);
-
-  // Для мобильных устройств — переключаем в режим чата
-  if (window.innerWidth <= 768) {
-    enterChatMode();
-  }
-}
-
-// Запускаем мгновенную отрисовку при загрузке документа
-document.addEventListener('DOMContentLoaded', checkAndOpenUrlChat);
