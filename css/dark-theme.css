@@ -986,18 +986,18 @@ a:focus {
 
 /* --- Лайки в темной теме --- */
 .dark-theme .like-btn.liked {
-  color: #ffffff !important; 
+  color: #ef4444 !important; 
 }
 
-/* Белая полупрозрачная подложка при наведении вместо красной */
+/* Красная полупрозрачная подложка при наведении */
 .dark-theme .like-btn.liked:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(239, 68, 68, 0.15) !important;
 }
 
-/* Заливаем само сердечко белым цветом */
+/* Заливаем само сердечко красным цветом */
 .dark-theme .like-btn.liked svg {
-  fill: #ffffff !important;
-  stroke: #ffffff !important;
+  fill: #ef4444 !important;
+  stroke: #ef4444 !important;
 }
 
 /* ==========================================
