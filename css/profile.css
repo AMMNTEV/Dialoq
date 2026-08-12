@@ -90,7 +90,8 @@
   background: white;
   border-radius: 24px;
   padding: 24px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  box-shadow: none !important; /* Убираем тень */
+  border: 1px solid #e2e8f0;   /* Добавляем обводку */
 }
 .profile-avatar-placeholder {
   text-align: center;
@@ -282,21 +283,24 @@
   background: white;
   border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  border: 1px solid #f0f0f0;
+  box-shadow: none !important; /* Убираем тень */
+  border: 1px solid #e2e8f0;   /* Обводка в цвет карточки профиля */
   transition: all 0.2s;
+  position: relative; /* <--- Добавлено для привязки крестика */
 }
 .post-card:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: none !important;
+  border-color: #cbd5e1;       /* При наведении делаем рамку чуть темнее */
 }
 .post-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #f0f0f0;
+  position: absolute; /* Делаем крестик независимым от текста */
+  top: 12px;          /* Отступ сверху */
+  right: 12px;        /* Отступ справа */
+  margin: 0;
+  padding: 0;
+  border: none;
 }
+
 .post-date {
   font-size: 0.8rem;
   color: #666;
@@ -498,19 +502,26 @@
     width: 100%;
   }
   .post-header {
-    margin-bottom: 8px;
-    padding-bottom: 6px;
-    width: 100%;
+    top: 10px;
+    right: 10px;
+    width: auto;
+    margin: 0;
+    padding: 0;
   }
   .post-date {
-    font-size: 0.7rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  white-space: nowrap;
   }
   .post-content {
-    font-size: 0.9rem;
-    line-height: 1.5;
-    width: 100%;
-    word-wrap: break-word;
-  }
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #1a1a1a;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  padding-right: 28px; /* <--- Добавлено: безопасная зона для крестика */
+  margin-top: 2px;     /* <--- Добавлено: выравнивание по уровню кнопки */
+}
   .delete-post-btn {
     width: 36px;
     height: 36px;
@@ -766,3 +777,55 @@ a:focus {
     flex: none !important;
   }
 }
+
+/* ========== ЛАЙКИ ========== */
+.post-footer {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0; /* Полоску над футером можно оставить для эстетики */
+  display: flex;
+  justify-content: space-between; /* Раскидываем лайки налево, дату направо */
+  align-items: center;
+}
+
+.like-btn {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #999;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  margin-left: -6px; /* Компенсируем padding для ровного края */
+}
+
+.like-btn:hover {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.like-btn svg {
+  transition: all 0.2s ease;
+  width: 16px !important;  /* Принудительно уменьшаем размер SVG */
+  height: 16px !important;
+}
+
+/* Состояние, когда лайк поставлен */
+.like-btn.liked {
+  color: #ef4444; 
+}
+
+.like-btn.liked:hover {
+  background: #fee2e2;
+}
+
+.like-btn.liked svg {
+  fill: #ef4444;     /* Заливаем сердечко красным */
+  stroke: #ef4444;   /* Красная обводка */
+}
+

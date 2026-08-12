@@ -984,6 +984,22 @@ a:focus {
   color: var(--accent) !important;
 }
 
+/* --- Лайки в темной теме --- */
+.dark-theme .like-btn.liked {
+  color: #ef4444 !important; 
+}
+
+/* Красная полупрозрачная подложка при наведении */
+.dark-theme .like-btn.liked:hover {
+  background: rgba(239, 68, 68, 0.15) !important;
+}
+
+/* Заливаем само сердечко красным цветом */
+.dark-theme .like-btn.liked svg {
+  fill: #ef4444 !important;
+  stroke: #ef4444 !important;
+}
+
 /* ==========================================
    КОНЕЦ DARK THEME
    ========================================== */
