@@ -7,6 +7,53 @@ let changes = {};
 document.addEventListener("DOMContentLoaded", () => {
   // Смотрим, кто был авторизован при последнем открытии приложения
   const lastUid = localStorage.getItem('lastUid');
+
+  // === МГНОВЕННЫЙ ПЕРЕХОД В ЧАТ ПО URL ===
+  const urlParams = new URLSearchParams(window.location.search);
+  const openUserId = urlParams.get('openUser');
+
+  if (openUserId) {
+    // Включаем мобильный режим чата моментально, если экран маленький
+    if (window.innerWidth <= 768) {
+      document.body.classList.add('chat-mode');
+      const bottomNav = document.getElementById('mobileBottomNav');
+      const chatsSidebar = document.getElementById('chatsSidebar');
+      if (bottomNav) bottomNav.style.display = 'none';
+      if (chatsSidebar) chatsSidebar.style.display = 'none';
+    }
+
+    const chatHeader = document.getElementById('chatHeader');
+    // Пытаемся достать данные пользователя из кэша для моментальной отрисовки
+    const cachedTargetUser = localStorage.getItem(`cachedUser_${openUserId}`);
+    
+    if (cachedTargetUser && chatHeader) {
+      try {
+        const user = JSON.parse(cachedTargetUser);
+        let avatarContent = user.avatar 
+          ? `<img src="${user.avatar}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` 
+          : (user.nickname ? user.nickname.charAt(0).toUpperCase() : '?');
+        
+        const backIconSvg = `<svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>`;
+        
+        chatHeader.innerHTML = `
+          <button class="mobile-back-btn" onclick="exitChatMode()">${backIconSvg}</button>
+          <div class="selected-chat">
+            <div class="chat-avatar-placeholder large" style="overflow:hidden; display:flex; align-items:center; justify-content:center; padding:0;">${avatarContent}</div>
+            <div class="chat-info">
+              <h3>${user.nickname || 'Пользователь'}</h3>
+              <p>${user.tag || ''}</p>
+            </div>
+          </div>
+        `;
+      } catch(e) {
+        // Если кэш сломан, просто пишем "Загрузка..."
+        chatHeader.innerHTML = `<div class="loading">Загрузка чата...</div>`;
+      }
+    } else if (chatHeader) {
+      // Если кэша нет, убираем надпись "Выберите чат" и показываем загрузку
+      chatHeader.innerHTML = `<div class="loading">Загрузка чата...</div>`;
+    }
+  }
   
   if (lastUid) {
     // 1. Мгновенно загружаем данные пользователя
