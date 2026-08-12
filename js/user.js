@@ -17,7 +17,7 @@ const userId = urlParams.get('id');
 if (!userId) window.location.href = 'messenger.html';
 
 let unsubscribePosts = null;
-let currentUser = null;
+
 
 onAuthStateChanged(async (user) => {
   if (!user || !user.emailVerified) {
