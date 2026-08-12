@@ -299,12 +299,10 @@ function listenForNewPosts() {
         postsHTML += `
           <div class="post-card" id="post-${doc.id}">
             <div class="post-header">
-              <span class="post-date">${date}</span>
               <button onclick="deletePost('${doc.id}')" class="delete-post-btn">×</button>
             </div>
             <div class="post-content">${post.content ? post.content.replace(/\n/g, '<br>') : ''}</div>
             
-            <!-- Добавлен блок с лайком -->
             <div class="post-footer">
               <button class="${heartClass}" onclick="toggleLike('${doc.id}')">
                 <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -312,6 +310,7 @@ function listenForNewPosts() {
                 </svg>
                 <span class="like-count">${likesCount > 0 ? likesCount : ''}</span>
               </button>
+              <span class="post-date">${date}</span>
             </div>
           </div>
         `;
