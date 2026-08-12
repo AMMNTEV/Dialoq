@@ -1637,17 +1637,20 @@ onAuthStateChanged(async (user) => {
   }
   currentUser = user;
   localStorage.setItem('lastUid', user.uid);
-  await loadAllUsers();
-  await loadAllUsersForModal();
+
+  // Фоновая загрузка без await, чтобы не блокировать открытие чата
+  loadAllUsers();
+  loadAllUsersForModal();
   listenForChats();
 
-  // === АВТОМАТИЧЕСКОЕ ОТКРЫТИЕ ЧАТА ПО URL ===
+  // === АВТОМАТИЧЕСКОЕ ПОДКЛЮЧЕНИЕ К ЧАТУ ИЗ FIREBASE ПО URL ===
   const urlParams = new URLSearchParams(window.location.search);
   const openUserId = urlParams.get('openUser');
 
   if (openUserId) {
     const targetUser = await getUserById(openUserId);
     if (targetUser) {
+      localStorage.setItem(`cachedUser_${openUserId}`, JSON.stringify(targetUser));
       createPrivateChat(
         openUserId,
         targetUser.nickname || 'Пользователь',
@@ -1818,3 +1821,95 @@ function formatMessageText(text) {
   // Заменяем переносы строк на теги <br>
   return linkedText.replace(/\n/g, '<br>');
 }
+
+
+// ========== МГНОВЕННОЕ ОТКРЫТИЕ КОСТЯКА ЧАТА ПО URL (ДО FIREBASE) ==========
+function checkAndOpenUrlChat() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const openUserId = urlParams.get('openUser');
+  if (!openUserId) return;
+
+  // 1. Пытаемся достать данные пользователя из кэша
+  let nickname = 'Загрузка...';
+  let tag = '';
+  let avatar = null;
+
+  const cachedUserStr = localStorage.getItem(`cachedUser_${openUserId}`);
+  if (cachedUserStr) {
+    try {
+      const uData = JSON.parse(cachedUserStr);
+      nickname = uData.nickname || nickname;
+      tag = uData.tag || tag;
+      avatar = uData.avatar || uData.bitmap || uData.photo || uData.profileImage || null;
+    } catch(e) {}
+  }
+
+  // Если данных в cachedUser нет, ищем в кэше чатов
+  const lastUid = localStorage.getItem('lastUid');
+  let existingChatId = null;
+  if (lastUid) {
+    const cachedChatsStr = localStorage.getItem(`cachedChats_${lastUid}`);
+    if (cachedChatsStr) {
+      try {
+        const chats = JSON.parse(cachedChatsStr);
+        const found = chats.find(c => !c.isGroup && c.participants && c.participants.includes(openUserId));
+        if (found) {
+          existingChatId = found.id;
+          if (nickname === 'Загрузка...') nickname = found.displayName || nickname;
+          if (!tag) tag = found.displayAvatar || '';
+          if (!avatar) avatar = found.chatImage || null;
+        }
+      } catch(e) {}
+    }
+  }
+
+  // 2. Создаем временный объект чата
+  const tempChat = {
+    id: existingChatId || ('temp_' + openUserId),
+    participants: [lastUid || '', openUserId],
+    isGroup: false,
+    displayName: nickname,
+    displayAvatar: tag,
+    chatImage: avatar,
+    isNew: !existingChatId
+  };
+
+  selectedChat = tempChat;
+  currentChatId = tempChat.id;
+
+  // 3. Мгновенно отрисовываем UI
+  const messagesContainer = document.getElementById('messagesContainer');
+  const messageInputArea = document.getElementById('messageInputArea');
+
+  // Лоадер в контейнере сообщений
+  if (messagesContainer) {
+    const loadingText = typeof t === 'function' ? t('loadingMessages') : 'Загрузка сообщений...';
+    messagesContainer.innerHTML = `<div class="loading">${loadingText}</div>`;
+  }
+
+  // Поле ввода сообщения
+  if (messageInputArea) {
+    const placeholderText = typeof t === 'function' ? t('typeMessage') : 'Напишите сообщение...';
+    messageInputArea.innerHTML = `
+      <textarea id="messageInput" placeholder="${placeholderText}" rows="1" oninput="autoResize(this)" onkeydown="handleEnter(event)"></textarea>
+      <button onclick="sendMessage()" id="sendButton" title="Отправить">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 2L11 13"/>
+          <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
+        </svg>
+      </button>
+    `;
+    messageInputArea.style.display = 'flex';
+  }
+
+  // Шапка чата
+  updateChatHeader(tempChat);
+
+  // Для мобильных устройств — переключаем в режим чата
+  if (window.innerWidth <= 768) {
+    enterChatMode();
+  }
+}
+
+// Запускаем мгновенную отрисовку при загрузке документа
+document.addEventListener('DOMContentLoaded', checkAndOpenUrlChat);

@@ -43,6 +43,7 @@ onAuthStateChanged(async (user) => {
       return;
     }
     const userData = userDoc.data();
+    localStorage.setItem(`cachedUser_${userId}`, JSON.stringify(userData));
     
     const firstLetter = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
 
@@ -189,12 +190,7 @@ window.toggleLike = async function(postId) {
 };
 
 function goToUserChat() {
-  // Если мы перешли на профиль из мессенджера, возвращаемся на шаг назад без перезагрузки
-  if (document.referrer && document.referrer.includes('messenger.html')) {
-    window.history.back();
-  } 
-  // Если профиль был открыт по прямой ссылке (без истории), используем ваш старый метод
-  else if (userId) {
+  if (userId) {
     window.location.href = `messenger.html?openUser=${userId}`;
   } else {
     window.location.href = 'messenger.html';
