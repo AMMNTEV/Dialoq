@@ -1706,6 +1706,11 @@ window.addEventListener('popstate', function(event) {
 });
 
 function openUserProfile(userId) {
+  const lastUid = currentUser?.uid || localStorage.getItem('lastUid');
+  if (lastUid) {
+    // Сбрасываем последний активный чат, так как пользователь ушел в профиль
+    localStorage.removeItem(`lastOpenedChat_${lastUid}`);
+  }
   window.location.href = `user.html?id=${userId}`;
 }
 
