@@ -1500,3 +1500,55 @@ a:focus {
   max-width: 100% !important;
   display: block !important;
 }
+
+/* ==========================================
+   ФИНАЛЬНОЕ ИСПРАВЛЕНИЕ: ПРЫЖОК КНОПКИ И ОТСТУП
+   ========================================== */
+
+/* 1. Строгая синхронизация шапок (Чат и Профиль) */
+.chat-header,
+.profile-header {
+  display: flex !important;
+  align-items: center !important;
+  
+  /* Единые отступы! Именно из-за разницы padding кнопка прыгала по вертикали */
+  padding: 12px 16px !important; 
+  
+  /* Маленький отступ между кнопкой "Назад" и карточкой собеседника (уменьшили) */
+  gap: 6px !important; 
+  
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
+/* На мобильных фиксируем шапки сверху */
+@media (max-width: 768px) {
+  .chat-header,
+  .profile-header {
+    position: absolute !important;
+    top: 0 !important;
+  }
+}
+
+/* 2. Очищаем кнопку "Назад" от конфликтующих сдвигов */
+.mobile-back-btn,
+.profile-header .back-btn,
+.back-btn {
+  width: 44px !important;
+  height: 44px !important;
+  
+  /* Убираем старые margin-right: 12px и margin-left: -6px, из-за которых ломалась позиция */
+  margin: 0 !important; 
+  padding: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+/* 3. Корректируем ширину карточки под новый уменьшенный отступ (44px кнопка + 6px gap = 50px) */
+.selected-chat {
+  max-width: calc(100% - 50px) !important;
+}
+
+/* Сохраняем нижний отступ исключительно для страницы профиля, чтобы контент не наезжал */
+.profile-header {
+  margin-bottom: 16px !important;
+}
