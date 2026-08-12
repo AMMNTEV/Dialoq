@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let chatToRestore = null;
 
-  if (openUserId) {
+    if (openUserId) {
     // 1. Ищем в кэше профиля юзера
     const cachedUserStr = localStorage.getItem(`cachedUser_${openUserId}`);
     if (cachedUserStr) {
@@ -1716,7 +1716,8 @@ window.addEventListener('popstate', function(event) {
 function openUserProfile(userId) {
   const lastUid = currentUser?.uid || localStorage.getItem('lastUid');
   if (lastUid) {
-    // Сбрасываем последний активный чат, так как пользователь ушел в профиль
+    // Устанавливаем флаг, что мы вышли из чата перед переходом в профиль
+    localStorage.setItem(`userExitedChat_${lastUid}`, 'true');
     localStorage.removeItem(`lastOpenedChat_${lastUid}`);
   }
   window.location.href = `user.html?id=${userId}`;
