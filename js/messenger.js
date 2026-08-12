@@ -7,6 +7,9 @@ let changes = {};
 document.addEventListener("DOMContentLoaded", () => {
   const lastUid = localStorage.getItem('lastUid');
   
+  // === ПРОВЕРЯЕМ, НЕ ВЫШЕЛ ЛИ ПОЛЬЗОВАТЕЛЬ ИЗ ЧАТА ===
+  const userExited = localStorage.getItem(`userExitedChat_${lastUid}`) === 'true';
+  
   // === МГНОВЕННЫЙ ПЕРЕХОД В ЧАТ ПО URL ИЛИ ИЗ КЭША ===
   const urlParams = new URLSearchParams(window.location.search);
   const openUserId = urlParams.get('openUser');
@@ -16,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let chatToRestore = null;
 
-    if (openUserId) {
+  if (openUserId) {
     // 1. Ищем в кэше профиля юзера
     const cachedUserStr = localStorage.getItem(`cachedUser_${openUserId}`);
     if (cachedUserStr) {
