@@ -187,3 +187,11 @@ window.toggleLike = async function(postId) {
     console.error('Ошибка при переключении лайка:', error);
   }
 };
+
+function goToUserChat() {
+  if (userId) {
+    window.location.href = `messenger.html?openUser=${userId}`;
+  } else {
+    window.location.href = 'messenger.html';
+  }
+}

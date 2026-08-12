@@ -1640,6 +1640,21 @@ onAuthStateChanged(async (user) => {
   await loadAllUsers();
   await loadAllUsersForModal();
   listenForChats();
+
+  // === АВТОМАТИЧЕСКОЕ ОТКРЫТИЕ ЧАТА ПО URL ===
+  const urlParams = new URLSearchParams(window.location.search);
+  const openUserId = urlParams.get('openUser');
+
+  if (openUserId) {
+    const targetUser = await getUserById(openUserId);
+    if (targetUser) {
+      createPrivateChat(
+        openUserId,
+        targetUser.nickname || 'Пользователь',
+        targetUser.tag || ''
+      );
+    }
+  }
 });
 
 // Функция обновления карточки пользователя в боковой панели
