@@ -536,12 +536,9 @@ function listenForChats() {
         unreadCounts = newUnreadCounts;
         allChats = filteredChats;
         allChats.sort((a, b) => {
-          const unreadA = unreadCounts[a.id] || 0;
-          const unreadB = unreadCounts[b.id] || 0;
-          if (unreadB !== unreadA) return unreadB - unreadA;
           const timeA = a.lastMessageTime || a.createdAt || new Date(0);
           const timeB = b.lastMessageTime || b.createdAt || new Date(0);
-          return timeB - timeA;
+          return timeB - timeA; 
         });
 
         // 3. ОБНОВЛЕНИЕ КЭША НОВЫМИ ДАННЫМИ ИЗ БАЗЫ
