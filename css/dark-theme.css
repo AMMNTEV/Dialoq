@@ -903,6 +903,87 @@ a:focus {
   color: var(--text-primary) !important;
 }
 
+/* --- Исправление фона поля ввода и заглушки в тёмной теме --- */
+.dark-theme .message-input-area textarea {
+  background: var(--bg-input) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .message-input-area textarea:focus {
+  background: var(--bg-secondary) !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 4px var(--accent-glow) !important;
+}
+
+.dark-theme .deleted-user-stub {
+  background: var(--bg-input) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-muted) !important;
+}
+
+/* --- Ссылки внутри сообщений и карточек для темной темы --- */
+.dark-theme .message a,
+.dark-theme .post-content a,
+.dark-theme .about-content a,
+.dark-theme .chat-last-message a {
+  color: var(--accent-hover) !important;
+  text-decoration: underline;
+}
+
+.dark-theme .message a:hover,
+.dark-theme .post-content a:hover,
+.dark-theme .about-content a:hover,
+.dark-theme .chat-last-message a:hover {
+  color: #ffffff !important;
+}
+
+/* Если ссылки находятся внутри вашего сообщения (.my-message фон синий): */
+.dark-theme .my-message a {
+  color: #ffffff !important;
+  text-decoration: underline;
+}
+
+.dark-theme .my-message a:hover {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* --- ИСПРАВЛЕНИЕ ШАПКИ ЧАТА ДЛЯ ТЕМНОЙ ТЕМЫ --- */
+.dark-theme .chat-header {
+  background: transparent !important; /* Сама полоса шапки должна быть прозрачной */
+}
+
+/* Делаем плавающие элементы шапки темным стеклом */
+.dark-theme .selected-chat,
+.dark-theme .mobile-back-btn,
+.dark-theme .back-btn {
+  background: rgba(22, 25, 32, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Отменяем прозрачность при наведении в темной теме, чтобы стекло не пропадало */
+.dark-theme .back-btn:hover,
+.dark-theme .mobile-back-btn:hover {
+  background: rgba(32, 36, 45, 0.9) !important;
+}
+
+/* Тёмное стекло кнопки "Назад" в профиле */
+.dark-theme .profile-header .back-btn {
+  background: rgba(22, 25, 32, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .profile-header .back-btn:hover {
+  background: rgba(32, 36, 45, 0.9) !important;
+  color: var(--accent) !important;
+}
+
 /* ==========================================
    КОНЕЦ DARK THEME
    ========================================== */

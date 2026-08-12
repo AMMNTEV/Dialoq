@@ -277,7 +277,7 @@ function listenForNewPosts() {
               <span class="post-date">${date}</span>
               <button onclick="deletePost('${doc.id}')" class="delete-post-btn">×</button>
             </div>
-            <div class="post-content">${post.content ? post.content.replace(/\n/g, '<br>') : ''}</div>
+            <div class="post-content">${post.content ? formatMessageText(post.content) : ''}</div>
           </div>
         `;
       });
@@ -852,8 +852,8 @@ function updateChatHeader(chat) {
   if (chat.isGroup) {
     const participantsCount = chat.participants ? chat.participants.length : 2;
     headerContent = `
+      <button class="mobile-back-btn" onclick="exitChatMode()">${backIconSvg}</button>
       <div class="selected-chat" onclick="openChatInfo('${chat.id}')">
-        <button class="mobile-back-btn" onclick="event.stopPropagation(); exitChatMode()">${backIconSvg}</button>
         <div class="chat-avatar-placeholder large" style="overflow:hidden; display:flex; align-items:center; justify-content:center; padding:0;">${avatarContent}</div>
         <div class="chat-info">
           <h3>${chat.displayName}</h3>
@@ -864,8 +864,8 @@ function updateChatHeader(chat) {
   } else {
     const otherUserId = chat.participants.find(id => id !== currentUser.uid);
     headerContent = `
+      <button class="mobile-back-btn" onclick="exitChatMode()">${backIconSvg}</button>
       <div class="selected-chat" onclick="openUserProfile('${otherUserId}')">
-        <button class="mobile-back-btn" onclick="event.stopPropagation(); exitChatMode()">${backIconSvg}</button>
         <div class="chat-avatar-placeholder large" style="overflow:hidden; display:flex; align-items:center; justify-content:center; padding:0;">${avatarContent}</div>
         <div class="chat-info">
           <h3>${chat.displayName}</h3>
@@ -1048,7 +1048,7 @@ async function loadMessages(showLoading = false) {
           <div class="message ${isMyMessage ? 'my-message' : 'other-message'}" id="msg-${msg.id}">
             ${deleteOption}
             ${senderInfo}
-            <div class="message-content">${msg.text.replace(/\n/g, '<br>')}</div>
+            <div class="message-content">${formatMessageText(msg.text)}</div>
             <div class="message-time">${time}</div>
           </div>
         `;
@@ -1134,7 +1134,7 @@ function listenForNewMessages() {
             <div class="message ${isMyMessage ? 'my-message' : 'other-message'}" id="msg-${msgId}">
               ${deleteOption}
               ${senderInfo}
-              <div class="message-content">${msg.text.replace(/\n/g, '<br>')}</div>
+              <div class="message-content">${formatMessageText(msg.text)}</div>
               <div class="message-time">${time}</div>
             </div>
           `;
@@ -1779,4 +1779,27 @@ function handleEnter(e) {
     sendMessage(); 
     e.target.style.height = 'auto'; // Схлопываем поле обратно после отправки
   }
+}
+
+function formatMessageText(text) {
+  if (!text) return '';
+  
+  // Экранируем HTML, чтобы избежать XSS-атак
+  const escapedText = text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+  // Регулярное выражение для поиска ссылок
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+  // Превращаем найденные URL в кликабельные ссылки
+  const linkedText = escapedText.replace(urlRegex, (url) => {
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline;">${url}</a>`;
+  });
+
+  // Заменяем переносы строк на теги <br>
+  return linkedText.replace(/\n/g, '<br>');
 }

@@ -50,7 +50,7 @@
 }
 
 .nav-user-name {
-  font-size: 1.1rem;
+  font-size: 0.95rem !important; /* Было 1.1rem */
   font-weight: 600;
   color: #1a1a1a;
   white-space: nowrap;
@@ -61,7 +61,7 @@
 }
 
 .nav-user-tag {
-  font-size: 0.85rem;
+  font-size: 0.75rem !important; /* Было 0.85rem */
   font-weight: 400;
   color: #888888;
   line-height: 1.2;
@@ -1184,4 +1184,454 @@ a:focus {
 .chat-info,
 .user-info {
   padding-right: 32px;
+}
+
+/* 1. Делаем контейнер чата относительным, чтобы шапка позиционировалась внутри него */
+.chat-area {
+  position: relative;
+}
+
+/* 2. Делаем саму шапку полностью прозрачной, парящей и пропускающей клики сквозь пустые места */
+.chat-header {
+  position: absolute !important;
+  top: 14px !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 70px !important;
+  z-index: 100;
+  background: transparent !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  padding: 0 16px !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  pointer-events: none;
+}
+
+/* 3. Оформляем кнопку "Назад" как самостоятельную круглую стеклянную кнопку */
+.mobile-back-btn, 
+.back-btn {
+  pointer-events: auto !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  border-radius: 50% !important;
+  box-sizing: border-box !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  color: #1a1a1a !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  outline: none !important;
+}
+
+/* 4. Оформляем блок информации о собеседнике в стиле панелей навигации */
+.mobile-back-btn:hover,
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #3b82f6 !important;
+}
+
+.mobile-back-btn svg,
+.back-btn svg {
+  width: 24px !important;
+  height: 24px !important;
+  stroke-width: 1.8 !important;
+}
+
+.selected-chat {
+  pointer-events: auto !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 28px !important;
+  padding: 4px 16px 4px 4px !important;
+  height: 48px !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  flex: 0 1 auto !important;
+  max-width: calc(100% - 56px) !important;
+  box-sizing: border-box !important;
+}
+
+/* 5. Уменьшаем аватар в шапке для идеальной центровки внутри 48px */
+.selected-chat .chat-avatar-placeholder,
+.selected-chat .user-avatar-placeholder {
+  width: 40px !important;
+  height: 40px !important;
+  margin-right: 10px !important;
+}
+
+/* 6. Сдвигаем контейнер с сообщениями вниз, чтобы они скроллились под парящей шапкой */
+.messages-container {
+  padding-top: 80px !important; 
+}
+
+/* --- ИСПРАВЛЕНИЕ СТЕКЛА ДЛЯ КНОПКИ НАЗАД (СВЕТЛАЯ ТЕМА) --- */
+.mobile-back-btn:not(:hover), 
+.back-btn:not(:hover) {
+  /* Перезаписываем прозрачный фон на полупрозрачный белый */
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important; /* Добавлена граница */
+}
+
+.mobile-back-btn:hover,
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #3b82f6 !important;
+}
+
+.messages-container {
+  padding-top: 90px !important;
+}
+
+/* --- ПЛАВНЫЙ СКРОЛЛ СООБЩЕНИЙ ПОД ШАПКОЙ --- */
+@media (max-width: 768px) {
+  .messages-container {
+    /* Снимаем жесткое ограничение высоты, чтобы блок тянулся до самого верха */
+    height: auto !important; 
+    flex: 1 1 auto !important;
+    /* Отступ сверху сохраняем, чтобы самые первые сообщения не прятались навсегда под кнопками */
+    padding-top: 80px !important; 
+  }
+}
+
+/* --- ВЫРАВНИВАНИЕ ШАПКИ ЧАТА С ПОИСКОМ --- */
+.chat-header {
+  position: absolute !important;
+  top: 14px !important; /* Опускаем на уровень поиска */
+  left: 0;
+  right: 0;
+  height: 70px !important; /* Высота контейнера как у поиска */
+  z-index: 100;
+  background: transparent !important;
+  border-bottom: none !important;
+  padding: 0 16px !important; /* Убираем вертикальные отступы, центрируем через flex */
+  display: flex;
+  align-items: center;
+  gap: 12px !important;
+  pointer-events: none; 
+}
+
+/* На мобильных устройствах возвращаем шапку на самый верх, так как там нет боковых панелей */
+@media (max-width: 768px) {
+  .chat-header {
+    top: 0 !important;
+    height: auto !important;
+    padding: 10px 16px 10px 4px !important; 
+  }
+}
+
+/* --- КОМПАКТНОЕ ОФОРМЛЕНИЕ ИМЕНИ И ТЭГА --- */
+.selected-chat .chat-info,
+.selected-chat .user-info {
+  padding-right: 8px !important; /* Убираем отступ для счетчика непрочитанных (его тут нет) */
+  justify-content: center;
+  gap: 2px; /* Задаем минимальное расстояние между именем и тэгом */
+}
+
+.selected-chat .chat-name,
+.selected-chat .user-name {
+  line-height: 1.1 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.selected-chat .chat-tag,
+.selected-chat .user-tag {
+  line-height: 1.1 !important;
+  margin: 0 !important;
+}
+
+/* ==========================================
+   ФИНАЛЬНЫЕ КОРРЕКТИРОВКИ ДИЗАЙНА
+   ========================================== */
+
+/* 1. Отлепляем тэг от низа шапки (даем больше воздуха) */
+.selected-chat {
+  height: 52px !important; /* Немного увеличили высоту для баланса */
+  padding: 6px 16px 6px 6px !important; 
+}
+
+.selected-chat .chat-info,
+.selected-chat .user-info {
+  padding-bottom: 2px !important; /* Искусственно приподнимаем весь текстовый блок */
+  gap: 1px !important;
+}
+
+.selected-chat .chat-name,
+.selected-chat .user-name {
+  font-size: 1rem !important; /* Делаем шрифт чуть компактнее */
+  line-height: 1.2 !important;
+}
+
+.selected-chat .chat-tag,
+.selected-chat .user-tag {
+  font-size: 0.8rem !important;
+  line-height: 1.2 !important;
+}
+
+/* 2. Приводим поиск к единому плоскому "стеклянному" стилю */
+.search-box input {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: none !important; /* Убираем тени, делаем плоским как кнопки */
+}
+
+.search-box input:focus {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: #3b82f6 !important;
+  /* Меняем массивную тень на аккуратное свечение */
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.3) !important; 
+}
+
+/* 3. Приводим нижнюю мобильную панель навигации к тому же стилю */
+.mobile-bottom-nav {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: none !important; /* Убираем грубую тень, оставляем чистое стекло с легкой рамкой */
+}
+
+/* ==========================================
+   УНИФИКАЦИЯ КНОПОК "НАЗАД" (ПРОФИЛЬ И МЕССЕНДЖЕР)
+   ========================================== */
+
+@media (max-width: 768px) {
+  /* 1. Синхронизируем шапки (контейнеры кнопок) */
+  .chat-header,
+  .profile-header {
+    min-height: 64px !important; /* Одинаковая минимальная высота */
+    height: auto !important;
+    padding: 10px 16px !important; /* Строго одинаковые отступы со всех сторон */
+    display: flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Прижимаем шапку профиля к самому верху, если она позиционируется абсолютно */
+  .profile-header {
+    top: 0 !important;
+  }
+
+  /* 2. Делаем сами кнопки абсолютно идентичными */
+  .mobile-back-btn,
+  .profile-header .back-btn {
+    width: 44px !important;
+    height: 44px !important;
+    margin: 0 !important; /* Убираем все старые сдвиги (margin-left: -6px и т.д.) */
+    margin-right: 12px !important; /* Единый отступ справа до аватарки/текста */
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    border-radius: 50% !important;
+    
+    /* Единый стеклянный эффект для светлой темы */
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    color: #1a1a1a !important;
+    box-shadow: none !important;
+    transition: all 0.2s ease !important;
+  }
+
+  /* 3. Одинаковый размер иконок внутри кнопок */
+  .mobile-back-btn svg,
+  .profile-header .back-btn svg {
+    width: 24px !important;
+    height: 24px !important;
+    stroke-width: 1.8 !important;
+  }
+}
+
+/* 4. Синхронизация цветов для Темной Темы */
+@media (max-width: 768px) {
+  .dark-theme .mobile-back-btn,
+  .dark-theme .profile-header .back-btn {
+    background: rgba(22, 25, 32, 0.85) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: var(--text-primary) !important;
+  }
+}
+
+/* ==========================================
+   ИСПРАВЛЕНИЕ КНОПКИ "НАЗАД" И ШАПКИ ЧАТА
+   ========================================== */
+
+/* 1. Выравнивание шапки профиля (user.html) с шапкой мессенджера + отступ снизу */
+.profile-header {
+  display: flex !important;
+  align-items: center !important;
+  padding: 13px 16px !important; /* Одинаковые вертикальные и боковые отступы */
+  margin-bottom: 16px !important; /* Появился недостающий отступ снизу до карточки профиля */
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
+.profile-header .back-btn {
+  width: 44px !important;
+  height: 44px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  border-radius: 50% !important;
+}
+
+/* 2. Ограничение ширины карточки собеседника в мессенджере */
+.selected-chat {
+  max-width: calc(100% - 56px) !important; /* Запрещает вылезать за правый край (44px кнопка + 12px gap) */
+  min-width: 0 !important;
+  flex: 0 1 auto !important;
+  box-sizing: border-box !important;
+}
+
+/* 3. Включение обрезки текста с многоточием (...) для длинных никнеймов и тегов */
+.selected-chat .chat-info,
+.selected-chat .user-info {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+  overflow: hidden !important;
+}
+
+.selected-chat .chat-name,
+.selected-chat .user-name,
+.selected-chat .chat-tag,
+.selected-chat .user-tag {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+  display: block !important;
+}
+
+/* ==========================================
+   ФИНАЛЬНОЕ ИСПРАВЛЕНИЕ: ПРЫЖОК КНОПКИ И ОТСТУП
+   ========================================== */
+
+/* ==========================================
+   ЕИНАЯ СИНХРОНИЗАЦИЯ ШАПОК И КНОПОК "НАЗАД"
+   ========================================== */
+
+.chat-header {
+  position: absolute !important;
+  top: 14px !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 70px !important;
+  z-index: 100;
+  background: transparent !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  padding: 0 16px !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  pointer-events: none;
+}
+
+.mobile-back-btn, 
+.back-btn {
+  pointer-events: auto !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  border-radius: 50% !important;
+  box-sizing: border-box !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  color: #1a1a1a !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  outline: none !important;
+}
+
+.mobile-back-btn:hover,
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #3b82f6 !important;
+}
+
+.mobile-back-btn svg,
+.back-btn svg {
+  width: 24px !important;
+  height: 24px !important;
+  stroke-width: 1.8 !important;
+}
+
+.selected-chat {
+  pointer-events: auto !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 28px !important;
+  padding: 4px 16px 4px 4px !important;
+  height: 48px !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  flex: 0 1 auto !important;
+  max-width: calc(100% - 56px) !important;
+  box-sizing: border-box !important;
+}
+
+.messages-container {
+  padding-top: 90px !important;
+}
+
+@media (max-width: 768px) {
+  .chat-header {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 64px !important;
+    padding: 0 16px !important;
+    margin: 0 !important;
+  }
+
+  .messages-container {
+    padding-top: 76px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important;
+  }
 }
