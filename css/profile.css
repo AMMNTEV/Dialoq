@@ -90,7 +90,8 @@
   background: white;
   border-radius: 24px;
   padding: 24px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  box-shadow: none !important; /* Убираем тень */
+  border: 1px solid #e2e8f0;   /* Добавляем обводку */
 }
 .profile-avatar-placeholder {
   text-align: center;
@@ -282,20 +283,20 @@
   background: white;
   border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  border: 1px solid #f0f0f0;
+  box-shadow: none !important; /* Убираем тень */
+  border: 1px solid #e2e8f0;   /* Обводка в цвет карточки профиля */
   transition: all 0.2s;
 }
 .post-card:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: none !important;
+  border-color: #cbd5e1;       /* При наведении делаем рамку чуть темнее */
 }
 .post-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #f0f0f0;
+  justify-content: flex-end; /* Оставляем только кнопку удаления справа */
+  margin-bottom: 4px;        /* Уменьшаем отступ до контента */
+  padding-bottom: 0;         /* Убираем внутренний отступ */
+  border-bottom: none;       /* Убираем разделительную линию */
 }
 .post-date {
   font-size: 0.8rem;
@@ -503,7 +504,9 @@
     width: 100%;
   }
   .post-date {
-    font-size: 0.7rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  white-space: nowrap;
   }
   .post-content {
     font-size: 0.9rem;
@@ -771,8 +774,9 @@ a:focus {
 .post-footer {
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid #f0f0f0; /* Полоску над футером можно оставить для эстетики */
   display: flex;
+  justify-content: space-between; /* Раскидываем лайки налево, дату направо */
   align-items: center;
 }
 
@@ -781,12 +785,12 @@ a:focus {
   border: none;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   color: #999;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 500;
-  padding: 6px 10px;
+  padding: 4px 8px;
   border-radius: 12px;
   transition: all 0.2s ease;
   margin-left: -6px; /* Компенсируем padding для ровного края */
@@ -799,6 +803,8 @@ a:focus {
 
 .like-btn svg {
   transition: all 0.2s ease;
+  width: 16px !important;  /* Принудительно уменьшаем размер SVG */
+  height: 16px !important;
 }
 
 /* Состояние, когда лайк поставлен */
