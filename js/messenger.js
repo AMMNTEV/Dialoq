@@ -931,17 +931,20 @@ async function loadMessages(showLoading = false) {
   try {
     const snapshot = await db.collection('chats').doc(currentChatId)
       .collection('messages')
-      .orderBy('timestamp', 'asc')
-      .get({ source: 'server' });
+      .orderBy('timestamp', 'desc') // Берем с конца
+      .limit(50) // Загружаем только последние 50 сообщений
+      .get(); // Кэш включен по умолчанию
+      // .get({ source: 'server' });
 
     const visibleMessages = [];
-    snapshot.forEach(doc => {
-      const msg = doc.data();
-      if (msg.deletedFor && (msg.deletedFor.includes('everyone') || msg.deletedFor.includes(currentUser.uid))) {
-        return;
-      }
-      visibleMessages.push({ id: doc.id, ...msg });
-    });
+snapshot.forEach(doc => {
+  const msg = doc.data();
+  if (msg.deletedFor && (msg.deletedFor.includes('everyone') || msg.deletedFor.includes(currentUser.uid))) {
+    return;
+  }
+  visibleMessages.push({ id: doc.id, ...msg });
+});
+visibleMessages.reverse();
 
     if (visibleMessages.length === 0) {
       messagesContainer.innerHTML = `<div class="no-messages">${t('noMessages')}</div>`;
@@ -990,7 +993,7 @@ async function loadMessages(showLoading = false) {
       }
     });
     if (hasUnread) {
-      await batch.commit();
+      // await batch.commit();
       unreadCounts[currentChatId] = 0;
       
       // Обновляем кэш непрочитанных при групповом прочтении
