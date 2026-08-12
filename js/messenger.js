@@ -536,8 +536,8 @@ function listenForChats() {
         unreadCounts = newUnreadCounts;
         allChats = filteredChats;
         allChats.sort((a, b) => {
-          const timeA = a.lastMessageTime || a.createdAt || new Date(0);
-          const timeB = b.lastMessageTime || b.createdAt || new Date(0);
+          const timeA = a.lastMessageTime ? new Date(a.lastMessageTime).getTime() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+          const timeB = b.lastMessageTime ? new Date(b.lastMessageTime).getTime() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
           return timeB - timeA; 
         });
 
