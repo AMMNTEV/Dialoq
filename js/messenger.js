@@ -1679,7 +1679,10 @@ function exitChatMode() {
   document.body.classList.remove('chat-mode');
 
   const lastUid = currentUser?.uid || localStorage.getItem('lastUid');
-  if (lastUid) localStorage.removeItem(`lastOpenedChat_${lastUid}`);
+  if (lastUid) {
+    // Очищаем информацию о последнем открытом чате, чтобы при обновлении страницы он не восстанавливался
+    localStorage.removeItem(`lastOpenedChat_${lastUid}`);
+  }
 
   // Возвращаем нижнюю панель ТОЛЬКО на мобильных устройствах и в неактивном режиме чата
   const bottomNav = document.getElementById('mobileBottomNav');
