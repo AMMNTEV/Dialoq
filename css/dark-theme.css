@@ -687,9 +687,11 @@
 
 /* --- Панель ввода сообщения --- */
 .dark-theme .message-input-area {
-  background: var(--bg-card) !important;
-  border-top-color: var(--border-color) !important;
-}
+  background: rgba(22, 25, 32, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}[cite: 9]
 
 /* ==========================================
    НАСТРОЙКИ — ФОН ТЕМНЕЕ КАРТОЧЕК
@@ -908,17 +910,13 @@ a:focus {
 }
 
 /* --- Исправление фона поля ввода и заглушки в тёмной теме --- */
-.dark-theme .message-input-area textarea {
-  background: var(--bg-input) !important;
-  border-color: var(--border-color) !important;
-  color: var(--text-primary) !important;
-}
-
+.dark-theme .message-input-area textarea,
 .dark-theme .message-input-area textarea:focus {
-  background: var(--bg-secondary) !important;
-  border-color: var(--accent) !important;
-  box-shadow: 0 0 0 4px var(--accent-glow) !important;
-}
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  color: var(--text-primary) !important;
+}[cite: 9]
 
 .dark-theme .deleted-user-stub {
   background: var(--bg-input) !important;
@@ -1001,6 +999,26 @@ a:focus {
 /* Заливаем само сердечко красным цветом */
 .dark-theme .like-btn.liked svg {
   fill: #ef4444 !important;
+  stroke: #ef4444 !important;
+}
+
+/* Красный цвет при наведении на непоставленный лайк (Темная тема) */
+.dark-theme .like-btn:hover {
+  color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.15) !important;
+}
+
+.dark-theme .like-btn:hover svg {
+  stroke: #ef4444 !important;
+}
+
+/* Красный цвет при наведении на непоставленный лайк (Светлая тема) */
+.like-btn:hover {
+  color: #ef4444 !important;
+  background: #fee2e2 !important;
+}
+
+.like-btn:hover svg {
   stroke: #ef4444 !important;
 }
 

@@ -1641,3 +1641,177 @@ a:focus {
     padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
+
+/* ==========================================
+   ПАНЕЛЬ ВВОДА СООБЩЕНИЙ (В СТИЛЕ ШАПКИ И ПОИСКА)
+   ========================================== */
+
+/* 1. Делаем контейнер парящим, стеклянным и закругленным */
+.message-input-area {
+  position: absolute !important;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+  left: 16px !important;
+  right: 16px !important;
+  width: auto !important;
+  
+  /* Единый стеклянный эффект, без массивных теней */
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 28px !important;
+  box-shadow: none !important;
+  
+  /* Тонкие отступы для компактности */
+  padding: 0 6px 0 0 !important; 
+  margin: 0 !important;
+  gap: 0 !important; /* Убираем стандартный отступ, чтобы контролировать его кнопкой */
+  
+  z-index: 100;
+  align-items: center; 
+}
+
+/* 2. Делаем само поле ввода полностью прозрачным, чтобы оно слилось с контейнером */
+.message-input-area textarea {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 14px 20px !important;
+  margin: 0 !important;
+  min-height: 48px !important; /* Тонкий стартовый размер, как у поиска */
+  line-height: 20px !important;
+  border-radius: 28px !important;
+  flex: 1;
+}
+
+/* Убираем синюю обводку при клике (фокусе), оставляем только рамку самого контейнера */
+.message-input-area textarea:focus {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  outline: none !important;
+}
+
+/* 3. Кнопка отправки: убираем заливку, делаем в стиле легких иконок навигации */
+.message-input-area button {
+  background: transparent !important;
+  color: #3b82f6 !important; /* Синяя иконка */
+  border: none !important;
+  box-shadow: none !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background 0.2s ease !important;
+  margin-left: 4px !important;
+}
+
+.message-input-area button:hover {
+  background: rgba(59, 130, 246, 0.1) !important;
+}
+
+/* 4. Сдвигаем сообщения вверх, чтобы они плавно уходили под парящую панель ввода */
+.messages-container {
+  /* Компенсируем высоту панели (48px) + отступ снизу (16px) */
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+@media (max-width: 768px) {
+  .messages-container {
+    padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* ========== 1. ТОЧНОЕ ВЫРАВНИВАНИЕ НИКА И ТЭГА В ШАПКЕ ========== */
+.selected-chat {
+  display: flex !important;
+  align-items: center !important;
+  height: 48px !important;
+  padding: 0 16px 0 4px !important; 
+}
+
+.selected-chat .chat-info,
+.selected-chat .user-info {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  height: 48px !important;
+  padding: 0 !important;
+  /* Чуть-чуть поднимаем весь блок текста целиком для идеального визуального центра */
+  margin: -2px 0 0 0 !important; 
+  gap: 0 !important; 
+}
+
+/* Сброс мусорных отступов тегов */
+.selected-chat .chat-info h3,
+.selected-chat .user-info h3,
+.selected-chat .chat-info p,
+.selected-chat .user-info p {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* ДОБАВЛЕНЫ h3 СЕЛЕКТОРЫ (НИКНЕЙМ) */
+.selected-chat .chat-name,
+.selected-chat .user-name,
+.selected-chat .chat-info h3,
+.selected-chat .user-info h3 {
+  font-size: 1rem !important;
+  /* Увеличиваем line-height, чтобы дать место буквам */
+  line-height: 1.2 !important; 
+  margin: 0 !important;
+  padding: 0 !important;
+  font-weight: 600 !important;
+  display: block !important;
+}
+
+/* ДОБАВЛЕНЫ p СЕЛЕКТОРЫ (ТЭГ) */
+.selected-chat .chat-tag,
+.selected-chat .user-tag,
+.selected-chat .chat-info p,
+.selected-chat .user-info p {
+  font-size: 0.8rem !important;
+  /* Увеличиваем line-height, чтобы спасти символ @ от обрезки снизу */
+  line-height: 1.2 !important; 
+  /* Меняем минус на небольшой плюс, чтобы отодвинуть тэг от ника */
+  margin: 2px 0 0 0 !important; 
+  padding: 0 !important;
+  opacity: 0.7 !important;
+  display: block !important;
+}
+
+/* ========== 2. КРУГЛАЯ ПОДЛОЖКА ДЛЯ КНОПКИ ОТПРАВКИ (СВЕТЛАЯ ТЕМА) ========== */
+.message-input-area button {
+  background: #3b82f6 !important; /* Фирменный синий круг */
+  color: #ffffff !important;       /* Белая иконка самолетика */
+  border: none !important;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  margin-left: 6px !important;
+  transition: background-color 0.2s ease, transform 0.1s ease !important;
+}
+
+.message-input-area button:hover {
+  background: #2563eb !important;  /* Чуть темнее при наведении */
+}
+
+.message-input-area button:active {
+  transform: scale(0.95);
+}
+
+/* Фикс размера SVG-иконки внутри кнопки отправки */
+.message-input-area button svg {
+  width: 18px !important;
+  height: 18px !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
