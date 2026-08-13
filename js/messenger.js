@@ -926,29 +926,60 @@ async function clearCurrentChat() {
   if (menu) menu.style.display = 'none';
 
   try {
-    // 1. Мгновенно очищаем экран на нашей стороне для быстрой реакции интерфейса
+    // 1. Мгновенно очищаем экран у себя
     const messagesContainer = document.getElementById('messagesContainer');
     if (messagesContainer) {
       messagesContainer.innerHTML = `<div class="no-messages">${t('noMessages')}</div>`;
     }
 
-    // 2. Запускаем рекурсивное удаление порциями по 450 сообщений
-    await deleteMessagesBatch(currentChatId, 450);
+    // 2. Вместо физического удаления, добавляем свой UID в массив deletedFor
+    await hideMessagesBatch(currentChatId, currentUser.uid, 450);
 
-    // 3. После того как ВСЕ сообщения удалены, сбрасываем метаданные самого чата
-    await db.collection('chats').doc(currentChatId).update({
-      lastMessage: null,
-      lastMessageTime: null
-    });
-
-    // Примечание: Благодаря Firebase listeners (onSnapshot), 
-    // у второго собеседника все сообщения в DOM сработают как "removed" 
-    // и экран тоже мгновенно очистится, не закрывая сам чат.
+    // 3. Скрываем чат из боковой панели (он появится снова, если напишут новое сообщение)
+    const chatElement = document.querySelector(`.chat-item[onclick*='${currentChatId}']`);
+    if (chatElement) {
+      chatElement.style.display = 'none';
+    }
+    
+    // ВНИМАНИЕ: Мы больше НЕ обновляем глобальный lastMessage, 
+    // чтобы не сломать отображение чата у собеседника!
 
   } catch (error) {
     console.error('Ошибка при очистке чата:', error);
-    alert('Произошла ошибка при удалении сообщений. Возможно, удалена только часть.');
+    alert('Произошла ошибка при очистке чата.');
   }
+}
+
+// Новая безопасная функция скрытия сообщений порциями
+async function hideMessagesBatch(chatId, userId, batchSize = 450, lastDoc = null) {
+  let query = db.collection('chats').doc(chatId)
+    .collection('messages')
+    .orderBy('timestamp') // Сортировка обязательна для работы курсора
+    .limit(batchSize);
+
+  if (lastDoc) {
+    query = query.startAfter(lastDoc);
+  }
+
+  const msgsSnapshot = await query.get();
+  if (msgsSnapshot.empty) return;
+
+  const batch = db.batch();
+  msgsSnapshot.forEach(doc => {
+    const msg = doc.data();
+    // Обновляем, только если нас еще нет в списке скрывших
+    if (!msg.deletedFor || (!msg.deletedFor.includes('everyone') && !msg.deletedFor.includes(userId))) {
+      batch.update(doc.ref, {
+        deletedFor: firebase.firestore.FieldValue.arrayUnion(userId)
+      });
+    }
+  });
+
+  await batch.commit();
+
+  // Рекурсивно переходим к следующей порции
+  const newLastDoc = msgsSnapshot.docs[msgsSnapshot.docs.length - 1];
+  return hideMessagesBatch(chatId, userId, batchSize, newLastDoc);
 }
 
 // ========== РЕКУРСИВНОЕ УДАЛЕНИЕ СООБЩЕНИЙ ПОРЦИЯМИ ==========
