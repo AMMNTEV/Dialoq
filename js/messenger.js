@@ -1539,13 +1539,12 @@ async function deleteCurrentGroup() {
   if (!selectedChat || !selectedChat.isGroup) return;
   if (!confirm(t('confirmDeleteGroup'))) return;
   try {
-    const messagesSnapshot = await db.collection('chats').doc(selectedChat.id)
-      .collection('messages')
-      .get();
-    const batch = db.batch();
-    messagesSnapshot.forEach(doc => batch.delete(doc.ref));
-    batch.delete(db.collection('chats').doc(selectedChat.id));
-    await batch.commit();
+    // 1. Сначала удаляем все сообщения порциями (обходя лимит в 500)
+    await deleteMessagesBatch(selectedChat.id, 450);
+
+    // 2. Затем удаляем сам документ беседы
+    await db.collection('chats').doc(selectedChat.id).delete();
+    
     hideGroupInfoModal();
     exitChatMode();
   } catch (error) {
