@@ -926,39 +926,56 @@ async function clearCurrentChat() {
   if (menu) menu.style.display = 'none';
 
   try {
-    // 1. Получаем все сообщения текущего чата
-    const msgsSnapshot = await db.collection('chats').doc(currentChatId)
-      .collection('messages')
-      .get();
-      
-    // 2. Используем batch для массового удаления
-    const batch = db.batch();
-    msgsSnapshot.forEach(doc => {
-      batch.delete(doc.ref);
-    });
-
-    // 3. Сбрасываем информацию о последнем сообщении в самом чате
-    batch.update(db.collection('chats').doc(currentChatId), {
-      lastMessage: null,
-      lastMessageTime: null
-    });
-
-    await batch.commit();
-
-    // 4. Мгновенно очищаем экран на нашей стороне 
+    // 1. Мгновенно очищаем экран на нашей стороне для быстрой реакции интерфейса
     const messagesContainer = document.getElementById('messagesContainer');
     if (messagesContainer) {
       messagesContainer.innerHTML = `<div class="no-messages">${t('noMessages')}</div>`;
     }
-    
+
+    // 2. Запускаем рекурсивное удаление порциями по 450 сообщений
+    await deleteMessagesBatch(currentChatId, 450);
+
+    // 3. После того как ВСЕ сообщения удалены, сбрасываем метаданные самого чата
+    await db.collection('chats').doc(currentChatId).update({
+      lastMessage: null,
+      lastMessageTime: null
+    });
+
     // Примечание: Благодаря Firebase listeners (onSnapshot), 
     // у второго собеседника все сообщения в DOM сработают как "removed" 
     // и экран тоже мгновенно очистится, не закрывая сам чат.
 
   } catch (error) {
     console.error('Ошибка при очистке чата:', error);
-    alert('Произошла ошибка при удалении сообщений.');
+    alert('Произошла ошибка при удалении сообщений. Возможно, удалена только часть.');
   }
+}
+
+// ========== РЕКУРСИВНОЕ УДАЛЕНИЕ СООБЩЕНИЙ ПОРЦИЯМИ ==========
+async function deleteMessagesBatch(chatId, batchSize = 450) {
+  // Получаем ограниченную порцию документов
+  const msgsSnapshot = await db.collection('chats').doc(chatId)
+    .collection('messages')
+    .limit(batchSize)
+    .get();
+
+  // Базовый случай рекурсии: если удалять больше нечего, завершаем выполнение
+  if (msgsSnapshot.empty) {
+    return;
+  }
+
+  // Создаем пакетную операцию для текущей порции
+  const batch = db.batch();
+  msgsSnapshot.forEach(doc => {
+    batch.delete(doc.ref);
+  });
+
+  // Отправляем пакет в Firestore
+  await batch.commit();
+
+  // Рекурсивно вызываем саму себя для следующей порции
+  // Возвращаем вызов, чтобы дождаться полного завершения всей цепочки
+  return deleteMessagesBatch(chatId, batchSize);
 }
 
 // ========== ОТМЕТКА ПРОЧИТАННЫХ (ТОЛЬКО ЛИЧНЫЕ) ==========
