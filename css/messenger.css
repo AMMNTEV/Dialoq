@@ -1753,28 +1753,30 @@ a:focus {
   padding: 0 !important;
 }
 
-/* ДОБАВЛЕНЫ h3 СЕЛЕКТОРЫ, ЧТОБЫ ЖЕСТКО СБИТЬ СТАРЫЙ line-height: 1.5 */
+/* ДОБАВЛЕНЫ h3 СЕЛЕКТОРЫ (НИКНЕЙМ) */
 .selected-chat .chat-name,
 .selected-chat .user-name,
 .selected-chat .chat-info h3,
 .selected-chat .user-info h3 {
   font-size: 1rem !important;
-  line-height: 1 !important; 
+  /* Увеличиваем line-height, чтобы дать место буквам */
+  line-height: 1.2 !important; 
   margin: 0 !important;
   padding: 0 !important;
   font-weight: 600 !important;
   display: block !important;
 }
 
-/* ДОБАВЛЕНЫ p СЕЛЕКТОРЫ, ЧТОБЫ ТЭГ ТОЧНО ПОДЧИНЯЛСЯ ПРАВИЛАМ */
+/* ДОБАВЛЕНЫ p СЕЛЕКТОРЫ (ТЭГ) */
 .selected-chat .chat-tag,
 .selected-chat .user-tag,
 .selected-chat .chat-info p,
 .selected-chat .user-info p {
   font-size: 0.8rem !important;
-  line-height: 1 !important; 
-  /* Теперь, когда скрытый воздух от line-height убран, -9px не нужно (текст слипнется). Хватит 0 или -1px */
-  margin: -1px 0 0 0 !important; 
+  /* Увеличиваем line-height, чтобы спасти символ @ от обрезки снизу */
+  line-height: 1.2 !important; 
+  /* Меняем минус на небольшой плюс, чтобы отодвинуть тэг от ника */
+  margin: 2px 0 0 0 !important; 
   padding: 0 !important;
   opacity: 0.7 !important;
   display: block !important;
