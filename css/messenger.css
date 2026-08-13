@@ -871,26 +871,31 @@
   }
 
   .message-input-area {
+  display: flex; /* Возвращаем flex для центрирования элементов */
+  align-items: flex-end;
+  gap: 12px;
+  
+  /* Делаем панель парящей */
   position: absolute;
   bottom: 24px;
-  left: 16px;
-  right: 16px;
+  left: 24px;
+  right: 24px;
   z-index: 100;
   
-  /* Эффект Liquid Glass (взят из ваших стилей шапки) */
+  /* Эффект Liquid Glass */
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  
+  /* Скругления, рамка и тени */
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 28px;
-  
-  /* Внутренние отступы и выравнивание */
-  padding: 8px 8px 8px 16px;
-  gap: 12px;
-  display: flex; 
-  align-items: flex-end; /* Чтобы кнопка была внизу, если текст многострочный */
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
-}[cite: 10]
+  
+  /* Внутренние отступы */
+  padding: 8px 8px 8px 16px;
+  flex-shrink: 0;
+}
 
   .chat-item {
     padding: 10px;
