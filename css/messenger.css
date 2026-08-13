@@ -1739,8 +1739,9 @@ a:focus {
   justify-content: center !important;
   height: 48px !important;
   padding: 0 !important;
-  margin: 0 !important;
-  gap: 0 !important; /* Строго убираем gap */
+  /* ПОДНИМАЕМ ВЕСЬ БЛОК ТЕКСТА ЦЕЛИКОМ НА 3px ВВЕРХ */
+  margin: -3px 0 0 0 !important; 
+  gap: 0 !important; 
 }
 
 /* Сброс мусорных отступов тегов */
@@ -1761,7 +1762,7 @@ a:focus {
 .selected-chat .chat-name,
 .selected-chat .user-name {
   font-size: 1rem !important;
-  line-height: 1 !important; /* Убиваем внутренний интервал шрифта */
+  line-height: 1 !important; 
   margin: 0 !important;
   padding: 0 !important;
   font-weight: 600 !important;
@@ -1771,9 +1772,9 @@ a:focus {
 .selected-chat .chat-tag,
 .selected-chat .user-tag {
   font-size: 0.8rem !important;
-  line-height: 1 !important; /* Убиваем внутренний интервал шрифта */
-  margin: 0 !important;
-  margin-top: -3px !important; /* ПРИНУДИТЕЛЬНО ТЯНЕМ ТЭГ ВВЕРХ */
+  line-height: 1 !important; 
+  /* ПРИЖИМАЕМ ТЭГ ЕЩЕ СИЛЬНЕЕ К НИКУ (было -3, стало -5) */
+  margin: -5px 0 0 0 !important; 
   padding: 0 !important;
   opacity: 0.7 !important;
   display: block !important;
