@@ -918,7 +918,7 @@ document.addEventListener('click', function(event) {
   }
 });
 
-// ========== ПОЛНАЯ ОЧИСТКА ЧАТА (УДАЛЕНИЕ ВСЕХ СООБЩЕНИЙ) ==========
+// ========== ПОЛНАЯ ОЧИСТКА ЧАТА (С ОПЦИЕЙ ДЛЯ ОБОИХ) ==========
 async function clearCurrentChat() {
   if (!currentChatId) return;
   if (!confirm(t('confirmClearChat'))) return;
@@ -933,17 +933,19 @@ async function clearCurrentChat() {
       messagesContainer.innerHTML = `<div class="no-messages">${t('noMessages')}</div>`;
     }
 
-    // 2. Вместо физического удаления, добавляем свой UID в массив deletedFor
-    await hideMessagesBatch(currentChatId, currentUser.uid, 450);
+    // 2. Добавляем 'everyone' в массив deletedFor для всех сообщений
+    // Передаем true в качестве третьего параметра (isForEveryone)
+    await hideMessagesBatch(currentChatId, currentUser.uid, true, 450);
 
-    // 3. Скрываем чат из боковой панели (он появится снова, если напишут новое сообщение)
+    // 3. Обновляем превью чата для ВСЕХ, чтобы чат пропал из боковой панели у собеседника
+    // Вызываем уже существующую у тебя функцию
+    await updateChatPreviewAfterDelete(currentChatId, true);
+
+    // 4. Скрываем чат из боковой панели мгновенно
     const chatElement = document.querySelector(`.chat-item[onclick*='${currentChatId}']`);
     if (chatElement) {
       chatElement.style.display = 'none';
     }
-    
-    // ВНИМАНИЕ: Мы больше НЕ обновляем глобальный lastMessage, 
-    // чтобы не сломать отображение чата у собеседника!
 
   } catch (error) {
     console.error('Ошибка при очистке чата:', error);
@@ -951,8 +953,8 @@ async function clearCurrentChat() {
   }
 }
 
-// Новая безопасная функция скрытия сообщений порциями
-async function hideMessagesBatch(chatId, userId, batchSize = 450, lastDoc = null) {
+// Новая безопасная функция скрытия сообщений порциями с поддержкой удаления для всех
+async function hideMessagesBatch(chatId, userId, isForEveryone = false, batchSize = 450, lastDoc = null) {
   let query = db.collection('chats').doc(chatId)
     .collection('messages')
     .orderBy('timestamp') // Сортировка обязательна для работы курсора
@@ -968,11 +970,13 @@ async function hideMessagesBatch(chatId, userId, batchSize = 450, lastDoc = null
   const batch = db.batch();
   msgsSnapshot.forEach(doc => {
     const msg = doc.data();
-    // Обновляем, только если нас еще нет в списке скрывших
-    if (!msg.deletedFor || (!msg.deletedFor.includes('everyone') && !msg.deletedFor.includes(userId))) {
-      batch.update(doc.ref, {
-        deletedFor: firebase.firestore.FieldValue.arrayUnion(userId)
-      });
+    // Проверяем, не скрыто ли уже сообщение для всех
+    if (!msg.deletedFor || !msg.deletedFor.includes('everyone')) {
+      const updateData = isForEveryone 
+        ? { deletedFor: ['everyone'] } // Скрываем для обоих
+        : { deletedFor: firebase.firestore.FieldValue.arrayUnion(userId) }; // Скрываем только для себя
+
+      batch.update(doc.ref, updateData);
     }
   });
 
@@ -980,7 +984,7 @@ async function hideMessagesBatch(chatId, userId, batchSize = 450, lastDoc = null
 
   // Рекурсивно переходим к следующей порции
   const newLastDoc = msgsSnapshot.docs[msgsSnapshot.docs.length - 1];
-  return hideMessagesBatch(chatId, userId, batchSize, newLastDoc);
+  return hideMessagesBatch(chatId, userId, isForEveryone, batchSize, newLastDoc);
 }
 
 // ========== РЕКУРСИВНОЕ УДАЛЕНИЕ СООБЩЕНИЙ ПОРЦИЯМИ ==========
