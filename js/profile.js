@@ -334,22 +334,46 @@ document.getElementById('avatarInput')?.addEventListener('change', function(e) {
     img.onload = function() {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      const targetSize = 800;
+      
+      // 1. Умное определение размера
+      const maxDim = 1024; // Можно безопасно увеличить до 1024px для лучшего качества
+      const minOriginalDim = Math.min(img.width, img.height);
+
+      // Если картинка меньше maxDim, оставляем её оригинальное разрешение, иначе жмем до maxDim
+      const targetSize = minOriginalDim < maxDim ? minOriginalDim : maxDim;
       
       canvas.width = targetSize;
       canvas.height = targetSize;
 
-      const minDim = Math.min(img.width, img.height);
-      const startX = (img.width - minDim) / 2;
-      const startY = (img.height - minDim) / 2;
+      // Координаты для обрезки по центру (строгий квадрат)
+      const startX = (img.width - minOriginalDim) / 2;
+      const startY = (img.height - minOriginalDim) / 2;
 
-      ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, targetSize, targetSize);
-      const base64Avatar = canvas.toDataURL('image/jpeg', 0.7);
+      ctx.drawImage(img, startX, startY, minOriginalDim, minOriginalDim, 0, 0, targetSize, targetSize);
 
-      if (base64Avatar.length > 1000000) {
+      // 2. Умное подбор качества
+      const maxLength = 1000000; // Ваше ограничение из кода
+      let quality = 0.95; // Начинаем с почти идеального качества
+      let base64Avatar = '';
+      
+      // Используем WebP для лучшего соотношения вес/качество, с фолбэком на JPEG
+      let mimeType = 'image/jpeg';
+      if (canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0) {
+          mimeType = 'image/webp';
+      }
+
+      // Цикл: сжимаем, пока размер больше допустимого, плавно снижая качество
+      do {
+        base64Avatar = canvas.toDataURL(mimeType, quality);
+        quality -= 0.05; 
+      } while (base64Avatar.length > maxLength && quality > 0.1);
+
+      // Если даже при минимальном качестве размер превышает лимит
+      if (base64Avatar.length > maxLength) {
         alert(t('fileTooLarge'));
         return;
       }
+
       saveAvatarToFirebase(base64Avatar);
     };
     img.src = event.target.result;
