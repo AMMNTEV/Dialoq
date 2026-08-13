@@ -471,11 +471,12 @@ function listenForChats() {
           let lastMessageTime = chat.lastMessageTime ? chat.lastMessageTime.toDate?.() || new Date(chat.lastMessageTime) : null;
           let hasAnyMessage = false;
 
-          for (const msgDoc of lastMsgQuery.docs) {
+for (const msgDoc of lastMsgQuery.docs) {
   const msg = msgDoc.data();
-  hasAnyMessage = true;
+  
+  // Проверяем, не скрыто ли сообщение для текущего пользователя
   if (!msg.deletedFor || (!msg.deletedFor.includes('everyone') && !msg.deletedFor.includes(currentUser.uid))) {
-    // Если сообщение системное, парсим его, иначе берем обычный текст
+    hasAnyMessage = true; // <-- СТАВИМ ФЛАГ ТОЛЬКО ЕСЛИ ЕСТЬ ХОТЯ БЫ ОДНО ВИДИМОЕ СООБЩЕНИЕ
     lastMessage = msg.isSystem ? getSystemMessageText(msg) : msg.text; 
     lastMessageTime = msg.timestamp ? msg.timestamp.toDate?.() || new Date(msg.timestamp) : lastMessageTime;
     break;
