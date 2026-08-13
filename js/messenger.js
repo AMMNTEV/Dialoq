@@ -843,35 +843,121 @@ function updateChatHeader(chat) {
     avatarContent = chat.displayName ? chat.displayName.charAt(0).toUpperCase() : '?';
   }
 
-  // Общий SVG-код стрелки "Назад" для мобильных и десктопов
+  // Иконка "Назад"
   const backIconSvg = `<svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>`;
+  
+  // Иконка "Бургер-меню" (три полоски)
+  const burgerIconSvg = `<svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`;
+
+  // Блок с выпадающим меню, который появится справа
+  const dropdownHtml = `
+    <div class="chat-header-actions" style="position: relative; margin-left: auto;">
+      <button class="mobile-back-btn burger-menu-btn" onclick="toggleChatMenu(event)">
+        ${burgerIconSvg}
+      </button>
+      <div id="chatDropdownMenu" class="chat-dropdown-menu" style="display: none; position: absolute; top: 100%; right: 0; background: var(--bg-card, #fff); border: 1px solid var(--border-color, #ccc); border-radius: 8px; box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,0.1)); z-index: 100; min-width: 170px; padding: 5px 0;">
+        <button onclick="clearCurrentChat()" style="width: 100%; text-align: left; background: none; border: none; padding: 10px 15px; color: var(--danger, #b84a4a); cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          ${t('clearChat')}
+        </button>
+      </div>
+    </div>
+  `;
 
   if (chat.isGroup) {
     const participantsCount = chat.participants ? chat.participants.length : 2;
     headerContent = `
       <button class="mobile-back-btn" onclick="exitChatMode()">${backIconSvg}</button>
-      <div class="selected-chat" onclick="openChatInfo('${chat.id}')">
+      <div class="selected-chat" onclick="openChatInfo('${chat.id}')" style="flex: 1; overflow: hidden; cursor: pointer; min-width: 0;">
         <div class="chat-avatar-placeholder large" style="overflow:hidden; display:flex; align-items:center; justify-content:center; padding:0;">${avatarContent}</div>
         <div class="chat-info">
-          <h3>${chat.displayName}</h3>
+          <h3 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${chat.displayName}</h3>
           <p>${participantsCount} ${t('participantsCount')}</p>
         </div>
       </div>
+      ${dropdownHtml}
     `;
   } else {
     const otherUserId = chat.participants.find(id => id !== currentUser.uid);
     headerContent = `
       <button class="mobile-back-btn" onclick="exitChatMode()">${backIconSvg}</button>
-      <div class="selected-chat" onclick="openUserProfile('${otherUserId}')">
+      <div class="selected-chat" onclick="openUserProfile('${otherUserId}')" style="flex: 1; overflow: hidden; cursor: pointer; min-width: 0;">
         <div class="chat-avatar-placeholder large" style="overflow:hidden; display:flex; align-items:center; justify-content:center; padding:0;">${avatarContent}</div>
         <div class="chat-info">
-          <h3>${chat.displayName}</h3>
+          <h3 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${chat.displayName}</h3>
           <p>${chat.displayAvatar}</p>
         </div>
       </div>
+      ${dropdownHtml}
     `;
   }
+  
   chatHeader.innerHTML = headerContent;
+  
+  // Добавляем flex-стили напрямую в шапку для корректного распределения (слева-центр-справа)
+  chatHeader.style.display = 'flex';
+  chatHeader.style.alignItems = 'center';
+}
+
+// ========== ВЫПАДАЮЩЕЕ МЕНЮ ЧАТА ==========
+function toggleChatMenu(event) {
+  event.stopPropagation();
+  const menu = document.getElementById('chatDropdownMenu');
+  if (menu) {
+    menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
+  }
+}
+
+// Закрываем меню при клике в любое другое место экрана
+document.addEventListener('click', function(event) {
+  const menu = document.getElementById('chatDropdownMenu');
+  if (menu && event.target.closest('.chat-header-actions') === null) {
+    menu.style.display = 'none';
+  }
+});
+
+// ========== ПОЛНАЯ ОЧИСТКА ЧАТА (УДАЛЕНИЕ ВСЕХ СООБЩЕНИЙ) ==========
+async function clearCurrentChat() {
+  if (!currentChatId) return;
+  if (!confirm(t('confirmClearChat'))) return;
+
+  const menu = document.getElementById('chatDropdownMenu');
+  if (menu) menu.style.display = 'none';
+
+  try {
+    // 1. Получаем все сообщения текущего чата
+    const msgsSnapshot = await db.collection('chats').doc(currentChatId)
+      .collection('messages')
+      .get();
+      
+    // 2. Используем batch для массового удаления
+    const batch = db.batch();
+    msgsSnapshot.forEach(doc => {
+      batch.delete(doc.ref);
+    });
+
+    // 3. Сбрасываем информацию о последнем сообщении в самом чате
+    batch.update(db.collection('chats').doc(currentChatId), {
+      lastMessage: null,
+      lastMessageTime: null
+    });
+
+    await batch.commit();
+
+    // 4. Мгновенно очищаем экран на нашей стороне 
+    const messagesContainer = document.getElementById('messagesContainer');
+    if (messagesContainer) {
+      messagesContainer.innerHTML = `<div class="no-messages">${t('noMessages')}</div>`;
+    }
+    
+    // Примечание: Благодаря Firebase listeners (onSnapshot), 
+    // у второго собеседника все сообщения в DOM сработают как "removed" 
+    // и экран тоже мгновенно очистится, не закрывая сам чат.
+
+  } catch (error) {
+    console.error('Ошибка при очистке чата:', error);
+    alert('Произошла ошибка при удалении сообщений.');
+  }
 }
 
 // ========== ОТМЕТКА ПРОЧИТАННЫХ (ТОЛЬКО ЛИЧНЫЕ) ==========
