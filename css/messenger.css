@@ -870,7 +870,7 @@
     min-height: 0;
   }
 
-  ..message-input-area {
+  .message-input-area {
   position: absolute;
   bottom: 24px;
   left: 16px;
