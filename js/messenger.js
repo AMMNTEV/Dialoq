@@ -919,9 +919,13 @@ document.addEventListener('click', function(event) {
 });
 
 // ========== ПОЛНАЯ ОЧИСТКА ЧАТА (С ОПЦИЕЙ ДЛЯ ОБОИХ) ==========
+// ========== ПОЛНАЯ ОЧИСТКА ЧАТА (С ОПЦИЕЙ ДЛЯ ОБОИХ) ==========
 async function clearCurrentChat() {
   if (!currentChatId) return;
-  if (!confirm(t('confirmClearChat'))) return;
+  
+  // Безопасный вызов confirm (если функции t() не передали ключ, скрипт не упадет)
+  const confirmText = (typeof t === 'function' && t('confirmClearChat')) ? t('confirmClearChat') : 'Вы уверены, что хотите удалить этот чат?';
+  if (!confirm(confirmText)) return;
 
   const menu = document.getElementById('chatDropdownMenu');
   if (menu) menu.style.display = 'none';
@@ -930,15 +934,14 @@ async function clearCurrentChat() {
     // 1. Мгновенно очищаем экран у себя
     const messagesContainer = document.getElementById('messagesContainer');
     if (messagesContainer) {
-      messagesContainer.innerHTML = `<div class="no-messages">${t('noMessages')}</div>`;
+      const noMsgText = (typeof t === 'function' && t('noMessages')) ? t('noMessages') : 'Нет сообщений';
+      messagesContainer.innerHTML = `<div class="no-messages">${noMsgText}</div>`;
     }
 
-    // 2. Добавляем 'everyone' в массив deletedFor для всех сообщений
-    // Передаем true в качестве третьего параметра (isForEveryone)
+    // 2. Добавляем 'everyone' в массив deletedFor для всех сообщений (с защитой от пустого батча)
     await hideMessagesBatch(currentChatId, currentUser.uid, true, 450);
 
     // 3. Обновляем превью чата для ВСЕХ, чтобы чат пропал из боковой панели у собеседника
-    // Вызываем уже существующую у тебя функцию
     await updateChatPreviewAfterDelete(currentChatId, true);
 
     // 4. Скрываем чат из боковой панели мгновенно
@@ -947,13 +950,16 @@ async function clearCurrentChat() {
       chatElement.style.display = 'none';
     }
 
+    // 5. Выходим из режима чата (закрываем удалённую беседу)
+    exitChatMode();
+
   } catch (error) {
     console.error('Ошибка при очистке чата:', error);
     alert('Произошла ошибка при очистке чата.');
   }
 }
 
-// Новая безопасная функция скрытия сообщений порциями с поддержкой удаления для всех
+// Новая безопасная функция скрытия сообщений порциями с защитой от пустых пакетов
 async function hideMessagesBatch(chatId, userId, isForEveryone = false, batchSize = 450, lastDoc = null) {
   let query = db.collection('chats').doc(chatId)
     .collection('messages')
@@ -968,6 +974,8 @@ async function hideMessagesBatch(chatId, userId, isForEveryone = false, batchSiz
   if (msgsSnapshot.empty) return;
 
   const batch = db.batch();
+  let opsCount = 0; // Счётчик операций
+
   msgsSnapshot.forEach(doc => {
     const msg = doc.data();
     // Проверяем, не скрыто ли уже сообщение для всех
@@ -977,10 +985,14 @@ async function hideMessagesBatch(chatId, userId, isForEveryone = false, batchSiz
         : { deletedFor: firebase.firestore.FieldValue.arrayUnion(userId) }; // Скрываем только для себя
 
       batch.update(doc.ref, updateData);
+      opsCount++;
     }
   });
 
-  await batch.commit();
+  // Отправляем пакет в Firestore ТОЛЬКО если есть хотя бы 1 изменение
+  if (opsCount > 0) {
+    await batch.commit();
+  }
 
   // Рекурсивно переходим к следующей порции
   const newLastDoc = msgsSnapshot.docs[msgsSnapshot.docs.length - 1];
