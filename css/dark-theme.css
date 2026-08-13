@@ -1032,6 +1032,22 @@ a:focus {
   stroke: #ef4444 !important;
 }
 
+/* --- Красный текст и элементы удаления аккаунта в тёмной теме --- */
+.dark-theme .settings-item-title.danger-title,
+.dark-theme .settings-item-arrow.danger-arrow {
+  color: var(--danger) !important; /* #b84a4a или #ef4444 */
+}
+
+.dark-theme .settings-item-desc.danger-desc {
+  color: rgba(239, 68, 68, 0.85) !important;
+}
+
+/* Корзина в тёмной теме при наведении */
+.dark-theme .settings-item:hover .settings-item-icon.danger-icon {
+  background: rgba(184, 74, 74, 0.25) !important;
+  color: var(--danger) !important;
+}
+
 /* ==========================================
    КОНЕЦ DARK THEME
    ========================================== */

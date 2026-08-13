@@ -357,3 +357,18 @@ a:focus {
   background: rgba(220, 38, 38, 0.1);
   color: #dc2626;
 }
+
+.settings-item:hover .settings-item-icon.danger-icon {
+  background: rgba(220, 38, 38, 0.2);
+  color: #dc2626;
+}
+
+/* Красные цвета для текста и стрелочки в светлой теме */
+.settings-item-title.danger-title,
+.settings-item-arrow.danger-arrow {
+  color: #dc2626;
+}
+
+.settings-item-desc.danger-desc {
+  color: #ef4444;
+}
