@@ -1739,8 +1739,8 @@ a:focus {
   justify-content: center !important;
   height: 48px !important;
   padding: 0 !important;
-  /* ПОДНИМАЕМ ВЕСЬ БЛОК ТЕКСТА ЦЕЛИКОМ НА 3px ВВЕРХ */
-  margin: -3px 0 0 0 !important; 
+  /* Чуть-чуть поднимаем весь блок текста целиком для идеального визуального центра */
+  margin: -2px 0 0 0 !important; 
   gap: 0 !important; 
 }
 
@@ -1753,14 +1753,11 @@ a:focus {
   padding: 0 !important;
 }
 
-.selected-chat .chat-avatar-placeholder,
-.selected-chat .user-avatar-placeholder {
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-}
-
+/* ДОБАВЛЕНЫ h3 СЕЛЕКТОРЫ, ЧТОБЫ ЖЕСТКО СБИТЬ СТАРЫЙ line-height: 1.5 */
 .selected-chat .chat-name,
-.selected-chat .user-name {
+.selected-chat .user-name,
+.selected-chat .chat-info h3,
+.selected-chat .user-info h3 {
   font-size: 1rem !important;
   line-height: 1 !important; 
   margin: 0 !important;
@@ -1769,12 +1766,15 @@ a:focus {
   display: block !important;
 }
 
+/* ДОБАВЛЕНЫ p СЕЛЕКТОРЫ, ЧТОБЫ ТЭГ ТОЧНО ПОДЧИНЯЛСЯ ПРАВИЛАМ */
 .selected-chat .chat-tag,
-.selected-chat .user-tag {
+.selected-chat .user-tag,
+.selected-chat .chat-info p,
+.selected-chat .user-info p {
   font-size: 0.8rem !important;
   line-height: 1 !important; 
-  /* ПРИЖИМАЕМ ТЭГ ЕЩЕ СИЛЬНЕЕ К НИКУ (было -3, стало -5) */
-  margin: -9px 0 0 0 !important; 
+  /* Теперь, когда скрытый воздух от line-height убран, -9px не нужно (текст слипнется). Хватит 0 или -1px */
+  margin: -1px 0 0 0 !important; 
   padding: 0 !important;
   opacity: 0.7 !important;
   display: block !important;
