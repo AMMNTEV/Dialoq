@@ -1724,43 +1724,65 @@ a:focus {
   }
 }
 
-/* ==========================================
-   ИСПРАВЛЕНИЕ: ЦЕНТРОВКА НИКА И ТЭГА В ШАПКЕ
-   ========================================== */
-
+/* ========== 1. КОМПАКТНЫЙ НИК И ТЭГ В ШАПКЕ ЧАТА ========== */
 .selected-chat .chat-info,
 .selected-chat .user-info {
   display: flex !important;
   flex-direction: column !important;
-  justify-content: center !important; /* Центрируем содержимое по вертикали */
-  gap: 0 !important; /* Убираем любые разрывы между строками */
-  padding-bottom: 0 !important; 
-  height: 100% !important; /* Контейнер берет высоту карточки для правильной центровки */
+  justify-content: center !important;
+  padding: 0 !important;        /* Убираем смещающие отступы */
+  gap: 0px !important;          /* Плотно сближаем ник и тэг */
+  min-width: 0 !important;
 }
 
 .selected-chat .chat-name,
 .selected-chat .user-name {
-  font-size: 1rem !important;
-  line-height: 1.2 !important;
+  font-size: 0.95rem !important;
+  line-height: 1.15 !important;
+  margin: 0 !important;
   padding: 0 !important;
-  margin: 0 0 2px 0 !important; /* Аккуратный отступ в 2px только снизу */
-  flex: 0 0 auto !important; /* Строго запрещаем элементу растягиваться по высоте */
+  font-weight: 600 !important;
 }
 
 .selected-chat .chat-tag,
 .selected-chat .user-tag {
-  font-size: 0.8rem !important;
-  line-height: 1.2 !important;
-  padding: 0 !important;
+  font-size: 0.75rem !important;
+  line-height: 1.15 !important;
   margin: 0 !important;
-  flex: 0 0 auto !important; /* Строго запрещаем элементу растягиваться по высоте */
+  padding: 0 !important;
+  opacity: 0.7;
 }
 
+/* ========== 2. КРУГЛАЯ ПОДЛОЖКА ДЛЯ КНОПКИ ОТПРАВКИ (СВЕТЛАЯ ТЕМА) ========== */
 .message-input-area button {
-  background: #3b82f6 !important;
-  color: #ffffff !important;
+  background: #3b82f6 !important; /* Фирменный синий круг */
+  color: #ffffff !important;       /* Белая иконка самолетика */
+  border: none !important;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  margin-left: 6px !important;
+  transition: background-color 0.2s ease, transform 0.1s ease !important;
 }
 
 .message-input-area button:hover {
-  background: #2563eb !important;
+  background: #2563eb !important;  /* Чуть темнее при наведении */
+}
+
+.message-input-area button:active {
+  transform: scale(0.95);
+}
+
+/* Фикс размера SVG-иконки внутри кнопки отправки */
+.message-input-area button svg {
+  width: 18px !important;
+  height: 18px !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
 }
