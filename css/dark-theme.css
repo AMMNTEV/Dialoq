@@ -308,10 +308,20 @@
 .dark-theme .nav-user-avatar,
 .dark-theme .chat-avatar-placeholder,
 .dark-theme .user-avatar-placeholder,
-.dark-theme .avatar-large,
-.dark-theme .settings-item-icon {
+.dark-theme .avatar-large {
   background: var(--accent-light) !important;
   color: var(--accent-hover) !important;
+}
+
+.dark-theme .settings-item-icon {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: var(--text-secondary) !important;
+}
+
+/* Иконка "Удалить аккаунт" — красная */
+.dark-theme .settings-item-icon.danger-icon {
+  background: rgba(184, 74, 74, 0.15) !important;
+  color: var(--danger) !important;
 }
 
 /* --- Тоггл-свитч --- */
