@@ -502,26 +502,18 @@
 }
 
 .message-input-area textarea {
-  flex: 1;
-  padding: 11px 20px; /* Слегка корректируем отступ для многострочного текста */
-  min-height: 44px; /* Стартовая высота как у поиска */
-  max-height: 120px; /* Ограничение, после которого появится внутренний скролл */
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 22px; /* Оставляем красивое закругление */
-  font-size: 0.95rem;
-  resize: none; /* Запрещаем пользователю растягивать поле вручную за уголок */
-  overflow-y: hidden; /* Скрываем скролл, пока не достигнет max-height */
-  line-height: 20px;
-  font-family: inherit;
-  box-sizing: border-box;
-}
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 12px 0; /* Компенсируем отступы контейнера */
+}[cite: 10]
 
 .message-input-area textarea:focus {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
   outline: none;
-  border-color: #3b82f6;
-  background: #ffffff;
-}
+}[cite: 10]
 
 .message-input-area button {
   width: 44px;
@@ -878,16 +870,27 @@
     min-height: 0;
   }
 
-  .message-input-area {
-    flex-shrink: 0;
-    padding: 12px 16px;
-    padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
-    background: #ffffff;
-    border-top: 1px solid #eef2f6;
-    width: 100%;
-    position: relative;
-    bottom: 0;
-  }
+  ..message-input-area {
+  position: absolute;
+  bottom: 24px;
+  left: 16px;
+  right: 16px;
+  z-index: 100;
+  
+  /* Эффект Liquid Glass (взят из ваших стилей шапки) */
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 28px;
+  
+  /* Внутренние отступы и выравнивание */
+  padding: 8px 8px 8px 16px;
+  gap: 12px;
+  display: flex; 
+  align-items: flex-end; /* Чтобы кнопка была внизу, если текст многострочный */
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+}[cite: 10]
 
   .chat-item {
     padding: 10px;
@@ -1620,8 +1623,8 @@ a:focus {
 }
 
 .messages-container {
-  padding-top: 90px !important;
-}
+  padding-bottom: 90px !important; /* Увеличьте значение, если панель высокая */
+}[cite: 10]
 
 @media (max-width: 768px) {
   .chat-header {
@@ -1635,9 +1638,16 @@ a:focus {
   }
 
   .messages-container {
-    padding-top: 76px !important;
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)) !important;
   }
+
+  .message-input-area {
+    /* Прижимаем к низу с учетом скруглений и безопасной зоны iPhone */
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    left: 12px;
+    right: 12px;
+    width: auto;
+    border-radius: 28px;
+    position: fixed; /* На мобилках лучше fixed, чтобы клавиатура не ломала поток */
+  }[cite: 10]
 }
