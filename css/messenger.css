@@ -1723,3 +1723,35 @@ a:focus {
     padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
+
+/* ==========================================
+   ИСПРАВЛЕНИЕ: ЦЕНТРОВКА НИКА И ТЭГА В ШАПКЕ
+   ========================================== */
+
+.selected-chat .chat-info,
+.selected-chat .user-info {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important; /* Центрируем содержимое по вертикали */
+  gap: 0 !important; /* Убираем любые разрывы между строками */
+  padding-bottom: 0 !important; 
+  height: 100% !important; /* Контейнер берет высоту карточки для правильной центровки */
+}
+
+.selected-chat .chat-name,
+.selected-chat .user-name {
+  font-size: 1rem !important;
+  line-height: 1.2 !important;
+  padding: 0 !important;
+  margin: 0 0 2px 0 !important; /* Аккуратный отступ в 2px только снизу */
+  flex: 0 0 auto !important; /* Строго запрещаем элементу растягиваться по высоте */
+}
+
+.selected-chat .chat-tag,
+.selected-chat .user-tag {
+  font-size: 0.8rem !important;
+  line-height: 1.2 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  flex: 0 0 auto !important; /* Строго запрещаем элементу растягиваться по высоте */
+}
