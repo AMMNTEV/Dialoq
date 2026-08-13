@@ -493,20 +493,43 @@
 }
 
 .message-input-area {
-  display: none;
-  padding: 20px 24px;
-  border-top: 1px solid #eef2f6;
-  background: #ffffff;
+  /* По умолчанию flex, или none, если скрываешь через JS */
+  display: flex;
+  align-items: flex-end;
   gap: 12px;
+  
+  /* Парящее позиционирование относительно .chat-area */
+  position: absolute; 
+  bottom: 24px;
+  left: 24px;
+  right: 24px;
+  z-index: 100;
+  box-sizing: border-box;
+  
+  /* Эффект Liquid Glass */
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  
+  /* Рамка, скругления и тени */
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 28px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+  
+  padding: 8px 8px 8px 16px;
   flex-shrink: 0;
 }
 
 .message-input-area textarea {
+  flex: 1; /* <-- Это ключевое свойство для растягивания */
   background: transparent;
   border: none;
   box-shadow: none;
-  padding: 12px 0; /* Компенсируем отступы контейнера */
-}[cite: 10]
+  padding: 12px 0;
+  color: inherit;
+  resize: none; 
+  outline: none;
+}
 
 .message-input-area textarea:focus {
   background: transparent;
@@ -871,28 +894,29 @@
   }
 
   .message-input-area {
-  display: flex; /* Возвращаем flex для центрирования элементов */
+  /* По умолчанию flex, или none, если скрываешь через JS */
+  display: flex;
   align-items: flex-end;
   gap: 12px;
   
-  /* Делаем панель парящей */
-  position: absolute;
+  /* Парящее позиционирование относительно .chat-area */
+  position: absolute; 
   bottom: 24px;
   left: 24px;
   right: 24px;
   z-index: 100;
+  box-sizing: border-box;
   
   /* Эффект Liquid Glass */
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   
-  /* Скругления, рамка и тени */
+  /* Рамка, скругления и тени */
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 28px;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
   
-  /* Внутренние отступы */
   padding: 8px 8px 8px 16px;
   flex-shrink: 0;
 }
@@ -1647,12 +1671,10 @@ a:focus {
   }
 
   .message-input-area {
-    /* Прижимаем к низу с учетом скруглений и безопасной зоны iPhone */
+    /* Прижимаем к низу с учетом безопасной зоны PWA */
     bottom: calc(12px + env(safe-area-inset-bottom, 0px));
     left: 12px;
     right: 12px;
-    width: auto;
-    border-radius: 28px;
-    position: fixed; /* На мобилках лучше fixed, чтобы клавиатура не ломала поток */
-  }[cite: 10]
+    position: absolute; /* Оставляем absolute, чтобы не ломать верстку при вызове клавиатуры */
+  }
 }
