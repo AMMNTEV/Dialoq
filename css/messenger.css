@@ -1729,7 +1729,6 @@ a:focus {
   display: flex !important;
   align-items: center !important;
   height: 48px !important;
-  /* Убираем вертикальные отступы, центруем строго по оси flexbox */
   padding: 0 16px 0 4px !important; 
 }
 
@@ -1738,13 +1737,13 @@ a:focus {
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
-  height: 48px !important; /* Жестко привязываем к высоте родителя */
+  height: 48px !important;
   padding: 0 !important;
   margin: 0 !important;
-  gap: 1px !important;
+  gap: 0 !important; /* Строго убираем gap */
 }
 
-/* Принудительно убиваем скрытые отступы у заголовков и абзацев внутри шапки */
+/* Сброс мусорных отступов тегов */
 .selected-chat .chat-info h3,
 .selected-chat .user-info h3,
 .selected-chat .chat-info p,
@@ -1761,8 +1760,8 @@ a:focus {
 
 .selected-chat .chat-name,
 .selected-chat .user-name {
-  font-size: 0.95rem !important;
-  line-height: 1.1 !important; /* Уменьшили межстрочный интервал для центровки */
+  font-size: 1rem !important;
+  line-height: 1 !important; /* Убиваем внутренний интервал шрифта */
   margin: 0 !important;
   padding: 0 !important;
   font-weight: 600 !important;
@@ -1771,9 +1770,10 @@ a:focus {
 
 .selected-chat .chat-tag,
 .selected-chat .user-tag {
-  font-size: 0.75rem !important;
-  line-height: 1.1 !important; /* Уменьшили межстрочный интервал для центровки */
+  font-size: 0.8rem !important;
+  line-height: 1 !important; /* Убиваем внутренний интервал шрифта */
   margin: 0 !important;
+  margin-top: -3px !important; /* ПРИНУДИТЕЛЬНО ТЯНЕМ ТЭГ ВВЕРХ */
   padding: 0 !important;
   opacity: 0.7 !important;
   display: block !important;
