@@ -493,50 +493,35 @@
 }
 
 .message-input-area {
-  /* По умолчанию flex, или none, если скрываешь через JS */
-  display: flex;
-  align-items: flex-end;
+  display: none;
+  padding: 20px 24px;
+  border-top: 1px solid #eef2f6;
+  background: #ffffff;
   gap: 12px;
-  
-  /* Парящее позиционирование относительно .chat-area */
-  position: absolute; 
-  bottom: 24px;
-  left: 24px;
-  right: 24px;
-  z-index: 100;
-  box-sizing: border-box;
-  
-  /* Эффект Liquid Glass */
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  
-  /* Рамка, скругления и тени */
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 28px;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
-  
-  padding: 8px 8px 8px 16px;
   flex-shrink: 0;
 }
 
 .message-input-area textarea {
-  flex: 1; /* <-- Это ключевое свойство для растягивания */
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  padding: 12px 0;
-  color: inherit;
-  resize: none; 
-  outline: none;
+  flex: 1;
+  padding: 11px 20px; /* Слегка корректируем отступ для многострочного текста */
+  min-height: 44px; /* Стартовая высота как у поиска */
+  max-height: 120px; /* Ограничение, после которого появится внутренний скролл */
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 22px; /* Оставляем красивое закругление */
+  font-size: 0.95rem;
+  resize: none; /* Запрещаем пользователю растягивать поле вручную за уголок */
+  overflow-y: hidden; /* Скрываем скролл, пока не достигнет max-height */
+  line-height: 20px;
+  font-family: inherit;
+  box-sizing: border-box;
 }
 
 .message-input-area textarea:focus {
-  background: transparent;
-  border-color: transparent;
-  box-shadow: none;
   outline: none;
-}[cite: 10]
+  border-color: #3b82f6;
+  background: #ffffff;
+}
 
 .message-input-area button {
   width: 44px;
@@ -894,32 +879,15 @@
   }
 
   .message-input-area {
-  /* По умолчанию flex, или none, если скрываешь через JS */
-  display: flex;
-  align-items: flex-end;
-  gap: 12px;
-  
-  /* Парящее позиционирование относительно .chat-area */
-  position: absolute; 
-  bottom: 24px;
-  left: 24px;
-  right: 24px;
-  z-index: 100;
-  box-sizing: border-box;
-  
-  /* Эффект Liquid Glass */
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  
-  /* Рамка, скругления и тени */
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 28px;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
-  
-  padding: 8px 8px 8px 16px;
-  flex-shrink: 0;
-}
+    flex-shrink: 0;
+    padding: 12px 16px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
+    background: #ffffff;
+    border-top: 1px solid #eef2f6;
+    width: 100%;
+    position: relative;
+    bottom: 0;
+  }
 
   .chat-item {
     padding: 10px;
@@ -1652,8 +1620,8 @@ a:focus {
 }
 
 .messages-container {
-  padding-bottom: 90px !important; /* Увеличьте значение, если панель высокая */
-}[cite: 10]
+  padding-top: 90px !important;
+}
 
 @media (max-width: 768px) {
   .chat-header {
@@ -1667,14 +1635,91 @@ a:focus {
   }
 
   .messages-container {
-    padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-top: 76px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important;
   }
+}
 
-  .message-input-area {
-    /* Прижимаем к низу с учетом безопасной зоны PWA */
-    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-    left: 12px;
-    right: 12px;
-    position: absolute; /* Оставляем absolute, чтобы не ломать верстку при вызове клавиатуры */
+/* ==========================================
+   ПАНЕЛЬ ВВОДА СООБЩЕНИЙ (В СТИЛЕ ШАПКИ И ПОИСКА)
+   ========================================== */
+
+/* 1. Делаем контейнер парящим, стеклянным и закругленным */
+.message-input-area {
+  position: absolute !important;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+  left: 16px !important;
+  right: 16px !important;
+  width: auto !important;
+  
+  /* Единый стеклянный эффект, без массивных теней */
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 28px !important;
+  box-shadow: none !important;
+  
+  /* Тонкие отступы для компактности */
+  padding: 0 6px 0 0 !important; 
+  margin: 0 !important;
+  gap: 0 !important; /* Убираем стандартный отступ, чтобы контролировать его кнопкой */
+  
+  z-index: 100;
+  align-items: center; 
+}
+
+/* 2. Делаем само поле ввода полностью прозрачным, чтобы оно слилось с контейнером */
+.message-input-area textarea {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 14px 20px !important;
+  margin: 0 !important;
+  min-height: 48px !important; /* Тонкий стартовый размер, как у поиска */
+  line-height: 20px !important;
+  border-radius: 28px !important;
+  flex: 1;
+}
+
+/* Убираем синюю обводку при клике (фокусе), оставляем только рамку самого контейнера */
+.message-input-area textarea:focus {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  outline: none !important;
+}
+
+/* 3. Кнопка отправки: убираем заливку, делаем в стиле легких иконок навигации */
+.message-input-area button {
+  background: transparent !important;
+  color: #3b82f6 !important; /* Синяя иконка */
+  border: none !important;
+  box-shadow: none !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background 0.2s ease !important;
+  margin-left: 4px !important;
+}
+
+.message-input-area button:hover {
+  background: rgba(59, 130, 246, 0.1) !important;
+}
+
+/* 4. Сдвигаем сообщения вверх, чтобы они плавно уходили под парящую панель ввода */
+.messages-container {
+  /* Компенсируем высоту панели (48px) + отступ снизу (16px) */
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+@media (max-width: 768px) {
+  .messages-container {
+    padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
