@@ -166,18 +166,18 @@
           <button onclick="logout()" class="settings-btn" data-i18n="logoutBtn">Выйти из аккаунта</button>
           
           <!-- Удалить -->
-          <div class="settings-item" onclick="toggleDelete()">
-            <div class="settings-item-icon danger-icon">
-              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-            </div>
-            <div class="settings-item-info">
-              <div class="settings-item-title" style="color: #dc2626;" data-i18n="deleteTitle">Удаление аккаунта</div>
-              <div class="settings-item-desc" style="color: #ef4444;" data-i18n="deleteDesc">Безвозвратное удаление данных</div>
-            </div>
-            <div class="settings-item-arrow transition-arrow" id="deleteArrow" style="color: #dc2626;">
-              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
-          </div>
+          <div class="settings-item settings-item-danger" onclick="toggleDelete()">
+  <div class="settings-item-icon danger-icon">
+    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+  </div>
+  <div class="settings-item-info">
+    <div class="settings-item-title danger-title" data-i18n="deleteTitle">Удаление аккаунта</div>
+    <div class="settings-item-desc danger-desc" data-i18n="deleteDesc">Безвозвратное удаление данных</div>
+  </div>
+  <div class="settings-item-arrow transition-arrow danger-arrow" id="deleteArrow">
+    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+  </div>
+</div>
           
           <!-- Скрытый контент для удаления -->
           <div class="about-content" id="deleteContent">
