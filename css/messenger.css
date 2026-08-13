@@ -1755,3 +1755,12 @@ a:focus {
   margin: 0 !important;
   flex: 0 0 auto !important; /* Строго запрещаем элементу растягиваться по высоте */
 }
+
+.message-input-area button {
+  background: #3b82f6 !important;
+  color: #ffffff !important;
+}
+
+.message-input-area button:hover {
+  background: #2563eb !important;
+}
