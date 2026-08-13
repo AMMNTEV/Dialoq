@@ -1724,34 +1724,59 @@ a:focus {
   }
 }
 
-/* ========== 1. КОМПАКТНЫЙ НИК И ТЭГ В ШАПКЕ ЧАТА ========== */
+/* ========== 1. ТОЧНОЕ ВЫРАВНИВАНИЕ НИКА И ТЭГА В ШАПКЕ ========== */
+.selected-chat {
+  display: flex !important;
+  align-items: center !important;
+  height: 48px !important;
+  /* Убираем вертикальные отступы, центруем строго по оси flexbox */
+  padding: 0 16px 0 4px !important; 
+}
+
 .selected-chat .chat-info,
 .selected-chat .user-info {
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
-  height: 100% !important;
+  height: 48px !important; /* Жестко привязываем к высоте родителя */
   padding: 0 !important;
   margin: 0 !important;
   gap: 1px !important;
 }
 
+/* Принудительно убиваем скрытые отступы у заголовков и абзацев внутри шапки */
+.selected-chat .chat-info h3,
+.selected-chat .user-info h3,
+.selected-chat .chat-info p,
+.selected-chat .user-info p {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.selected-chat .chat-avatar-placeholder,
+.selected-chat .user-avatar-placeholder {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
 .selected-chat .chat-name,
 .selected-chat .user-name {
   font-size: 0.95rem !important;
-  line-height: 1.2 !important;
+  line-height: 1.1 !important; /* Уменьшили межстрочный интервал для центровки */
   margin: 0 !important;
   padding: 0 !important;
   font-weight: 600 !important;
+  display: block !important;
 }
 
 .selected-chat .chat-tag,
 .selected-chat .user-tag {
   font-size: 0.75rem !important;
-  line-height: 1.2 !important;
+  line-height: 1.1 !important; /* Уменьшили межстрочный интервал для центровки */
   margin: 0 !important;
   padding: 0 !important;
-  opacity: 0.7;
+  opacity: 0.7 !important;
+  display: block !important;
 }
 
 /* ========== 2. КРУГЛАЯ ПОДЛОЖКА ДЛЯ КНОПКИ ОТПРАВКИ (СВЕТЛАЯ ТЕМА) ========== */
