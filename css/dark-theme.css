@@ -1002,6 +1002,26 @@ a:focus {
   stroke: #ef4444 !important;
 }
 
+/* Красный цвет при наведении на непоставленный лайк (Темная тема) */
+.dark-theme .like-btn:hover {
+  color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.15) !important;
+}
+
+.dark-theme .like-btn:hover svg {
+  stroke: #ef4444 !important;
+}
+
+/* Красный цвет при наведении на непоставленный лайк (Светлая тема) */
+.like-btn:hover {
+  color: #ef4444 !important;
+  background: #fee2e2 !important;
+}
+
+.like-btn:hover svg {
+  stroke: #ef4444 !important;
+}
+
 /* ==========================================
    КОНЕЦ DARK THEME
    ========================================== */
