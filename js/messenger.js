@@ -849,7 +849,7 @@ function updateChatHeader(chat) {
   // Иконка "Бургер-меню" (три полоски)
   const burgerIconSvg = `<svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`;
 
-  // Блок с выпадающим меню, который появится справа
+  // Блок с выпадающим меню (оставляем его генерацию)
   const dropdownHtml = `
     <div class="chat-header-actions" style="position: relative; margin-left: auto;">
       <button class="mobile-back-btn burger-menu-btn" onclick="toggleChatMenu(event)">
@@ -866,6 +866,7 @@ function updateChatHeader(chat) {
 
   if (chat.isGroup) {
     const participantsCount = chat.participants ? chat.participants.length : 2;
+    // ВНИМАНИЕ: Отсюда убран ${dropdownHtml}, меню не будет рендериться в беседах
     headerContent = `
       <button class="mobile-back-btn" onclick="exitChatMode()">${backIconSvg}</button>
       <div class="selected-chat" onclick="openChatInfo('${chat.id}')" style="flex: 1; overflow: hidden; cursor: pointer; min-width: 0;">
@@ -875,10 +876,10 @@ function updateChatHeader(chat) {
           <p>${participantsCount} ${t('participantsCount')}</p>
         </div>
       </div>
-      ${dropdownHtml}
     `;
   } else {
     const otherUserId = chat.participants.find(id => id !== currentUser.uid);
+    // Для личных сообщений меню остается на месте
     headerContent = `
       <button class="mobile-back-btn" onclick="exitChatMode()">${backIconSvg}</button>
       <div class="selected-chat" onclick="openUserProfile('${otherUserId}')" style="flex: 1; overflow: hidden; cursor: pointer; min-width: 0;">
@@ -894,7 +895,7 @@ function updateChatHeader(chat) {
   
   chatHeader.innerHTML = headerContent;
   
-  // Добавляем flex-стили напрямую в шапку для корректного распределения (слева-центр-справа)
+  // Flex-стили для корректного распределения
   chatHeader.style.display = 'flex';
   chatHeader.style.alignItems = 'center';
 }
