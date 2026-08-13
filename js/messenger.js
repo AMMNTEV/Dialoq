@@ -923,7 +923,6 @@ document.addEventListener('click', function(event) {
 async function clearCurrentChat() {
   if (!currentChatId) return;
   
-  // Безопасный вызов confirm (если функции t() не передали ключ, скрипт не упадет)
   const confirmText = (typeof t === 'function' && t('confirmClearChat')) ? t('confirmClearChat') : 'Вы уверены, что хотите удалить этот чат?';
   if (!confirm(confirmText)) return;
 
@@ -938,17 +937,22 @@ async function clearCurrentChat() {
       messagesContainer.innerHTML = `<div class="no-messages">${noMsgText}</div>`;
     }
 
-    // 2. Добавляем 'everyone' в массив deletedFor для всех сообщений (с защитой от пустого батча)
-    await hideMessagesBatch(currentChatId, currentUser.uid, true, 450);
+    // 2. Добавляем 'everyone' в массив deletedFor для всех сообщений
+    await hideMessagesBatch(currentChatId, true);
 
     // 3. Обновляем превью чата для ВСЕХ, чтобы чат пропал из боковой панели у собеседника
     await updateChatPreviewAfterDelete(currentChatId, true);
 
     // 4. Скрываем чат из боковой панели мгновенно
-    const chatElement = document.querySelector(`.chat-item[onclick*='${currentChatId}']`);
-    if (chatElement) {
-      chatElement.style.display = 'none';
-    }
+    // Обновляем allChats и перерисовываем список
+    allChats = allChats.filter(c => c.id !== currentChatId);
+    displayChats(allChats);
+    
+    // Также удаляем из localStorage
+    try {
+      const cacheKeyChats = `cachedChats_${currentUser.uid}`;
+      localStorage.setItem(cacheKeyChats, JSON.stringify(allChats));
+    } catch (e) { console.warn('Ошибка записи кэша', e); }
 
     // 5. Выходим из режима чата (закрываем удалённую беседу)
     exitChatMode();
@@ -959,44 +963,61 @@ async function clearCurrentChat() {
   }
 }
 
-// Новая безопасная функция скрытия сообщений порциями с защитой от пустых пакетов
-async function hideMessagesBatch(chatId, userId, isForEveryone = false, batchSize = 450, lastDoc = null) {
-  let query = db.collection('chats').doc(chatId)
-    .collection('messages')
-    .orderBy('timestamp') // Сортировка обязательна для работы курсора
-    .limit(batchSize);
-
-  if (lastDoc) {
-    query = query.startAfter(lastDoc);
-  }
-
-  const msgsSnapshot = await query.get();
-  if (msgsSnapshot.empty) return;
-
-  const batch = db.batch();
-  let opsCount = 0; // Счётчик операций
-
-  msgsSnapshot.forEach(doc => {
-    const msg = doc.data();
-    // Проверяем, не скрыто ли уже сообщение для всех
-    if (!msg.deletedFor || !msg.deletedFor.includes('everyone')) {
-      const updateData = isForEveryone 
-        ? { deletedFor: ['everyone'] } // Скрываем для обоих
-        : { deletedFor: firebase.firestore.FieldValue.arrayUnion(userId) }; // Скрываем только для себя
-
-      batch.update(doc.ref, updateData);
-      opsCount++;
+// ИСПРАВЛЕННАЯ ФУНКЦИЯ СКРЫТИЯ СООБЩЕНИЙ (БЕЗ РЕКУРСИИ)
+async function hideMessagesBatch(chatId, isForEveryone = false) {
+  const batchSize = 450;
+  let lastDoc = null;
+  let hasMore = true;
+  
+  while (hasMore) {
+    let query = db.collection('chats').doc(chatId)
+      .collection('messages')
+      .orderBy('timestamp')
+      .limit(batchSize);
+    
+    if (lastDoc) {
+      query = query.startAfter(lastDoc);
     }
-  });
-
-  // Отправляем пакет в Firestore ТОЛЬКО если есть хотя бы 1 изменение
-  if (opsCount > 0) {
-    await batch.commit();
+    
+    const msgsSnapshot = await query.get();
+    
+    if (msgsSnapshot.empty) {
+      hasMore = false;
+      break;
+    }
+    
+    const batch = db.batch();
+    let opsCount = 0;
+    
+    msgsSnapshot.forEach(doc => {
+      const msg = doc.data();
+      // Проверяем, не скрыто ли уже сообщение для всех
+      if (!msg.deletedFor || !msg.deletedFor.includes('everyone')) {
+        const updateData = isForEveryone 
+          ? { deletedFor: ['everyone'] } // Скрываем для обоих
+          : { deletedFor: firebase.firestore.FieldValue.arrayUnion(userId) }; // Скрываем только для себя
+        
+        batch.update(doc.ref, updateData);
+        opsCount++;
+      }
+    });
+    
+    // Отправляем пакет в Firestore ТОЛЬКО если есть хотя бы 1 изменение
+    if (opsCount > 0) {
+      await batch.commit();
+      console.log(`✅ Обновлено ${opsCount} сообщений в пакете`);
+    }
+    
+    // Проверяем, есть ли еще документы
+    if (msgsSnapshot.docs.length < batchSize) {
+      hasMore = false;
+    } else {
+      // Сохраняем последний документ для следующей итерации
+      lastDoc = msgsSnapshot.docs[msgsSnapshot.docs.length - 1];
+    }
   }
-
-  // Рекурсивно переходим к следующей порции
-  const newLastDoc = msgsSnapshot.docs[msgsSnapshot.docs.length - 1];
-  return hideMessagesBatch(chatId, userId, isForEveryone, batchSize, newLastDoc);
+  
+  console.log('✅ Все сообщения помечены как удаленные');
 }
 
 // ========== РЕКУРСИВНОЕ УДАЛЕНИЕ СООБЩЕНИЙ ПОРЦИЯМИ ==========
@@ -1639,19 +1660,21 @@ async function updateChatPreviewAfterDelete(chatId, isForEveryone = false) {
   let newLastMessageTime = null;
 
   for (const doc of snapshot.docs) {
-  const msg = doc.data();
-  if (!msg.deletedFor || (!msg.deletedFor.includes('everyone') && !msg.deletedFor.includes(currentUser.uid))) {
-    // Аналогичная проверка
-    newLastMessage = msg.isSystem ? getSystemMessageText(msg) : msg.text;
-    newLastMessageTime = msg.timestamp ? msg.timestamp.toDate() : null;
-    break;
+    const msg = doc.data();
+    // Проверяем, не скрыто ли сообщение для всех или для текущего пользователя
+    if (!msg.deletedFor || (!msg.deletedFor.includes('everyone') && !msg.deletedFor.includes(currentUser.uid))) {
+      newLastMessage = msg.isSystem ? getSystemMessageText(msg) : msg.text;
+      newLastMessageTime = msg.timestamp ? msg.timestamp.toDate() : null;
+      break;
+    }
   }
-}
 
   if (isForEveryone) {
+    // Если чат полностью очищен для всех, устанавливаем lastMessage = null
+    // Это скроет чат из списка у всех участников
     await db.collection('chats').doc(chatId).update({
-      lastMessage: newLastMessage,
-      lastMessageTime: newLastMessageTime ? firebase.firestore.Timestamp.fromDate(newLastMessageTime) : null
+      lastMessage: null,
+      lastMessageTime: null
     });
   } else {
     const chatIndex = allChats.findIndex(c => c.id === chatId);
@@ -1666,6 +1689,8 @@ async function updateChatPreviewAfterDelete(chatId, isForEveryone = false) {
     displayChats(allChats);
   }
 }
+
+
 
 // ========== ОБНОВЛЁННЫЕ ФУНКЦИИ УДАЛЕНИЯ (без мигания) ==========
 async function deleteMessageForMe() {
