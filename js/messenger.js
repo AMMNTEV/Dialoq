@@ -1,5 +1,7 @@
 // ========== ПРОФИЛЬ ТЕКУЩЕГО ПОЛЬЗОВАТЕЛЯ ==========
 const userCache = new Map(); // Обязательно создаем кэш!
+let currentUser = null;      // <-- ВАЖНО: Без этого ломается авторизация
+let currentUserData = null;  // <-- ВАЖНО: Без этого ломается отрисовка профиля
 let unsubscribePosts = null;
 let isSubmitting = false;
 let changes = {};
