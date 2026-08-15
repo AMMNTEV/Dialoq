@@ -853,11 +853,11 @@ function updateChatHeader(chat) {
   // Убираем onclick="..." и добавляем id="burgerMenuBtn" и id="clearChatActionBtn"
   const dropdownHtml = `
     <div class="chat-header-actions" style="position: relative; margin-left: auto;">
-      <button type="button" class="mobile-back-btn burger-menu-btn" id="burgerMenuBtn">
+      <button type="button" class="mobile-back-btn burger-menu-btn" onclick="toggleChatMenu(event)">
         ${burgerIconSvg}
       </button>
       <div id="chatDropdownMenu" class="chat-dropdown-menu" style="display: none; position: absolute; top: 100%; right: 0; background: var(--bg-card, #fff); border: 1px solid var(--border-color, #ccc); border-radius: 8px; box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,0.1)); z-index: 100; min-width: 170px; padding: 5px 0;">
-        <button type="button" id="clearChatActionBtn" style="width: 100%; text-align: left; background: none; border: none; padding: 10px 15px; color: var(--danger, #b84a4a); cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+        <button type="button" onclick="executeClearChat(event)" style="width: 100%; text-align: left; background: none; border: none; padding: 10px 15px; color: var(--danger, #b84a4a); cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px;">
           <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
           ${t('clearChat')}
         </button>
@@ -898,33 +898,35 @@ function updateChatHeader(chat) {
   // Flex-стили для корректного распределения
   chatHeader.style.display = 'flex';
   chatHeader.style.alignItems = 'center';
-  
-
-  if (!chat.isGroup) {
-    const burgerBtn = document.getElementById('burgerMenuBtn');
-    if (burgerBtn) {
-      burgerBtn.addEventListener('click', toggleChatMenu);
-    }
-
-    const clearChatBtn = document.getElementById('clearChatActionBtn');
-    if (clearChatBtn) {
-      clearChatBtn.addEventListener('click', (event) => {
-        event.preventDefault();     // Предотвращаем любые дефолтные действия
-        event.stopPropagation();    // Блокируем всплытие, чтобы внешние обработчики (например, открытие профиля) не перебили клик
-        clearCurrentChat();
-      });
-    }
-  }
 }
 
 // ========== ВЫПАДАЮЩЕЕ МЕНЮ ЧАТА ==========
-function toggleChatMenu(event) {
-  event.stopPropagation();
+// Обработчик для открытия меню
+window.toggleChatMenu = function(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation(); // Блокируем всплытие клика
+  }
   const menu = document.getElementById('chatDropdownMenu');
   if (menu) {
     menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
   }
-}
+};
+
+// Железобетонный обработчик для удаления чата
+window.executeClearChat = function(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation(); // Блокируем всплытие клика
+  }
+  
+  // Принудительно закрываем меню перед удалением
+  const menu = document.getElementById('chatDropdownMenu');
+  if (menu) menu.style.display = 'none';
+
+  // Вызываем основную функцию удаления
+  clearCurrentChat();
+};
 
 // Закрываем меню при клике в любое другое место экрана
 document.addEventListener('click', function(event) {
