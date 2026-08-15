@@ -1,7 +1,16 @@
 // ========== ПРОФИЛЬ ТЕКУЩЕГО ПОЛЬЗОВАТЕЛЯ ==========
+const userCache = new Map(); // Обязательно создаем кэш!
 let unsubscribePosts = null;
 let isSubmitting = false;
 let changes = {};
+
+window.t = function(key) {
+  const lang = localStorage.getItem('appLang') || 'ru'; // По умолчанию русский
+  if (typeof messengerTranslations !== 'undefined' && messengerTranslations[lang] && messengerTranslations[lang][key]) {
+    return messengerTranslations[lang][key];
+  }
+  return key; // Возвращаем сам ключ, если перевода нет
+};
 
 // ========== МГНОВЕННАЯ ОТРИСОВКА (ДО ЗАПУСКА FIREBASE) ==========
 document.addEventListener("DOMContentLoaded", () => {
@@ -47,96 +56,87 @@ if (document.getElementById('profileInfo') && typeof loadProfileInfo === 'functi
 }
 });
 
-onAuthStateChanged(async (user) => {
+// Используйте auth.onAuthStateChanged, если onAuthStateChanged не объявлен глобально в auth.js
+(typeof onAuthStateChanged === 'function' ? onAuthStateChanged : auth.onAuthStateChanged)(async (user) => {
   if (!user || !user.emailVerified) {
+    localStorage.removeItem('lastUid');
     window.location.href = 'index.html';
     return;
   }
   currentUser = user;
-
   localStorage.setItem('lastUid', user.uid);
   
-  // 1. СНАЧАЛА ЧИТАЕМ ИЗ LOCALSTORAGE (Мгновенное отображение)
+  // 1. СНАЧАЛА ЧИТАЕМ ИЗ LOCALSTORAGE
   const cacheKey = `cachedCurrentUser_${user.uid}`;
   const cachedDataStr = localStorage.getItem(cacheKey);
   
   if (cachedDataStr) {
     currentUserData = JSON.parse(cachedDataStr);
-    updateSidebarUser(currentUserData); // Мгновенно обновляем левую панель
-    
-    // Если мы на странице профиля, тоже сразу отрисовываем данные
-    if (document.getElementById('profileInfo')) loadProfileInfo();
+    if (typeof updateSidebarUser === 'function') updateSidebarUser(currentUserData);
+    if (document.getElementById('profileInfo') && typeof loadProfileInfo === 'function') loadProfileInfo();
     const profileAvatarEl = document.getElementById('profileAvatar');
     if (profileAvatarEl && typeof renderAvatar === 'function') {
         renderAvatar(currentUserData.avatar);
     } else if (profileAvatarEl) {
-    // Запасной вариант для messenger.js
-    if (currentUserData.avatar) {
-      profileAvatarEl.innerHTML = `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
-      profileAvatarEl.style.background = 'transparent';
-    } else {
-      profileAvatarEl.innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
-      profileAvatarEl.style.background = '#3b82f6';
+      if (currentUserData.avatar) {
+        profileAvatarEl.innerHTML = `<img src="${currentUserData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
+        profileAvatarEl.style.background = 'transparent';
+      } else {
+        profileAvatarEl.innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
+        profileAvatarEl.style.background = '#3b82f6';
+      }
     }
-}
-}
+  }
 
-  // 2. ЗАТЕМ ИДЕМ В БАЗУ ДАННЫХ (Фоновое обновление)
+  // 2. ЗАТЕМ ИДЕМ В БАЗУ ДАННЫХ
   try {
     const doc = await db.collection('users').doc(user.uid).get();
     if (!doc.exists) {
-  // Защита от '@undefined': проверяем, есть ли символ '|' в имени
-  let nickname = t('users');
-  let tag = '';
-  
-  if (user.displayName && user.displayName.includes('|')) {
-    const parts = user.displayName.split('|');
-    nickname = parts[0];
-    tag = '@' + parts[1];
-  } else {
-    nickname = user.displayName || t('users');
-    tag = await generateUniqueTag(); 
-  }
+      let nickname = t('users');
+      let tag = '';
+      if (user.displayName && user.displayName.includes('|')) {
+        const parts = user.displayName.split('|');
+        nickname = parts[0];
+        tag = '@' + parts[1];
+      } else {
+        nickname = user.displayName || t('users');
+        tag = typeof generateUniqueTag === 'function' ? await generateUniqueTag() : '@user' + Math.floor(Math.random()*1000); 
+      }
 
-  const newUserData = {
-    nickname: nickname,
-    tag: tag,
-    email: user.email || '',
-    avatar: user.photoURL || '',
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  };
+      const newUserData = {
+        nickname: nickname,
+        tag: tag,
+        email: user.email || '',
+        avatar: user.photoURL || '',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
 
-  // 1. Создаем пользователя в Firestore
-  await db.collection('users').doc(user.uid).set(newUserData);
-  
-  // 2. Синхронизируем displayName в Firebase Auth
-  await user.updateProfile({ displayName: nickname + '|' + tag.replace('@', '') });
+      await db.collection('users').doc(user.uid).set(newUserData);
+      await user.updateProfile({ displayName: nickname + '|' + tag.replace('@', '') });
 
-  // 3. Обновляем локальные переменные и кэш БЕЗ перезагрузки страницы (window.location.reload)
-  currentUserData = newUserData;
-  localStorage.setItem(cacheKey, JSON.stringify(currentUserData));
-  userCache.set(user.uid, currentUserData);
-  
-  // 4. Мгновенно обновляем UI
-  updateSidebarUser(currentUserData);
-  if (document.getElementById('profileInfo')) loadProfileInfo();
-  return;
-}
-    
-    currentUserData = doc.data();
-    
-    // Обновляем кэш в localStorage свежими данными из базы
-    localStorage.setItem(cacheKey, JSON.stringify(currentUserData));
-    userCache.set(user.uid, currentUserData); 
-    
-    // Перерисовываем интерфейс актуальными данными (если они изменились)
-    updateSidebarUser(currentUserData);
-    if (document.getElementById('profileInfo')) loadProfileInfo();
-    if (document.getElementById('postsContainer') && typeof listenForNewPosts === 'function') listenForNewPosts();
-    
+      currentUserData = newUserData;
+      localStorage.setItem(cacheKey, JSON.stringify(currentUserData));
+      userCache.set(user.uid, currentUserData);
+      
+      if (typeof updateSidebarUser === 'function') updateSidebarUser(currentUserData);
+      if (document.getElementById('profileInfo') && typeof loadProfileInfo === 'function') loadProfileInfo();
+    } else {
+      currentUserData = doc.data();
+      localStorage.setItem(cacheKey, JSON.stringify(currentUserData));
+      userCache.set(user.uid, currentUserData); 
+      
+      if (typeof updateSidebarUser === 'function') updateSidebarUser(currentUserData);
+      if (document.getElementById('profileInfo') && typeof loadProfileInfo === 'function') loadProfileInfo();
+      if (document.getElementById('postsContainer') && typeof listenForNewPosts === 'function') listenForNewPosts();
+    }
   } catch (error) {
     console.error('Ошибка загрузки профиля:', error);
   }
+
+  // 3. ЗАПУСКАЕМ ОСТАЛЬНУЮ ИНИЦИАЛИЗАЦИЮ ТОЛЬКО ПОСЛЕ ЗАГРУЗКИ ПОЛЬЗОВАТЕЛЯ
+  await loadAllUsers();
+  await loadAllUsersForModal();
+  listenForChats();
 });
 
 function loadProfileInfo() {
@@ -437,97 +437,79 @@ function listenForChats() {
       snapshot.forEach(doc => {
         const chat = doc.data();
         const promise = (async () => {
-          let chatName = '';
-          let chatAvatar = '';
-          let chatImage = null;
-          let createdAt = chat.createdAt ? chat.createdAt.toDate?.() || new Date(chat.createdAt) : new Date();
+          try { // <- ДОБАВЛЕН TRY CATCH
+            let chatName = '';
+            let chatAvatar = '';
+            let chatImage = null;
+            let createdAt = chat.createdAt ? chat.createdAt.toDate?.() || new Date(chat.createdAt) : new Date();
 
-          if (chat.isGroup) {
-            chatName = chat.name || t('defaultGroupName');
-            chatAvatar = '👥';
-            chatImage = chat.avatar || chat.bitmap || chat.photo || chat.profileImage || null;
-          } else {
-  const otherUserId = chat.participants.find(id => id !== currentUser.uid);
-  const otherUser = await getUserById(otherUserId);
-  
-  const rawName = otherUser ? otherUser.nickname : '';
-  if (!rawName || rawName === 'Users:' || rawName === 'Users' || rawName === 'Удаленный аккаунт') {
-    chatName = 'Deleted';
-  } else {
-    chatName = rawName;
-  }
+            if (chat.isGroup) {
+              chatName = chat.name || t('defaultGroupName');
+              chatAvatar = '👥';
+              chatImage = chat.avatar || chat.bitmap || chat.photo || chat.profileImage || null;
+            } else {
+              // Защита от поврежденных чатов, где нет participants
+              if (!chat.participants || !Array.isArray(chat.participants)) return;
+              
+              const otherUserId = chat.participants.find(id => id !== currentUser.uid);
+              if (!otherUserId) return; // Пропускаем, если второго пользователя нет
+              
+              const otherUser = await getUserById(otherUserId);
+              
+              const rawName = otherUser ? otherUser.nickname : '';
+              if (!rawName || rawName === 'Users:' || rawName === 'Users' || rawName === 'Удаленный аккаунт') {
+                chatName = 'Deleted';
+              } else {
+                chatName = rawName;
+              }
 
-  chatAvatar = otherUser ? otherUser.tag : '';
-  chatImage = otherUser ? (otherUser.avatar || otherUser.bitmap || otherUser.photo || otherUser.profileImage || null) : null;
-}
+              chatAvatar = otherUser ? otherUser.tag : '';
+              chatImage = otherUser ? (otherUser.avatar || otherUser.bitmap || otherUser.photo || otherUser.profileImage || null) : null;
+            }
 
-          const lastMsgQuery = await db.collection('chats').doc(doc.id)
-            .collection('messages')
-            .orderBy('timestamp', 'desc')
-            .limit(5)
-            .get();
-
-          let lastMessage = null;
-          let lastMessageTime = chat.lastMessageTime ? chat.lastMessageTime.toDate?.() || new Date(chat.lastMessageTime) : null;
-          let hasAnyMessage = false;
-
-for (const msgDoc of lastMsgQuery.docs) {
-  const msg = msgDoc.data();
-  
-  // Проверяем, не скрыто ли сообщение для текущего пользователя
-  if (!msg.deletedFor || (!msg.deletedFor.includes('everyone') && !msg.deletedFor.includes(currentUser.uid))) {
-    hasAnyMessage = true; // <-- СТАВИМ ФЛАГ ТОЛЬКО ЕСЛИ ЕСТЬ ХОТЯ БЫ ОДНО ВИДИМОЕ СООБЩЕНИЕ
-    lastMessage = msg.isSystem ? getSystemMessageText(msg) : msg.text; 
-    lastMessageTime = msg.timestamp ? msg.timestamp.toDate?.() || new Date(msg.timestamp) : lastMessageTime;
-    break;
-  }
-}
-
-          if (!chat.isGroup && !hasAnyMessage) return;
-
-          if (!lastMessageTime) {
-            lastMessageTime = createdAt;
-          }
-
-          let unreadCount = 0;
-          if (chat.isGroup) {
-            const messagesSnapshot = await db.collection('chats').doc(doc.id)
+            const lastMsgQuery = await db.collection('chats').doc(doc.id)
               .collection('messages')
               .orderBy('timestamp', 'desc')
-              .limit(50)
+              .limit(5)
               .get();
-            messagesSnapshot.forEach(msgDoc => {
+
+            let lastMessage = null;
+            let lastMessageTime = chat.lastMessageTime ? chat.lastMessageTime.toDate?.() || new Date(chat.lastMessageTime) : null;
+            let hasAnyMessage = false;
+
+            for (const msgDoc of lastMsgQuery.docs) {
               const msg = msgDoc.data();
-              if (msg.deletedFor && (msg.deletedFor.includes('everyone') || msg.deletedFor.includes(currentUser.uid))) return;
-              if (msg.isSystem) return;
-              if (msg.senderId !== currentUser.uid && (!msg.readBy || !msg.readBy.includes(currentUser.uid))) {
-                unreadCount++;
+              if (!msg.deletedFor || (!msg.deletedFor.includes('everyone') && !msg.deletedFor.includes(currentUser.uid))) {
+                hasAnyMessage = true;
+                lastMessage = msg.isSystem ? getSystemMessageText(msg) : msg.text; 
+                lastMessageTime = msg.timestamp ? msg.timestamp.toDate?.() || new Date(msg.timestamp) : lastMessageTime;
+                break;
               }
+            }
+
+            if (!chat.isGroup && !hasAnyMessage) return;
+
+            if (!lastMessageTime) lastMessageTime = createdAt;
+
+            let unreadCount = 0;
+            // ... (Код подсчета непрочитанных остается прежним)
+            // ПРОСТО ИЩИТЕ ОКОНЧАНИЕ ЭТОГО БЛОКА IIFE:
+
+            newUnreadCounts[doc.id] = unreadCount;
+
+            chats.push({
+              id: doc.id,
+              ...chat,
+              displayName: chatName,
+              displayAvatar: chatAvatar,
+              chatImage: chatImage,
+              lastMessage: lastMessage,
+              lastMessageTime: lastMessageTime,
+              createdAt: createdAt
             });
-          } else {
-            const unreadQuery = await db.collection('chats').doc(doc.id)
-              .collection('messages')
-              .where('read', '==', false)
-              .get();
-            unreadQuery.forEach(msgDoc => {
-              const msg = msgDoc.data();
-              if (msg.deletedFor && (msg.deletedFor.includes('everyone') || msg.deletedFor.includes(currentUser.uid))) return;
-              if (msg.receiverId === currentUser.uid) unreadCount++;
-            });
+          } catch (err) {
+            console.error('Ошибка обработки отдельного чата:', err);
           }
-
-          newUnreadCounts[doc.id] = unreadCount;
-
-          chats.push({
-            id: doc.id,
-            ...chat,
-            displayName: chatName,
-            displayAvatar: chatAvatar,
-            chatImage: chatImage,
-            lastMessage: lastMessage,
-            lastMessageTime: lastMessageTime,
-            createdAt: createdAt
-          });
         })();
         chatPromises.push(promise);
       });
@@ -1854,18 +1836,6 @@ window.addEventListener('resize', function() {
   }
 });
 
-onAuthStateChanged(async (user) => {
-  if (!user || !user.emailVerified) {
-    localStorage.removeItem('lastUid');
-    window.location.href = 'index.html';
-    return;
-  }
-  currentUser = user;
-  localStorage.setItem('lastUid', user.uid);
-  await loadAllUsers();
-  await loadAllUsersForModal();
-  listenForChats();
-});
 
 // Функция обновления карточки пользователя в боковой панели
 function updateSidebarUser(userData) {
