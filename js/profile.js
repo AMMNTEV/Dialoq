@@ -247,44 +247,95 @@ function showCreatePostModal() {
 }
 
 // Обязательно делаем функцию async, так как конвертация HEIC занимает время
+// Вспомогательная функция для мгновенного перевода любого формата (PNG, WEBP) в JPG
+function convertToJpgForPreview(file) {
+  return new Promise((resolve, reject) => {
+    // URL.createObjectURL работает надежнее и быстрее FileReader'а для тяжелых файлов
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+    
+    img.onload = function() {
+      URL.revokeObjectURL(objectUrl); // Очищаем память
+      
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // Слегка ограничиваем размер для быстрого предпросмотра
+      const maxDim = 1500;
+      let w = img.width;
+      let h = img.height;
+      
+      if (w > maxDim || h > maxDim) {
+        if (w > h) {
+          h = Math.round((h * maxDim) / w);
+          w = maxDim;
+        } else {
+          w = Math.round((w * maxDim) / h);
+          h = maxDim;
+        }
+      }
+      
+      canvas.width = w;
+      canvas.height = h;
+      
+      // Обязательно заливаем белым фоном, чтобы прозрачность PNG не стала черной
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+      
+      // Конвертируем в JPG с качеством 90%
+      resolve(canvas.toDataURL('image/jpeg', 0.9));
+    };
+    
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Формат не поддерживается'));
+    };
+    
+    img.src = objectUrl;
+  });
+}
+
+
+// Обновленная функция выбора картинки для поста
 async function handlePostImageSelect(event) {
   let file = event.target.files[0];
   if (!file) return;
 
-  // --- НАЧАЛО БЛОКА КОНВЕРТАЦИИ HEIC/HEIF ---
+  // 1. Обработка "яблочных" форматов (HEIC/HEIF)
   const isHeic = file.name.toLowerCase().endsWith('.heic') || file.type === 'image/heic' || file.type === 'image/heif';
-  
   if (isHeic) {
     try {
-      // Конвертируем HEIC в JPEG с помощью библиотеки heic2any
-      const convertedBlob = await heic2any({
-        blob: file,
-        toType: "image/jpeg",
-        quality: 0.8
-      });
-      
-      // heic2any может вернуть массив (если это live-photo), берем первый кадр
+      const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.8 });
       const finalBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
-      
-      // Перезаписываем переменную file новым JPEG-файлом
       file = new File([finalBlob], "converted_image.jpg", { type: "image/jpeg" });
     } catch (err) {
       console.error('Ошибка конвертации HEIC:', err);
-      alert(t('fileError') || 'Не удалось обработать формат HEIC. Пожалуйста, выберите другой файл.');
-      return; // Останавливаем загрузку, если конвертация не удалась
+      alert(t('fileError') || 'Не удалось обработать формат HEIC.');
+      removePostImage();
+      return;
     }
   }
-  // --- КОНЕЦ БЛОКА КОНВЕРТАЦИИ ---
 
-  selectedPostImageFile = file; // Сохраняем файл (уже гарантированно JPEG, PNG или WEBP) для сжатия при публикации
-
-  // Просто читаем файл для предпросмотра
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    document.getElementById('previewImg').src = e.target.result;
+  // 2. Универсальный перевод всех остальных форматов (PNG, WEBP) в JPG + отлов DNG
+  try {
+    const jpgBase64 = await convertToJpgForPreview(file);
+    
+    // Показываем в предпросмотре уже сконвертированный, 100% рабочий JPG
+    document.getElementById('previewImg').src = jpgBase64;
     document.getElementById('postImagePreview').style.display = 'block';
-  };
-  reader.readAsDataURL(file);
+    
+    // Превращаем Base64 обратно в файл JPG и сохраняем для дальнейшей публикации
+    const res = await fetch(jpgBase64);
+    const blob = await res.blob();
+    selectedPostImageFile = new File([blob], "post_image.jpg", { type: "image/jpeg" });
+
+  } catch (error) {
+    console.error('Ошибка чтения картинки:', error);
+    // Если поймали DNG или битый файл — показываем текст, а не ломаем верстку
+    alert('Не удалось обработать изображение. Возможно, этот формат (например, исходный RAW/DNG) не поддерживается браузером, либо файл поврежден.');
+    removePostImage(); // Сбрасываем инпут
+  }
 }
 
 function removePostImage() {
