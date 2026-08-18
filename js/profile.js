@@ -302,32 +302,8 @@ async function handlePostImageSelect(event) {
   let file = event.target.files[0];
   if (!file) return;
 
-  // 1. Точное определение HEIC/HEIF по расширению или MIME-типу
-  const isHeic = file.name.toLowerCase().endsWith('.heic') || 
-                 file.name.toLowerCase().endsWith('.heif') || 
-                 file.type === 'image/heic' || 
-                 file.type === 'image/heif';
-
-  if (isHeic) {
-    try {
-      // Конвертируем HEIC в JPEG через библиотеку с ограничением качества
-      const convertedBlob = await heic2any({ 
-        blob: file, 
-        toType: "image/jpeg", 
-        quality: 0.85 
-      });
-      const finalBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
-      file = new File([finalBlob], "converted_image.jpg", { type: "image/jpeg" });
-    } catch (err) {
-      console.error('Ошибка конвертации HEIC:', err);
-      alert(t('fileError') || 'Не удалось обработать формат HEIC.');
-      removePostImage();
-      return;
-    }
-  }
-
-  // 2. Универсальная обработка PNG, WEBP, JPG и конвертация в стабильный предпросмотр
   try {
+    // ПОПЫТКА 1: Пробуем обработать файл как обычный (PNG, JPG, WEBP)
     const jpgBase64 = await convertToJpgForPreview(file);
     
     document.getElementById('previewImg').src = jpgBase64;
@@ -338,9 +314,35 @@ async function handlePostImageSelect(event) {
     selectedPostImageFile = new File([blob], "post_image.jpg", { type: "image/jpeg" });
 
   } catch (error) {
-    console.error('Ошибка чтения картинки:', error);
-    alert('Не удалось обработать изображение. Файл может быть поврежден или иметь неподдерживаемый формат (например, RAW/DNG).');
-    removePostImage();
+    // ПОПЫТКА 2: Браузер не смог прочитать файл. Предполагаем, что это HEIC
+    console.warn('Обычное чтение не удалось, пробуем конвертировать через heic2any...', error);
+    
+    try {
+      // Запускаем конвертацию
+      const convertedBlob = await heic2any({ 
+        blob: file, 
+        toType: "image/jpeg", 
+        quality: 0.85 
+      });
+      const finalBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+      file = new File([finalBlob], "converted_image.jpg", { type: "image/jpeg" });
+
+      // Теперь, когда у нас есть настоящий JPG, снова прогоняем его через предпросмотр
+      const fallbackJpgBase64 = await convertToJpgForPreview(file);
+      
+      document.getElementById('previewImg').src = fallbackJpgBase64;
+      document.getElementById('postImagePreview').style.display = 'block';
+      
+      const res = await fetch(fallbackJpgBase64);
+      const fallbackBlob = await res.blob();
+      selectedPostImageFile = new File([fallbackBlob], "post_image.jpg", { type: "image/jpeg" });
+
+    } catch (heicErr) {
+      // ПОПЫТКА 3: Полный провал (файл поврежден или это вообще не картинка)
+      console.error('Ошибка конвертации фолбэка HEIC:', heicErr);
+      alert(t('fileError') || 'Не удалось обработать изображение. Файл может быть поврежден или иметь неподдерживаемый формат.');
+      removePostImage();
+    }
   }
 }
 
@@ -599,7 +601,6 @@ document.getElementById('avatarInput')?.addEventListener('change', async functio
   };
   reader.readAsDataURL(file);
 });
-
 
 async function saveAvatarToFirebase(base64String) {
   const user = auth.currentUser;
