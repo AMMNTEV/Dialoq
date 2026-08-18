@@ -1022,6 +1022,19 @@ a:focus {
   stroke: #ef4444 !important;
 }
 
+/* Тёмная тема для поля ввода текста поста */
+.dark-theme .modal-body textarea {
+  background: var(--bg-input) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .modal-body textarea:focus {
+  border-color: var(--accent) !important;
+  background: var(--bg-secondary) !important;
+  box-shadow: 0 0 0 4px var(--accent-glow) !important;
+}
+
 /* ==========================================
    КОНЕЦ DARK THEME
    ========================================== */
