@@ -829,3 +829,10 @@ a:focus {
   stroke: #ef4444;   /* Красная обводка */
 }
 
+#postImagePreview button {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+}

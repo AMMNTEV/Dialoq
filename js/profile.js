@@ -231,31 +231,252 @@ async function saveChanges() {
   updateSidebarUser(currentUserData);
 }
 
+let selectedPostImageFile = null; // Храним оригинальный файл до публикации
+
+window.autoResize = function(textarea) {
+  textarea.style.height = 'auto'; // Сбрасываем высоту
+  textarea.style.height = textarea.scrollHeight + 'px'; // Устанавливаем высоту по содержимому
+};
+
 function showCreatePostModal() {
   document.getElementById('postModal').style.display = 'flex';
-  document.getElementById('postContent').value = '';
+  const postContent = document.getElementById('postContent');
+  postContent.value = '';
+  postContent.style.height = 'auto'; // Сброс высоты
+  removePostImage();
 }
+
+// Обязательно делаем функцию async, так как конвертация HEIC занимает время
+// Вспомогательная функция для мгновенного перевода любого формата (PNG, WEBP) в JPG
+function convertToJpgForPreview(file) {
+  return new Promise((resolve, reject) => {
+    // URL.createObjectURL работает надежнее и быстрее FileReader'а для тяжелых файлов
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+    
+    img.onload = function() {
+      URL.revokeObjectURL(objectUrl); // Очищаем память
+      
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // Слегка ограничиваем размер для быстрого предпросмотра
+      const maxDim = 1500;
+      let w = img.width;
+      let h = img.height;
+      
+      if (w > maxDim || h > maxDim) {
+        if (w > h) {
+          h = Math.round((h * maxDim) / w);
+          w = maxDim;
+        } else {
+          w = Math.round((w * maxDim) / h);
+          h = maxDim;
+        }
+      }
+      
+      canvas.width = w;
+      canvas.height = h;
+      
+      // Обязательно заливаем белым фоном, чтобы прозрачность PNG не стала черной
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+      
+      // Конвертируем в JPG с качеством 90%
+      resolve(canvas.toDataURL('image/jpeg', 0.9));
+    };
+    
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Формат не поддерживается'));
+    };
+    
+    img.src = objectUrl;
+  });
+}
+
+
+// Обновленная функция выбора картинки для поста
+async function handlePostImageSelect(event) {
+  let file = event.target.files[0];
+  if (!file) return;
+
+  try {
+    // ПОПЫТКА 1: Пробуем обработать файл как обычный (PNG, JPG, WEBP)
+    const jpgBase64 = await convertToJpgForPreview(file);
+    
+    document.getElementById('previewImg').src = jpgBase64;
+    document.getElementById('postImagePreview').style.display = 'block';
+    
+    const res = await fetch(jpgBase64);
+    const blob = await res.blob();
+    selectedPostImageFile = new File([blob], "post_image.jpg", { type: "image/jpeg" });
+
+  } catch (error) {
+    // ПОПЫТКА 2: Браузер не смог прочитать файл. Предполагаем, что это HEIC
+    console.warn('Обычное чтение не удалось, пробуем конвертировать через heic2any...', error);
+    
+    try {
+      // Запускаем конвертацию
+      const convertedBlob = await heic2any({ 
+        blob: file, 
+        toType: "image/jpeg", 
+        quality: 0.85 
+      });
+      const finalBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+      file = new File([finalBlob], "converted_image.jpg", { type: "image/jpeg" });
+
+      // Теперь, когда у нас есть настоящий JPG, снова прогоняем его через предпросмотр
+      const fallbackJpgBase64 = await convertToJpgForPreview(file);
+      
+      document.getElementById('previewImg').src = fallbackJpgBase64;
+      document.getElementById('postImagePreview').style.display = 'block';
+      
+      const res = await fetch(fallbackJpgBase64);
+      const fallbackBlob = await res.blob();
+      selectedPostImageFile = new File([fallbackBlob], "post_image.jpg", { type: "image/jpeg" });
+
+    } catch (heicErr) {
+      // ПОПЫТКА 3: Полный провал (файл поврежден или это вообще не картинка)
+      console.error('Ошибка конвертации фолбэка HEIC:', heicErr);
+      alert(t('fileError') || 'Не удалось обработать изображение. Файл может быть поврежден или иметь неподдерживаемый формат.');
+      removePostImage();
+    }
+  }
+}
+
+function removePostImage() {
+  selectedPostImageFile = null; // Очищаем файл
+  const previewDiv = document.getElementById('postImagePreview');
+  const previewImg = document.getElementById('previewImg');
+  const fileInput = document.getElementById('postImageInput');
+  
+  if (previewDiv) previewDiv.style.display = 'none';
+  if (previewImg) previewImg.src = '';
+  if (fileInput) fileInput.value = '';
+}
+
+// Адаптивное сжатие под заданный лимит байт
+function compressImageToFit(file, maxBytes) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let quality = 0.9; // Начинаем с хорошего качества
+        let scale = 1.0;
+        let maxDim = 1500; // Начальное максимальное разрешение
+        let base64 = '';
+
+        const attemptCompression = () => {
+          let w = img.width * scale;
+          let h = img.height * scale;
+
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+
+          canvas.width = w;
+          canvas.height = h;
+          ctx.drawImage(img, 0, 0, w, h);
+          return canvas.toDataURL('image/jpeg', quality);
+        };
+
+        base64 = attemptCompression();
+
+        // Цикл: ухудшаем качество и размер, пока не влезем в остаток (maxBytes)
+        while (base64.length > maxBytes && quality > 0.1) {
+          quality -= 0.1; // Снижаем качество
+          
+          if (quality <= 0.4) {
+             // Если качество уже сильно упало, начинаем уменьшать само разрешение картинки на 20%
+             scale *= 0.8;
+          }
+          
+          if (scale < 0.1) break; // Защита от зависания
+          
+          base64 = attemptCompression();
+        }
+
+        if (base64.length > maxBytes) {
+          reject(new Error('Невозможно сжать до нужного размера'));
+        } else {
+          resolve(base64);
+        }
+      };
+      img.onerror = () => reject(new Error('Ошибка загрузки фото'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Ошибка чтения файла'));
+    reader.readAsDataURL(file);
+  });
+}
+
+
 function hideCreatePostModal() {
   document.getElementById('postModal').style.display = 'none';
 }
+
 async function createPost() {
   if (isSubmitting) return;
   const content = document.getElementById('postContent').value.trim();
-  if (!content) { alert(t('enterPostText')); return; }
+
+  // Пост должен содержать либо текст, либо картинку
+  if (!content && !selectedPostImageFile) {
+    alert(t('enterPostText') || 'Введите текст или выберите фото');
+    return;
+  }
+
+  // Прячем окно сразу, чтобы интерфейс казался отзывчивым
   hideCreatePostModal();
   isSubmitting = true;
+
+  let finalImageBase64 = null;
+
   try {
+    if (selectedPostImageFile) {
+      // 1. Вычисляем вес текста. (Один символ utf-8 может весить до 4 байт, Blob считает идеально точно)
+      const textBytes = new Blob([content]).size;
+      
+      // 2. Лимит Firestore на документ = 1 МБ (1 048 576 байт). 
+      // Резервируем 50 000 байт (~50 КБ) на технические поля Firestore, никнейм, даты и массивы лайков.
+      const maxImageBytes = 1048576 - 50000 - textBytes;
+
+      // 3. Сжимаем картинку так, чтобы она точно влезла в остаток
+      finalImageBase64 = await compressImageToFit(selectedPostImageFile, maxImageBytes);
+    }
+
+    // Сохраняем пост в базу
     await db.collection('posts').add({
       userId: currentUser.uid,
       userNickname: currentUserData.nickname,
       userTag: currentUserData.tag,
       content: content,
-      likedBy: [], // Инициализируем массив лайков
+      image: finalImageBase64 || null, 
+      likedBy: [],
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
+    
+    removePostImage();
   } catch (error) {
-    console.error('Ошибка создания поста:', error);
-    alert(t('postCreateError'));
+    console.error('Ошибка публикации поста:', error);
+    
+    // Если вывалилась ошибка из промиса компрессии
+    if (error.message.includes('сжать')) {
+       alert(t('fileTooLarge') || 'Файл слишком большой и его не удалось достаточно сжать.');
+    } else {
+       alert(t('postCreateError') || 'Ошибка при создании поста.');
+    }
   } finally {
     setTimeout(() => { isSubmitting = false; }, 1000);
   }
@@ -297,23 +518,24 @@ function listenForNewPosts() {
         const heartClass = isLiked ? 'like-btn liked' : 'like-btn';
 
         postsHTML += `
-          <div class="post-card" id="post-${doc.id}">
-            <div class="post-header">
-              <button onclick="deletePost('${doc.id}')" class="delete-post-btn">×</button>
-            </div>
-            <div class="post-content">${post.content ? post.content.replace(/\n/g, '<br>') : ''}</div>
-            
-            <div class="post-footer">
-              <button class="${heartClass}" onclick="toggleLike('${doc.id}')">
-                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                </svg>
-                <span class="like-count">${likesCount > 0 ? likesCount : ''}</span>
-              </button>
-              <span class="post-date">${date}</span>
-            </div>
-          </div>
-        `;
+  <div class="post-card" id="post-${doc.id}">
+    <div class="post-header">
+      <button onclick="deletePost('${doc.id}')" class="delete-post-btn">×</button>
+    </div>
+    ${post.image ? `<div class="post-image" style="margin-bottom: 12px;"><img src="${post.image}" style="width: 100%; max-height: 500px; object-fit: contain; border-radius: 12px; display: block;" /></div>` : ''}
+    <div class="post-content">${post.content ? post.content.replace(/\n/g, '<br>') : ''}</div>
+    
+    <div class="post-footer">
+      <button class="${heartClass}" onclick="toggleLike('${doc.id}')">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+        <span class="like-count">${likesCount > 0 ? likesCount : ''}</span>
+      </button>
+      <span class="post-date">${date}</span>
+    </div>
+  </div>
+`;
       });
       postsContainer.innerHTML = postsHTML;
     }, error => { console.error('Ошибка в слушателе постов:', error); });
@@ -324,9 +546,27 @@ window.onclick = function(event) {
   if (event.target === modal) modal.style.display = 'none';
 };
 
-document.getElementById('avatarInput')?.addEventListener('change', function(e) {
-  const file = e.target.files[0];
+// Добавляем async в обработчик события
+document.getElementById('avatarInput')?.addEventListener('change', async function(e) {
+  let file = e.target.files[0];
   if (!file) return;
+
+  const isHeic = file.name.toLowerCase().endsWith('.heic') || 
+                 file.name.toLowerCase().endsWith('.heif') || 
+                 file.type === 'image/heic' || 
+                 file.type === 'image/heif';
+                 
+  if (isHeic) {
+    try {
+      const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.85 });
+      const finalBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+      file = new File([finalBlob], "avatar.jpg", { type: "image/jpeg" });
+    } catch (err) {
+      console.error('Ошибка конвертации HEIC для аватара:', err);
+      alert(t('fileError') || 'Не удалось обработать формат HEIC.');
+      return;
+    }
+  }
 
   const reader = new FileReader();
   reader.onload = function(event) {
@@ -339,15 +579,20 @@ document.getElementById('avatarInput')?.addEventListener('change', function(e) {
       canvas.width = targetSize;
       canvas.height = targetSize;
 
+      // Белый фон под прозрачные PNG
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, targetSize, targetSize);
+
       const minDim = Math.min(img.width, img.height);
       const startX = (img.width - minDim) / 2;
       const startY = (img.height - minDim) / 2;
 
       ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, targetSize, targetSize);
-      const base64Avatar = canvas.toDataURL('image/jpeg', 0.7);
+      
+      const base64Avatar = canvas.toDataURL('image/jpeg', 0.8);
 
-      if (base64Avatar.length > 1000000) {
-        alert(t('fileTooLarge'));
+      if (base64Avatar.length > 1048576) {
+        alert(t('fileTooLarge') || 'Файл слишком большой');
         return;
       }
       saveAvatarToFirebase(base64Avatar);
