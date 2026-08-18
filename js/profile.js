@@ -231,11 +231,18 @@ async function saveChanges() {
   updateSidebarUser(currentUserData);
 }
 
-let selectedPostImageBase64 = null;
+let selectedPostImageFile = null; // Храним оригинальный файл до публикации
+
+window.autoResize = function(textarea) {
+  textarea.style.height = 'auto'; // Сбрасываем высоту
+  textarea.style.height = textarea.scrollHeight + 'px'; // Устанавливаем высоту по содержимому
+};
 
 function showCreatePostModal() {
   document.getElementById('postModal').style.display = 'flex';
-  document.getElementById('postContent').value = '';
+  const postContent = document.getElementById('postContent');
+  postContent.value = '';
+  postContent.style.height = 'auto'; // Сброс высоты
   removePostImage();
 }
 
@@ -243,51 +250,19 @@ function handlePostImageSelect(event) {
   const file = event.target.files[0];
   if (!file) return;
 
+  selectedPostImageFile = file; // Сохраняем файл для сжатия при публикации
+
+  // Просто читаем файл для предпросмотра (моментально и без потери качества)
   const reader = new FileReader();
   reader.onload = function(e) {
-    const img = new Image();
-    img.onload = function() {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const maxDim = 1000; // Максимальная сторона картинки в px
-
-      let width = img.width;
-      let height = img.height;
-
-      // Вычисление новых размеров с сохранением Aspect Ratio
-      if (width > maxDim || height > maxDim) {
-        if (width > height) {
-          height = Math.round((height * maxDim) / width);
-          width = maxDim;
-        } else {
-          width = Math.round((width * maxDim) / height);
-          height = maxDim;
-        }
-      }
-
-      canvas.width = width;
-      canvas.height = height;
-      ctx.drawImage(img, 0, 0, width, height);
-
-      const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-
-      if (compressedBase64.length > 1000000) {
-        alert(t('fileTooLarge'));
-        return;
-      }
-
-      selectedPostImageBase64 = compressedBase64;
-      document.getElementById('previewImg').src = compressedBase64;
-      document.getElementById('postImagePreview').style.display = 'block';
-    };
-    img.src = e.target.result;
+    document.getElementById('previewImg').src = e.target.result;
+    document.getElementById('postImagePreview').style.display = 'block';
   };
   reader.readAsDataURL(file);
 }
 
-// Удаление прикрепленной картинки из формы
 function removePostImage() {
-  selectedPostImageBase64 = null;
+  selectedPostImageFile = null; // Очищаем файл
   const previewDiv = document.getElementById('postImagePreview');
   const previewImg = document.getElementById('previewImg');
   const fileInput = document.getElementById('postImageInput');
@@ -297,37 +272,126 @@ function removePostImage() {
   if (fileInput) fileInput.value = '';
 }
 
+// Адаптивное сжатие под заданный лимит байт
+function compressImageToFit(file, maxBytes) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let quality = 0.9; // Начинаем с хорошего качества
+        let scale = 1.0;
+        let maxDim = 1500; // Начальное максимальное разрешение
+        let base64 = '';
+
+        const attemptCompression = () => {
+          let w = img.width * scale;
+          let h = img.height * scale;
+
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+
+          canvas.width = w;
+          canvas.height = h;
+          ctx.drawImage(img, 0, 0, w, h);
+          return canvas.toDataURL('image/jpeg', quality);
+        };
+
+        base64 = attemptCompression();
+
+        // Цикл: ухудшаем качество и размер, пока не влезем в остаток (maxBytes)
+        while (base64.length > maxBytes && quality > 0.1) {
+          quality -= 0.1; // Снижаем качество
+          
+          if (quality <= 0.4) {
+             // Если качество уже сильно упало, начинаем уменьшать само разрешение картинки на 20%
+             scale *= 0.8;
+          }
+          
+          if (scale < 0.1) break; // Защита от зависания
+          
+          base64 = attemptCompression();
+        }
+
+        if (base64.length > maxBytes) {
+          reject(new Error('Невозможно сжать до нужного размера'));
+        } else {
+          resolve(base64);
+        }
+      };
+      img.onerror = () => reject(new Error('Ошибка загрузки фото'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Ошибка чтения файла'));
+    reader.readAsDataURL(file);
+  });
+}
+
 
 function hideCreatePostModal() {
   document.getElementById('postModal').style.display = 'none';
 }
+
 async function createPost() {
   if (isSubmitting) return;
   const content = document.getElementById('postContent').value.trim();
 
   // Пост должен содержать либо текст, либо картинку
-  if (!content && !selectedPostImageBase64) {
-    alert(t('enterPostText'));
+  if (!content && !selectedPostImageFile) {
+    alert(t('enterPostText') || 'Введите текст или выберите фото');
     return;
   }
 
+  // Прячем окно сразу, чтобы интерфейс казался отзывчивым
   hideCreatePostModal();
   isSubmitting = true;
 
+  let finalImageBase64 = null;
+
   try {
+    if (selectedPostImageFile) {
+      // 1. Вычисляем вес текста. (Один символ utf-8 может весить до 4 байт, Blob считает идеально точно)
+      const textBytes = new Blob([content]).size;
+      
+      // 2. Лимит Firestore на документ = 1 МБ (1 048 576 байт). 
+      // Резервируем 50 000 байт (~50 КБ) на технические поля Firestore, никнейм, даты и массивы лайков.
+      const maxImageBytes = 1048576 - 50000 - textBytes;
+
+      // 3. Сжимаем картинку так, чтобы она точно влезла в остаток
+      finalImageBase64 = await compressImageToFit(selectedPostImageFile, maxImageBytes);
+    }
+
+    // Сохраняем пост в базу
     await db.collection('posts').add({
       userId: currentUser.uid,
       userNickname: currentUserData.nickname,
       userTag: currentUserData.tag,
       content: content,
-      image: selectedPostImageBase64 || null, // Сохраняем картинку
+      image: finalImageBase64 || null, 
       likedBy: [],
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
+    
     removePostImage();
   } catch (error) {
-    console.error('Ошибка создания поста:', error);
-    alert(t('postCreateError'));
+    console.error('Ошибка публикации поста:', error);
+    
+    // Если вывалилась ошибка из промиса компрессии
+    if (error.message.includes('сжать')) {
+       alert(t('fileTooLarge') || 'Файл слишком большой и его не удалось достаточно сжать.');
+    } else {
+       alert(t('postCreateError') || 'Ошибка при создании поста.');
+    }
   } finally {
     setTimeout(() => { isSubmitting = false; }, 1000);
   }
