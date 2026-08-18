@@ -302,11 +302,20 @@ async function handlePostImageSelect(event) {
   let file = event.target.files[0];
   if (!file) return;
 
-  // 1. Обработка "яблочных" форматов (HEIC/HEIF)
-  const isHeic = file.name.toLowerCase().endsWith('.heic') || file.type === 'image/heic' || file.type === 'image/heif';
+  // 1. Точное определение HEIC/HEIF по расширению или MIME-типу
+  const isHeic = file.name.toLowerCase().endsWith('.heic') || 
+                 file.name.toLowerCase().endsWith('.heif') || 
+                 file.type === 'image/heic' || 
+                 file.type === 'image/heif';
+
   if (isHeic) {
     try {
-      const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.8 });
+      // Конвертируем HEIC в JPEG через библиотеку с ограничением качества
+      const convertedBlob = await heic2any({ 
+        blob: file, 
+        toType: "image/jpeg", 
+        quality: 0.85 
+      });
       const finalBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
       file = new File([finalBlob], "converted_image.jpg", { type: "image/jpeg" });
     } catch (err) {
@@ -317,24 +326,21 @@ async function handlePostImageSelect(event) {
     }
   }
 
-  // 2. Универсальный перевод всех остальных форматов (PNG, WEBP) в JPG + отлов DNG
+  // 2. Универсальная обработка PNG, WEBP, JPG и конвертация в стабильный предпросмотр
   try {
     const jpgBase64 = await convertToJpgForPreview(file);
     
-    // Показываем в предпросмотре уже сконвертированный, 100% рабочий JPG
     document.getElementById('previewImg').src = jpgBase64;
     document.getElementById('postImagePreview').style.display = 'block';
     
-    // Превращаем Base64 обратно в файл JPG и сохраняем для дальнейшей публикации
     const res = await fetch(jpgBase64);
     const blob = await res.blob();
     selectedPostImageFile = new File([blob], "post_image.jpg", { type: "image/jpeg" });
 
   } catch (error) {
     console.error('Ошибка чтения картинки:', error);
-    // Если поймали DNG или битый файл — показываем текст, а не ломаем верстку
-    alert('Не удалось обработать изображение. Возможно, этот формат (например, исходный RAW/DNG) не поддерживается браузером, либо файл поврежден.');
-    removePostImage(); // Сбрасываем инпут
+    alert('Не удалось обработать изображение. Файл может быть поврежден или иметь неподдерживаемый формат (например, RAW/DNG).');
+    removePostImage();
   }
 }
 
@@ -543,15 +549,18 @@ document.getElementById('avatarInput')?.addEventListener('change', async functio
   let file = e.target.files[0];
   if (!file) return;
 
-  // Перехватываем HEIC для аватарки
-  const isHeic = file.name.toLowerCase().endsWith('.heic') || file.type === 'image/heic' || file.type === 'image/heif';
+  const isHeic = file.name.toLowerCase().endsWith('.heic') || 
+                 file.name.toLowerCase().endsWith('.heif') || 
+                 file.type === 'image/heic' || 
+                 file.type === 'image/heif';
+                 
   if (isHeic) {
     try {
-      const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.8 });
+      const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.85 });
       const finalBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
       file = new File([finalBlob], "avatar.jpg", { type: "image/jpeg" });
     } catch (err) {
-      console.error('Ошибка конвертации HEIC:', err);
+      console.error('Ошибка конвертации HEIC для аватара:', err);
       alert(t('fileError') || 'Не удалось обработать формат HEIC.');
       return;
     }
@@ -568,7 +577,7 @@ document.getElementById('avatarInput')?.addEventListener('change', async functio
       canvas.width = targetSize;
       canvas.height = targetSize;
 
-      // Заливаем белым фоном на случай, если загружен PNG с прозрачным фоном
+      // Белый фон под прозрачные PNG
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, targetSize, targetSize);
 
@@ -578,19 +587,19 @@ document.getElementById('avatarInput')?.addEventListener('change', async functio
 
       ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, targetSize, targetSize);
       
-      // Сохраняем итоговый результат в JPEG
-      const base64Avatar = canvas.toDataURL('image/jpeg', 0.7); //[cite: 18]
+      const base64Avatar = canvas.toDataURL('image/jpeg', 0.8);
 
-      if (base64Avatar.length > 1000000) { //[cite: 18]
-        alert(t('fileTooLarge')); //[cite: 18]
-        return; //[cite: 18]
+      if (base64Avatar.length > 1048576) {
+        alert(t('fileTooLarge') || 'Файл слишком большой');
+        return;
       }
-      saveAvatarToFirebase(base64Avatar); //[cite: 18]
+      saveAvatarToFirebase(base64Avatar);
     };
     img.src = event.target.result;
   };
-  reader.readAsDataURL(file); //[cite: 18]
+  reader.readAsDataURL(file);
 });
+
 
 async function saveAvatarToFirebase(base64String) {
   const user = auth.currentUser;
