@@ -132,7 +132,13 @@
       </div>
 
       <!-- Поле ввода текста -->
-      <textarea id="postContent" data-i18n-placeholder="postPlaceholder" placeholder="Что у вас нового?" rows="4"></textarea>
+      <textarea 
+  id="postContent" 
+  placeholder="Текст поста..." 
+  rows="1" 
+  oninput="autoResize(this)" 
+  style="resize: none; overflow: hidden; width: 100%; min-height: 40px; box-sizing: border-box; font-family: inherit; padding: 10px; border-radius: 8px;">
+</textarea>
 
       <!-- Скрытый инпут и кнопка прикрепления фото -->
       <input type="file" id="postImageInput" accept="image/png, image/jpeg, image/webp" style="display: none;" onchange="handlePostImageSelect(event)">
