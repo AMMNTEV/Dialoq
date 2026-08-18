@@ -231,28 +231,100 @@ async function saveChanges() {
   updateSidebarUser(currentUserData);
 }
 
+let selectedPostImageBase64 = null;
+
 function showCreatePostModal() {
   document.getElementById('postModal').style.display = 'flex';
   document.getElementById('postContent').value = '';
+  removePostImage();
 }
+
+function handlePostImageSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const maxDim = 1000; // Максимальная сторона картинки в px
+
+      let width = img.width;
+      let height = img.height;
+
+      // Вычисление новых размеров с сохранением Aspect Ratio
+      if (width > maxDim || height > maxDim) {
+        if (width > height) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(img, 0, 0, width, height);
+
+      const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+
+      if (compressedBase64.length > 1000000) {
+        alert(t('fileTooLarge'));
+        return;
+      }
+
+      selectedPostImageBase64 = compressedBase64;
+      document.getElementById('previewImg').src = compressedBase64;
+      document.getElementById('postImagePreview').style.display = 'block';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// Удаление прикрепленной картинки из формы
+function removePostImage() {
+  selectedPostImageBase64 = null;
+  const previewDiv = document.getElementById('postImagePreview');
+  const previewImg = document.getElementById('previewImg');
+  const fileInput = document.getElementById('postImageInput');
+  
+  if (previewDiv) previewDiv.style.display = 'none';
+  if (previewImg) previewImg.src = '';
+  if (fileInput) fileInput.value = '';
+}
+
+
 function hideCreatePostModal() {
   document.getElementById('postModal').style.display = 'none';
 }
 async function createPost() {
   if (isSubmitting) return;
   const content = document.getElementById('postContent').value.trim();
-  if (!content) { alert(t('enterPostText')); return; }
+
+  // Пост должен содержать либо текст, либо картинку
+  if (!content && !selectedPostImageBase64) {
+    alert(t('enterPostText'));
+    return;
+  }
+
   hideCreatePostModal();
   isSubmitting = true;
+
   try {
     await db.collection('posts').add({
       userId: currentUser.uid,
       userNickname: currentUserData.nickname,
       userTag: currentUserData.tag,
       content: content,
-      likedBy: [], // Инициализируем массив лайков
+      image: selectedPostImageBase64 || null, // Сохраняем картинку
+      likedBy: [],
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
+    removePostImage();
   } catch (error) {
     console.error('Ошибка создания поста:', error);
     alert(t('postCreateError'));
@@ -297,23 +369,24 @@ function listenForNewPosts() {
         const heartClass = isLiked ? 'like-btn liked' : 'like-btn';
 
         postsHTML += `
-          <div class="post-card" id="post-${doc.id}">
-            <div class="post-header">
-              <button onclick="deletePost('${doc.id}')" class="delete-post-btn">×</button>
-            </div>
-            <div class="post-content">${post.content ? post.content.replace(/\n/g, '<br>') : ''}</div>
-            
-            <div class="post-footer">
-              <button class="${heartClass}" onclick="toggleLike('${doc.id}')">
-                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                </svg>
-                <span class="like-count">${likesCount > 0 ? likesCount : ''}</span>
-              </button>
-              <span class="post-date">${date}</span>
-            </div>
-          </div>
-        `;
+  <div class="post-card" id="post-${doc.id}">
+    <div class="post-header">
+      <button onclick="deletePost('${doc.id}')" class="delete-post-btn">×</button>
+    </div>
+    ${post.image ? `<div class="post-image" style="margin-bottom: 12px;"><img src="${post.image}" style="width: 100%; max-height: 500px; object-fit: contain; border-radius: 12px; display: block;" /></div>` : ''}
+    <div class="post-content">${post.content ? post.content.replace(/\n/g, '<br>') : ''}</div>
+    
+    <div class="post-footer">
+      <button class="${heartClass}" onclick="toggleLike('${doc.id}')">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+        <span class="like-count">${likesCount > 0 ? likesCount : ''}</span>
+      </button>
+      <span class="post-date">${date}</span>
+    </div>
+  </div>
+`;
       });
       postsContainer.innerHTML = postsHTML;
     }, error => { console.error('Ошибка в слушателе постов:', error); });
