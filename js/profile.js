@@ -121,18 +121,19 @@ onAuthStateChanged(async (user) => {
   }
 });
 
+// Функция загрузки профиля (без кнопок-карандашей)
 function loadProfileInfo() {
   const profileInfo = document.getElementById('profileInfo');
+  if (!profileInfo) return; // Защита от ошибок
+  
   profileInfo.innerHTML = `
     <div class="info-row">
       <label>${t('lblNickname')}</label>
       <span id="nickname">${currentUserData.nickname || t('notSpecified')}</span>
-      <button onclick="editNickname()" class="edit-btn">✎</button>
     </div>
     <div class="info-row">
       <label>${t('lblTag')}</label>
       <span id="tag">${currentUserData.tag || t('notSpecified')}</span>
-      <button onclick="editTag()" class="edit-btn">✎</button>
     </div>
     <div class="info-row">
       <label>${t('lblEmail')}</label>
@@ -140,6 +141,49 @@ function loadProfileInfo() {
     </div>
   `;
 }
+
+// Новая функция: включает режим редактирования сразу для всех полей
+function editFullProfile() {
+  const nickSpan = document.getElementById('nickname');
+  const tagSpan = document.getElementById('tag');
+  
+  const currentNick = currentUserData.nickname || '';
+  const currentTag = (currentUserData.tag || '').replace(/^@+/, '');
+
+  nickSpan.innerHTML = `<input type="text" id="editNickname" value="${currentNick}" class="edit-input">`;
+  
+  tagSpan.innerHTML = `
+    <div style="display: flex; flex-direction: column; width: 100%;">
+      <div class="tag-input-wrapper">
+        <span class="tag-prefix">@</span>
+        <input type="text" id="editTag" value="${currentTag}" oninput="if(typeof handleTagInput === 'function') handleTagInput(this); validateProfileTag(this.value)" placeholder="tag" class="edit-input-borderless" autocomplete="off">
+      </div>
+      <div id="tagStatus" style="font-size: 0.8rem; margin-top: 4px; min-height: 16px; line-height: 1.2; font-weight: 500;"></div>
+    </div>
+  `;
+
+  changes.nickname = true;
+  changes.tag = true;
+  isTagValid = true; 
+  
+  // Прячем кнопку "Редактировать профиль" на время редактирования
+  document.getElementById('btnEditProfile').style.display = 'none';
+  showActionButtons();
+}
+
+// Обновляем cancelEditing, чтобы вернуть кнопку обратно
+function cancelEditing() {
+  changes = {};
+  const buttons = document.getElementById('profileActionButtons');
+  if (buttons) buttons.remove();
+  
+  const editBtn = document.getElementById('btnEditProfile');
+  if (editBtn) editBtn.style.display = 'block';
+  
+  loadProfileInfo(); 
+}
+
+
 
 function editNickname() {
   const span = document.getElementById('nickname');
@@ -644,12 +688,6 @@ function showActionButtons() {
   }
 }
 
-function cancelEditing() {
-  changes = {};
-  const buttons = document.getElementById('profileActionButtons');
-  if (buttons) buttons.remove();
-  loadProfileInfo(); 
-}
 
 function validateProfileTag(value) {
   const statusDiv = document.getElementById('tagStatus');
