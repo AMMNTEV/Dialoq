@@ -546,62 +546,52 @@ window.onclick = function(event) {
   if (event.target === modal) modal.style.display = 'none';
 };
 
-// Добавляем async в обработчик события
 document.getElementById('avatarInput')?.addEventListener('change', async function(e) {
   let file = e.target.files[0];
   if (!file) return;
 
-  const isHeic = file.name.toLowerCase().endsWith('.heic') || 
-                 file.name.toLowerCase().endsWith('.heif') || 
-                 file.type === 'image/heic' || 
-                 file.type === 'image/heif';
-                 
-  if (isHeic) {
+  let base64Avatar;
+
+  try {
+    // ПОПЫТКА 1: Пробуем обработать файл как обычный (PNG, JPG, WEBP)
+    base64Avatar = await processAvatarFile(file);
+    
+  } catch (error) {
+    // ПОПЫТКА 2: Браузер не смог прочитать файл. Предполагаем, что это HEIC
+    console.warn('Обычное чтение аватара не удалось, пробуем heic2any...', error);
+    
     try {
-      const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.85 });
+      // Запускаем конвертацию
+      const convertedBlob = await heic2any({ 
+        blob: file, 
+        toType: "image/jpeg", 
+        quality: 0.85 
+      });
       const finalBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
-      file = new File([finalBlob], "avatar.jpg", { type: "image/jpeg" });
-    } catch (err) {
-      console.error('Ошибка конвертации HEIC для аватара:', err);
-      alert(t('fileError') || 'Не удалось обработать формат HEIC.');
+      const fallbackFile = new File([finalBlob], "avatar.jpg", { type: "image/jpeg" });
+
+      // Повторно прогоняем уже сконвертированный JPG через обрезку
+      base64Avatar = await processAvatarFile(fallbackFile);
+
+    } catch (heicErr) {
+      // ПОПЫТКА 3: Полный провал
+      console.error('Ошибка конвертации фолбэка HEIC для аватара:', heicErr);
+      alert(t('fileError') || 'Не удалось обработать изображение. Файл может быть поврежден или иметь неподдерживаемый формат.');
+      // Очищаем input, чтобы можно было попробовать выбрать этот же файл заново
+      e.target.value = ''; 
       return;
     }
   }
 
-  const reader = new FileReader();
-  reader.onload = function(event) {
-    const img = new Image();
-    img.onload = function() {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const targetSize = 800;
-      
-      canvas.width = targetSize;
-      canvas.height = targetSize;
-
-      // Белый фон под прозрачные PNG
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, targetSize, targetSize);
-
-      const minDim = Math.min(img.width, img.height);
-      const startX = (img.width - minDim) / 2;
-      const startY = (img.height - minDim) / 2;
-
-      ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, targetSize, targetSize);
-      
-      const base64Avatar = canvas.toDataURL('image/jpeg', 0.8);
-
-      if (base64Avatar.length > 1048576) {
-        alert(t('fileTooLarge') || 'Файл слишком большой');
-        return;
-      }
-      saveAvatarToFirebase(base64Avatar);
-    };
-    img.src = event.target.result;
-  };
-  reader.readAsDataURL(file);
+  // Если всё прошло успешно, проверяем лимит базы данных Firestore (~1 МБ)
+  if (base64Avatar.length > 1048576) {
+    alert(t('fileTooLarge') || 'Файл слишком большой после обработки');
+    e.target.value = '';
+    return;
+  }
+  
+  saveAvatarToFirebase(base64Avatar);
 });
-
 async function saveAvatarToFirebase(base64String) {
   const user = auth.currentUser;
   try {
@@ -766,3 +756,42 @@ window.toggleLike = async function(postId) {
     console.error('Ошибка при переключении лайка:', error);
   }
 };
+
+// Вспомогательная функция для обработки, обрезки (квадрат) и сжатия аватара
+function processAvatarFile(file) {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+    
+    img.onload = function() {
+      URL.revokeObjectURL(objectUrl); // Очищаем память
+      
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const targetSize = 800;
+      
+      canvas.width = targetSize;
+      canvas.height = targetSize;
+
+      // Белый фон под прозрачные PNG
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, targetSize, targetSize);
+
+      // Вычисляем координаты для квадратной обрезки по центру
+      const minDim = Math.min(img.width, img.height);
+      const startX = (img.width - minDim) / 2;
+      const startY = (img.height - minDim) / 2;
+
+      ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, targetSize, targetSize);
+      
+      resolve(canvas.toDataURL('image/jpeg', 0.8));
+    };
+    
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Формат не поддерживается или файл поврежден'));
+    };
+    
+    img.src = objectUrl;
+  });
+}
