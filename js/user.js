@@ -32,12 +32,14 @@ onAuthStateChanged(async (user) => {
       if(doc.exists) updateSidebarUser(doc.data());
     });
   }
+  
   try {
     const userDoc = await db.collection('users').doc(userId).get();
     if (!userDoc.exists) {
-      document.getElementById('profileContent').innerHTML = `
-        <div class="error">${t('userNotFound')}</div>
-        <a href="messenger.html" style="display: block; text-align: center; margin-top: 20px; color: #667eea;">${t('backToMessenger')}</a>
+      // Если пользователя нет, показываем ошибку вместо профиля
+      document.querySelector('.profile-two-columns').innerHTML = `
+        <div class="error" style="text-align: center; margin-top: 50px; font-size: 1.2rem; width: 100%;">${t('userNotFound') || 'Пользователь не найден'}</div>
+        <a href="messenger.html" style="display: block; text-align: center; margin-top: 20px; color: #3b82f6; width: 100%;">${t('backToMessenger') || 'Вернуться в мессенджер'}</a>
       `;
       return;
     }
@@ -49,33 +51,38 @@ onAuthStateChanged(async (user) => {
       ? `<img src="${userData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">` 
       : firstLetter;
 
-    document.getElementById('profileContent').innerHTML = `
-      <div class="profile-left">
-        <div class="profile-card">
-          <div class="profile-avatar-placeholder">
-            <div class="avatar-large">${avatarHTML}</div>
-          </div>
-          <div class="profile-info">
-            <div class="info-row"><label>${t('lblNickname')}</label><span>${userData.nickname || t('notSpecified')}</span></div>
-            <div class="info-row"><label>${t('lblTag')}</label><span>${userData.tag || t('notSpecified')}</span></div>
-          </div>
-        </div>
-      </div>
-      <div class="profile-right">
-        <div class="posts-header"><h2>${t('userPosts')}</h2></div>
-        <div class="posts-container" id="postsContainer"><div class="loading">${t('loadingPosts')}</div></div>
-      </div>
-    `;
+    // 1. Точечно обновляем аватар
+    const avatarEl = document.getElementById('userAvatar');
+    if (avatarEl) {
+      avatarEl.innerHTML = avatarHTML;
+      if (!userData.avatar) {
+        avatarEl.style.background = '#3b82f6';
+        avatarEl.style.color = 'white';
+      }
+    }
 
+    // 2. Точечно обновляем информацию профиля (никнейм и тег)
+    const infoEl = document.getElementById('userInfo');
+    if (infoEl) {
+      infoEl.innerHTML = `
+        <div class="info-row" style="margin-bottom: 8px;"><label style="font-weight: bold; color: gray; margin-right: 8px;">${t('lblNickname')}</label><span>${userData.nickname || t('notSpecified')}</span></div>
+        <div class="info-row"><label style="font-weight: bold; color: gray; margin-right: 8px;">${t('lblTag')}</label><span>${userData.tag || t('notSpecified')}</span></div>
+      `;
+    }
+
+    // Загружаем посты
     loadPosts(userId);
   } catch (error) {
     console.error('Ошибка загрузки профиля:', error);
-    document.getElementById('profileContent').innerHTML = `<div class="error">${t('profileLoadError')}</div>`;
+    document.querySelector('.profile-two-columns').innerHTML = `<div class="error" style="text-align: center; margin-top: 50px; width: 100%;">${t('profileLoadError') || 'Ошибка загрузки'}</div>`;
   }
 });
 
 async function loadPosts(targetUserId) {
-  const postsContainer = document.getElementById('postsContainer');
+  // Используем новый ID контейнера из нового HTML
+  const postsContainer = document.getElementById('userPostsContainer');
+  if (!postsContainer) return;
+
   if (unsubscribePosts) unsubscribePosts();
 
   try {
@@ -84,15 +91,15 @@ async function loadPosts(targetUserId) {
       .orderBy('createdAt', 'desc')
       .onSnapshot(snapshot => {
         if (snapshot.empty) {
-          postsContainer.innerHTML = `<div class="no-posts">${t('noUserPosts')}</div>`;
+          postsContainer.innerHTML = `<div class="no-posts" style="text-align: center; color: gray; padding: 20px;">${t('noUserPosts') || 'У пользователя пока нет постов.'}</div>`;
           return;
         }
         let postsHTML = '';
         snapshot.forEach(doc => {
           const post = doc.data();
-          let date = t('unknownDate');
+          let date = t('unknownDate') || 'Неизвестная дата';
           if (post.createdAt) {
-            try { date = new Date(post.createdAt.toDate()).toLocaleString(); } catch(e) { date = t('justNow'); }
+            try { date = new Date(post.createdAt.toDate()).toLocaleString(); } catch(e) { date = t('justNow') || 'Только что'; }
           }
           
           // Логика лайков
@@ -122,14 +129,14 @@ async function loadPosts(targetUserId) {
       }, error => {
         console.error('Ошибка загрузки постов:', error);
         if (error.code === 'failed-precondition') {
-          postsContainer.innerHTML = `<div class="error">${t('indexRequired')}</div>`;
+          postsContainer.innerHTML = `<div class="error">${t('indexRequired') || 'Требуется индекс БД'}</div>`;
         } else {
-          postsContainer.innerHTML = `<div class="error">${t('postsLoadError')}</div>`;
+          postsContainer.innerHTML = `<div class="error">${t('postsLoadError') || 'Ошибка загрузки постов'}</div>`;
         }
       });
   } catch (error) {
     console.error('Ошибка:', error);
-    postsContainer.innerHTML = `<div class="error">${t('postsLoadError')}</div>`;
+    postsContainer.innerHTML = `<div class="error">${t('postsLoadError') || 'Ошибка загрузки постов'}</div>`;
   }
 }
 
@@ -140,11 +147,11 @@ function updateSidebarUser(userData) {
   
   if (nameEl) {
     try {
-      nameEl.textContent = userData.nickname || t('users');
-      nameEl.removeAttribute('data-i18n'); // <--- ДОБАВИТЬ СЮДА
+      nameEl.textContent = userData.nickname || (t('users') || 'Users');
+      nameEl.removeAttribute('data-i18n');
     } catch (e) {
       nameEl.textContent = userData.nickname || 'Users';
-      nameEl.removeAttribute('data-i18n'); // <--- И СЮДА НА ВСЯКИЙ СЛУЧАЙ
+      nameEl.removeAttribute('data-i18n');
     }
   }
   
@@ -152,7 +159,6 @@ function updateSidebarUser(userData) {
   
   if (avatarEl) {
     if (userData.avatar) {
-      // Заменяем t('avatarAlt') на обычную строку, как в messenger.js, чтобы избежать падения скрипта
       avatarEl.innerHTML = `<img src="${userData.avatar}" alt="Аватар" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block;">`;
       avatarEl.style.background = 'transparent';
     } else {
