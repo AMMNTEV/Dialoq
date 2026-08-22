@@ -85,32 +85,44 @@
         
         <!-- ВЕРХНЯЯ ЧАСТЬ: ИНФОРМАЦИЯ И КНОПКИ -->
         <div class="profile-left" style="width: 100%; max-width: 800px; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 40px; padding-right: 0; margin-bottom: 30px; overflow: visible; height: auto;">
-          
-          <div class="profile-avatar-placeholder" style="margin-bottom: 0; text-align: center;">
-            <div class="avatar-large" id="userAvatar" style="width: 150px; height: 150px; border-radius: 50%; font-size: 4rem; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
-              <!-- Аватар загрузится через JS -->
-            </div>
-          </div>
-          
-          <div class="profile-info-block" style="flex: 1; min-width: 300px; max-width: 400px; display: flex; flex-direction: column; justify-content: center;">
-            <div class="profile-info" id="userInfo" style="margin: 0 0 20px 0; padding: 0; background: transparent; border: none; box-shadow: none;">
-              <div class="skeleton-line"></div>
-              <div class="skeleton-line"></div>
-              <div class="skeleton-line"></div>
-            </div>
+  
+  <div class="profile-avatar-placeholder" style="margin-bottom: 0; text-align: center;">
+    <!-- Обертка аватарки -->
+    <div class="avatar-wrapper" onclick="document.getElementById('avatarInput').click()">
+      <div class="avatar-large" id="profileAvatar">
+        <!-- Аватар загрузится через JS -->
+      </div>
+      <!-- Прозрачный слой с иконкой фотоаппарата -->
+      <div class="avatar-overlay">
+        <svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+      </div>
+    </div>
+    <!-- Скрытый инпут для загрузки -->
+    <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+  </div>
+  
+  <div class="profile-info-block" style="flex: 1; min-width: 300px; max-width: 400px; display: flex; flex-direction: column; justify-content: center;">
+    <!-- ИСПРАВЛЕН ID НА profileInfo -->
+    <div class="profile-info" id="profileInfo" style="margin: 0 0 20px 0; padding: 0; background: transparent; border: none; box-shadow: none;">
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line"></div>
+    </div>
 
-            <!-- Кнопки взаимодействия -->
-            <div class="profile-actions" style="display: flex; gap: 10px;">
-              <button id="btnFollow" style="flex: 1; padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: 0.2s;" data-i18n="btnFollow">
-                Подписаться
-              </button>
-              <button id="btnMessage" style="flex: 1; padding: 8px 16px; background: #363636; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: 0.2s;" data-i18n="btnMessage">
-                Отправить сообщение
-              </button>
-            </div>
-          </div>
-
-        </div>
+    <!-- Новые кнопки взаимодействия -->
+    <div class="profile-actions" style="display: flex; gap: 10px;">
+      <button id="btnCreatePost" onclick="showCreatePostModal()" style="flex: 1; padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: 0.2s;" data-i18n="btnCreatePost">
+        Создать пост
+      </button>
+      <button id="btnEditProfile" onclick="editFullProfile()" style="flex: 1; padding: 8px 16px; background: #363636; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: 0.2s;" data-i18n="btnEditProfile">
+        Редактировать профиль
+      </button>
+    </div>
+  </div>
+</div>
         
         <!-- НИЖНЯЯ ЧАСТЬ: ПОСТЫ -->
         <div class="profile-right" style="width: 100%; max-width: 900px; overflow: visible; height: auto; border-top: 1px solid rgba(128, 128, 128, 0.2); padding-top: 20px;">
@@ -213,7 +225,9 @@ const profileTranslations = {
     saveBtn: "Save",
     noPostsYet: "This user has no posts yet.",
     btnFollow: "Follow",
-    btnMessage: "Send message"
+    btnMessage: "Send message",
+    btnCreatePost: "Create post",
+    btnEditProfile: "Edit profile"
   },
   ru: {
     titleProfile: "Мой профиль",
@@ -245,7 +259,9 @@ const profileTranslations = {
     saveBtn: "Сохранить",
     noPostsYet: "Постов пока нет",
     btnFollow: "Подписаться",
-    btnMessage: "Отправить сообщение"
+    btnMessage: "Отправить сообщение",
+    btnCreatePost: "Создать пост",
+    btnEditProfile: "Редактировать профиль"
   }
 };
 
