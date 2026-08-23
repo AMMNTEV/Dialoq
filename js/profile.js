@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (typeof updateSidebarUser === 'function') updateSidebarUser(currentUserData);
       
       // Если мы на странице профиля — мгновенно рисуем инфу профиля
-if (document.getElementById('profileInfo') && typeof loadProfileInfo === 'function') {
+if (document.getElementById('nickname') && typeof loadProfileInfo === 'function') {
   loadProfileInfo();
   const avatarDiv = document.getElementById('profileAvatar');
   if (avatarDiv) {
@@ -61,7 +61,7 @@ onAuthStateChanged(async (user) => {
     currentUserData = JSON.parse(cachedDataStr);
     updateSidebarUser(currentUserData); 
     
-    if (document.getElementById('profileInfo')) loadProfileInfo();
+    if (document.getElementById('nickname')) loadProfileInfo();
     const profileAvatarEl = document.getElementById('profileAvatar');
     if (profileAvatarEl && typeof renderAvatar === 'function') {
         renderAvatar(currentUserData.avatar);
@@ -113,7 +113,7 @@ onAuthStateChanged(async (user) => {
     if (window.userCache) userCache.set(user.uid, currentUserData);
     
     updateSidebarUser(currentUserData);
-    if (document.getElementById('profileInfo')) loadProfileInfo();
+    if (document.getElementById('nickname')) loadProfileInfo();
     if (document.getElementById('userPostsContainer') && typeof listenForNewPosts === 'function') listenForNewPosts();
     
   } catch (error) {
@@ -582,6 +582,11 @@ function listenForNewPosts() {
     .where('userId', '==', currentUser.uid)
     .orderBy('createdAt', 'desc')
     .onSnapshot(snapshot => {
+      const statPostsCount = document.getElementById('statPostsCount');
+      if (statPostsCount) {
+        statPostsCount.textContent = snapshot.size;
+      }
+      
       const postsContainer = document.getElementById('userPostsContainer');
       if (snapshot.empty) {
         postsContainer.innerHTML = `<div class="no-posts">${t('noPostsYet')}</div>`;

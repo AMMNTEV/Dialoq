@@ -97,6 +97,11 @@ async function loadPosts(targetUserId) {
       .where('userId', '==', targetUserId)
       .orderBy('createdAt', 'desc')
       .onSnapshot(snapshot => {
+        const statPostsCount = document.getElementById('statPostsCount');
+        if (statPostsCount) {
+          statPostsCount.textContent = snapshot.size;
+        }
+        
         if (snapshot.empty) {
           postsContainer.innerHTML = `<div class="no-posts" style="text-align: center; color: gray; padding: 20px;">${t('noUserPosts') || 'У пользователя пока нет постов.'}</div>`;
           return;
