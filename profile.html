@@ -102,24 +102,23 @@
   <input type="file" id="avatarInput" accept="image/*" style="display: none;">
   
   <!-- Информационный блок -->
+  <!-- Информационный блок -->
   <div class="insta-info-block">
     <div class="insta-title-row">
-      <!-- ID nickname важен для JS -->
-      <h2 id="nickname" class="insta-nickname">Загрузка...</h2>
+      <h2 id="nickname" class="insta-nickname" data-i18n="loading">Загрузка...</h2>
     </div>
     
-    <!-- ID tag важен для JS -->
     <div id="tag" class="insta-tag">@tag</div>
     
-    <!-- Счетчики -->
+    <!-- Счетчики с поддержкой локализации -->
     <div class="insta-stats">
-      <span><strong>0</strong> публикаций</span>
-      <span><strong>0</strong> подписчиков</span>
-      <span><strong>0</strong> подписок</span>
+      <span><strong id="statPostsCount">0</strong> <span data-i18n="statPosts">публикаций</span></span>
+      <span><strong id="statFollowersCount">0</strong> <span data-i18n="statFollowers">подписчиков</span></span>
+      <span><strong id="statFollowingCount">0</strong> <span data-i18n="statFollowing">подписок</span></span>
     </div>
     
-    <!-- Био (пока выводим email, как было раньше) -->
-    <div class="insta-bio" id="userBio">Загрузка...</div>
+    <!-- Пустое по умолчанию поле био -->
+    <div class="insta-bio" id="userBio"></div>
     
     <!-- Кнопки действий -->
     <div class="insta-actions" id="actionButtonsContainer">
@@ -232,6 +231,9 @@ const profileTranslations = {
     btnFollow: "Follow",
     btnMessage: "Send message",
     btnCreatePost: "Create post",
+    statPosts: "posts",
+    statFollowers: "followers",
+    statFollowing: "following",
     btnEditProfile: "Edit profile"
   },
   ru: {
@@ -266,6 +268,9 @@ const profileTranslations = {
     btnFollow: "Подписаться",
     btnMessage: "Отправить сообщение",
     btnCreatePost: "Создать пост",
+    statPosts: "публикаций",
+    statFollowers: "подписчиков",
+    statFollowing: "подписок",
     btnEditProfile: "Редактировать профиль"
   }
 };

@@ -91,28 +91,29 @@
   </div>
   
   <!-- Информационный блок -->
+  <!-- Информационный блок -->
   <div class="insta-info-block">
     <div class="insta-title-row">
-      <h2 id="userNickname" class="insta-nickname">Загрузка...</h2>
+      <h2 id="userNickname" class="insta-nickname" data-i18n="loading">Загрузка...</h2>
       <span class="insta-options">•••</span>
     </div>
     
     <div id="userTag" class="insta-tag">@tag</div>
     
-    <!-- Счетчики (пока заглушки) -->
+    <!-- Счетчики (заменили хардкод на 0 и добавили локализацию) -->
     <div class="insta-stats">
-      <span><strong>19</strong> публикаций</span>
-      <span><strong>679</strong> подписчиков</span>
-      <span><strong>222</strong> подписок</span>
+      <span><strong id="statPostsCount">0</strong> <span data-i18n="statPosts">публикаций</span></span>
+      <span><strong id="statFollowersCount">0</strong> <span data-i18n="statFollowers">подписчиков</span></span>
+      <span><strong id="statFollowingCount">0</strong> <span data-i18n="statFollowing">подписок</span></span>
     </div>
     
-    <!-- Заглушка био -->
+    <!-- Пустое по умолчанию био -->
     <div class="insta-bio" id="userBio"></div>
     
-    <!-- Кнопки действий -->
+    <!-- Кнопки действий с i18n -->
     <div class="insta-actions">
-      <button id="btnFollow" class="btn-primary">Подписаться</button>
-      <button id="btnMessage" class="btn-secondary">Отправить сообщение</button>
+      <button id="btnFollow" class="btn-primary" data-i18n="btnFollow">Подписаться</button>
+      <button id="btnMessage" class="btn-secondary" data-i18n="btnMessage">Отправить сообщение</button>
       <button class="btn-icon">
          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
            <path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
@@ -169,6 +170,9 @@ const userTranslations = {
     btnFollow: "Follow",
     btnMessage: "Send message",
     unfollow: "Unfollow",
+    statPosts: "posts",
+    statFollowers: "followers",
+    statFollowing: "following",
     loading: "Loading..."
   },
   ru: {
@@ -187,6 +191,9 @@ const userTranslations = {
     btnFollow: "Подписаться",
     btnMessage: "Отправить сообщение",
     unfollow: "Отписаться",
+    statPosts: "публикаций",
+    statFollowers: "подписчиков",
+    statFollowing: "подписок",
     loading: "Загрузка..."
   }
 };
