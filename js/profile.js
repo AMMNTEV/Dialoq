@@ -125,20 +125,22 @@ onAuthStateChanged(async (user) => {
 function loadProfileInfo() {
   const nickEl = document.getElementById('nickname');
   const tagEl = document.getElementById('tag');
-  const bioEl = document.getElementById('emailBio');
+  const bioEl = document.getElementById('userBio'); // Изменено с emailBio
   
   if (nickEl) nickEl.textContent = currentUserData.nickname || t('notSpecified');
   if (tagEl) tagEl.textContent = currentUserData.tag || t('notSpecified');
-  if (bioEl) bioEl.textContent = currentUserData.email || '';
+  if (bioEl) bioEl.textContent = currentUserData.bio || ''; // Выводим bio
 }
 
-// Новая функция: включает режим редактирования инста-шапки
+// Режим редактирования инста-шапки
 function editFullProfile() {
   const nickSpan = document.getElementById('nickname');
   const tagSpan = document.getElementById('tag');
+  const bioSpan = document.getElementById('userBio'); // Получаем контейнер био
   
   const currentNick = currentUserData.nickname || '';
   const currentTag = (currentUserData.tag || '').replace(/^@+/, '');
+  const currentBio = currentUserData.bio || ''; // Получаем текущее био
 
   nickSpan.innerHTML = `<input type="text" id="editNickname" value="${currentNick}" class="edit-input" style="font-size: 1.2rem; padding: 6px 12px; max-width: 250px;">`;
   
@@ -152,8 +154,12 @@ function editFullProfile() {
     </div>
   `;
 
+  // Добавляем поле ввода для био с maxlength="40"
+  bioSpan.innerHTML = `<input type="text" id="editBio" value="${currentBio}" maxlength="40" class="edit-input" placeholder="О себе (до 40 символов)" style="width: 100%; max-width: 250px; font-size: 0.9rem; padding: 6px 12px; margin-top: 5px;">`;
+
   changes.nickname = true;
   changes.tag = true;
+  changes.bio = true; // Отслеживаем изменения био
   isTagValid = true; 
   
   // Прячем стандартные кнопки на время редактирования
@@ -235,6 +241,7 @@ async function saveChanges() {
   
   let newNickname = currentUserData.nickname;
   let newTag = currentUserData.tag;
+  let newBio = currentUserData.bio;
 
   if (changes.nickname) {
     newNickname = document.getElementById('editNickname').value.trim();
@@ -259,6 +266,10 @@ async function saveChanges() {
     newTag = '@' + rawInputTag;
   }
 
+  if (changes.bio) {
+    newBio = document.getElementById('editBio').value.trim();
+  }
+
   isSubmitting = true;
   const user = auth.currentUser;
   const messageDiv = document.createElement('div');
@@ -267,6 +278,7 @@ async function saveChanges() {
   
   if (changes.nickname) updates.nickname = newNickname;
   if (changes.tag) updates.tag = newTag;
+  if (changes.bio) updates.bio = newBio; // Сохраняем био в базу данных
 
   try {
     await db.collection('users').doc(user.uid).update(updates);
@@ -278,7 +290,11 @@ async function saveChanges() {
     localStorage.setItem(`cachedCurrentUser_${user.uid}`, JSON.stringify(currentUserData));
     
     messageDiv.innerHTML = `<div class="success">${t('changesSaved')}</div>`;
-    document.querySelector('.profile-left').appendChild(messageDiv);
+    
+    const leftProfile = document.querySelector('.profile-left');
+    if (leftProfile) {
+        leftProfile.appendChild(messageDiv);
+    }
     
     cancelEditing(); 
     
@@ -286,7 +302,12 @@ async function saveChanges() {
   } catch (error) {
     console.error('Ошибка сохранения:', error);
     messageDiv.innerHTML = `<div class="error">${t('saveError')}</div>`;
-    document.querySelector('.profile-left').appendChild(messageDiv);
+    
+    const leftProfile = document.querySelector('.profile-left');
+    if (leftProfile) {
+        leftProfile.appendChild(messageDiv);
+    }
+    
     setTimeout(() => messageDiv.remove(), 2000);
   } finally {
     isSubmitting = false;

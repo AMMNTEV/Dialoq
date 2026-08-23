@@ -72,6 +72,11 @@ if (tagEl) {
   tagEl.textContent = userData.tag || t('notSpecified');
 }
 
+const bioEl = document.getElementById('userBio');
+if (bioEl) {
+  bioEl.textContent = userData.bio || '';
+}
+
     // Загружаем посты
     loadPosts(userId);
   } catch (error) {
