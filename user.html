@@ -81,33 +81,46 @@
       <div class="profile-two-columns" style="flex-direction: column; align-items: center; gap: 0; overflow: visible; height: auto;">
         
         <!-- ВЕРХНЯЯ ЧАСТЬ: ИНФОРМАЦИЯ И КНОПКИ -->
-        <div class="profile-left" style="width: 100%; max-width: 800px; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 40px; padding-right: 0; margin-bottom: 30px; overflow: visible; height: auto;">
-          
-          <div class="profile-avatar-placeholder" style="margin-bottom: 0; text-align: center;">
-            <div class="avatar-large" id="userAvatar" style="width: 150px; height: 150px; border-radius: 50%; font-size: 4rem; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
-              <!-- Аватар загрузится через JS -->
-            </div>
-          </div>
-          
-          <div class="profile-info-block" style="flex: 1; min-width: 300px; max-width: 400px; display: flex; flex-direction: column; justify-content: center;">
-            <div class="profile-info" id="userInfo" style="margin: 0 0 20px 0; padding: 0; background: transparent; border: none; box-shadow: none;">
-              <div class="skeleton-line"></div>
-              <div class="skeleton-line"></div>
-              <div class="skeleton-line"></div>
-            </div>
-
-            <!-- Кнопки взаимодействия -->
-            <div class="profile-actions" style="display: flex; gap: 10px;">
-              <button id="btnFollow" style="flex: 1; padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: 0.2s;" data-i18n="btnFollow">
-                Подписаться
-              </button>
-              <button id="btnMessage" style="flex: 1; padding: 8px 16px; background: #363636; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: 0.2s;" data-i18n="btnMessage">
-                Отправить сообщение
-              </button>
-            </div>
-          </div>
-
-        </div>
+        <!-- ЗАМЕНИТЬ СТАРЫЙ .profile-left НА ЭТОТ БЛОК -->
+<div class="insta-profile-header">
+  <!-- Контейнер аватарки с градиентной обводкой -->
+  <div class="insta-avatar-wrapper">
+    <div id="userAvatar" class="insta-avatar">
+      <!-- Аватар загрузится через JS -->
+    </div>
+  </div>
+  
+  <!-- Информационный блок -->
+  <div class="insta-info-block">
+    <div class="insta-title-row">
+      <h2 id="userNickname" class="insta-nickname">Загрузка...</h2>
+      <span class="insta-options">•••</span>
+    </div>
+    
+    <div id="userTag" class="insta-tag">@tag</div>
+    
+    <!-- Счетчики (пока заглушки) -->
+    <div class="insta-stats">
+      <span><strong>19</strong> публикаций</span>
+      <span><strong>679</strong> подписчиков</span>
+      <span><strong>222</strong> подписок</span>
+    </div>
+    
+    <!-- Заглушка био -->
+    <div class="insta-bio">msc, 18</div>
+    
+    <!-- Кнопки действий -->
+    <div class="insta-actions">
+      <button id="btnFollow" class="btn-primary">Подписаться</button>
+      <button id="btnMessage" class="btn-secondary">Отправить сообщение</button>
+      <button class="btn-icon">
+         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+           <path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+         </svg>
+      </button>
+    </div>
+  </div>
+</div>
         
         <!-- НИЖНЯЯ ЧАСТЬ: ПОСТЫ -->
         <div class="profile-right" style="width: 100%; max-width: 900px; overflow: visible; height: auto; border-top: 1px solid rgba(128, 128, 128, 0.2); padding-top: 20px;">
