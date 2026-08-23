@@ -114,7 +114,7 @@ onAuthStateChanged(async (user) => {
     
     updateSidebarUser(currentUserData);
     if (document.getElementById('profileInfo')) loadProfileInfo();
-    if (document.getElementById('postsContainer') && typeof listenForNewPosts === 'function') listenForNewPosts();
+    if (document.getElementById('userPostsContainer') && typeof listenForNewPosts === 'function') listenForNewPosts();
     
   } catch (error) {
     console.error('Ошибка загрузки профиля:', error);
@@ -124,7 +124,7 @@ onAuthStateChanged(async (user) => {
 // Функция загрузки профиля (без кнопок-карандашей)
 function loadProfileInfo() {
   const profileInfo = document.getElementById('profileInfo');
-  if (!profileInfo) return; // Защита от ошибок
+  if (!profileInfo) return; 
   
   profileInfo.innerHTML = `
     <div class="info-row">
@@ -542,7 +542,7 @@ function listenForNewPosts() {
     .where('userId', '==', currentUser.uid)
     .orderBy('createdAt', 'desc')
     .onSnapshot(snapshot => {
-      const postsContainer = document.getElementById('postsContainer');
+      const postsContainer = document.getElementById('userPostsContainer');
       if (snapshot.empty) {
         postsContainer.innerHTML = `<div class="no-posts">${t('noPostsYet')}</div>`;
         return;
