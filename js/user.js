@@ -17,6 +17,7 @@ const userId = urlParams.get('id');
 if (!userId) window.location.href = 'messenger.html';
 
 let unsubscribePosts = null;
+let isFollowing = false; // Выносим флаг на уровень модуля
 
 onAuthStateChanged(async (user) => {
   if (!user || !user.emailVerified) {
@@ -32,50 +33,86 @@ onAuthStateChanged(async (user) => {
       if(doc.exists) updateSidebarUser(doc.data());
     });
   }
+  
   try {
-    const userDoc = await db.collection('users').doc(userId).get();
-    if (!userDoc.exists) {
-      document.getElementById('profileContent').innerHTML = `
-        <div class="error">${t('userNotFound')}</div>
-        <a href="messenger.html" style="display: block; text-align: center; margin-top: 20px; color: #667eea;">${t('backToMessenger')}</a>
-      `;
-      return;
-    }
-    const userData = userDoc.data();
-    
-    const firstLetter = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
+    db.collection('users').doc(userId).onSnapshot((doc) => {
+      if (!doc.exists) {
+        document.querySelector('.profile-two-columns').innerHTML = `
+          <div class="error" style="text-align: center; margin-top: 50px; font-size: 1.2rem; width: 100%;">${t('userNotFound') || 'Пользователь не найден'}</div>
+          <a href="messenger.html" style="display: block; text-align: center; margin-top: 20px; color: #3b82f6; width: 100%;">${t('backToMessenger') || 'Вернуться в мессенджер'}</a>
+        `;
+        return;
+      }
+      
+      const userData = doc.data();
+      
+      // Аватар
+      const firstLetter = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
+      const avatarHTML = userData.avatar 
+        ? `<img src="${userData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">` 
+        : firstLetter;
 
-    const avatarHTML = userData.avatar 
-      ? `<img src="${userData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">` 
-      : firstLetter;
+      const avatarEl = document.getElementById('userAvatar');
+      if (avatarEl) {
+        avatarEl.innerHTML = avatarHTML;
+        if (!userData.avatar) {
+          avatarEl.style.background = '#3b82f6';
+          avatarEl.style.color = 'white';
+        }
+      }
 
-    document.getElementById('profileContent').innerHTML = `
-      <div class="profile-left">
-        <div class="profile-card">
-          <div class="profile-avatar-placeholder">
-            <div class="avatar-large">${avatarHTML}</div>
-          </div>
-          <div class="profile-info">
-            <div class="info-row"><label>${t('lblNickname')}</label><span>${userData.nickname || t('notSpecified')}</span></div>
-            <div class="info-row"><label>${t('lblTag')}</label><span>${userData.tag || t('notSpecified')}</span></div>
-          </div>
-        </div>
-      </div>
-      <div class="profile-right">
-        <div class="posts-header"><h2>${t('userPosts')}</h2></div>
-        <div class="posts-container" id="postsContainer"><div class="loading">${t('loadingPosts')}</div></div>
-      </div>
-    `;
+      // Информация профиля
+      const nicknameEl = document.getElementById('userNickname');
+      if (nicknameEl) nicknameEl.textContent = userData.nickname || t('notSpecified');
 
-    loadPosts(userId);
+      const tagEl = document.getElementById('userTag');
+      if (tagEl) tagEl.textContent = userData.tag || t('notSpecified');
+
+      const bioEl = document.getElementById('userBio');
+      if (bioEl) bioEl.textContent = userData.bio || '';
+
+      // Счетчики подписок
+      const followers = userData.followers || [];
+      const following = userData.following || [];
+      
+      const statFollowersCount = document.getElementById('statFollowersCount');
+      const statFollowingCount = document.getElementById('statFollowingCount');
+      if (statFollowersCount) statFollowersCount.textContent = followers.length;
+      if (statFollowingCount) statFollowingCount.textContent = following.length;
+
+      // Логика кнопки "Подписаться"
+      const btnFollow = document.getElementById('btnFollow');
+      if (btnFollow && currentUser) {
+        isFollowing = followers.includes(currentUser.uid);
+        
+        if (isFollowing) {
+          btnFollow.textContent = t('unfollow') || 'Отписаться';
+          btnFollow.classList.remove('btn-primary');
+          btnFollow.classList.add('btn-secondary'); 
+        } else {
+          btnFollow.textContent = t('btnFollow') || 'Подписаться';
+          btnFollow.classList.remove('btn-secondary');
+          btnFollow.classList.add('btn-primary');
+        }
+        
+        btnFollow.onclick = () => toggleFollow(userId);
+      }
+      
+      // Загружаем посты, если они еще не загружены
+      if (!unsubscribePosts) {
+        loadPosts(userId);
+      }
+    });
   } catch (error) {
     console.error('Ошибка загрузки профиля:', error);
-    document.getElementById('profileContent').innerHTML = `<div class="error">${t('profileLoadError')}</div>`;
+    document.querySelector('.profile-two-columns').innerHTML = `<div class="error" style="text-align: center; margin-top: 50px; width: 100%;">${t('profileLoadError') || 'Ошибка загрузки'}</div>`;
   }
 });
 
 async function loadPosts(targetUserId) {
-  const postsContainer = document.getElementById('postsContainer');
+  const postsContainer = document.getElementById('userPostsContainer');
+  if (!postsContainer) return;
+
   if (unsubscribePosts) unsubscribePosts();
 
   try {
@@ -83,19 +120,23 @@ async function loadPosts(targetUserId) {
       .where('userId', '==', targetUserId)
       .orderBy('createdAt', 'desc')
       .onSnapshot(snapshot => {
+        const statPostsCount = document.getElementById('statPostsCount');
+        if (statPostsCount) {
+          statPostsCount.textContent = snapshot.size;
+        }
+        
         if (snapshot.empty) {
-          postsContainer.innerHTML = `<div class="no-posts">${t('noUserPosts')}</div>`;
+          postsContainer.innerHTML = `<div class="no-posts" style="text-align: center; color: gray; padding: 20px;">${t('noUserPosts') || 'У пользователя пока нет постов.'}</div>`;
           return;
         }
         let postsHTML = '';
         snapshot.forEach(doc => {
           const post = doc.data();
-          let date = t('unknownDate');
+          let date = t('unknownDate') || 'Неизвестная дата';
           if (post.createdAt) {
-            try { date = new Date(post.createdAt.toDate()).toLocaleString(); } catch(e) { date = t('justNow'); }
+            try { date = new Date(post.createdAt.toDate()).toLocaleString(); } catch(e) { date = t('justNow') || 'Только что'; }
           }
           
-          // Логика лайков
           const likedBy = post.likedBy || [];
           const likesCount = likedBy.length;
           const isLiked = currentUser && likedBy.includes(currentUser.uid);
@@ -122,14 +163,14 @@ async function loadPosts(targetUserId) {
       }, error => {
         console.error('Ошибка загрузки постов:', error);
         if (error.code === 'failed-precondition') {
-          postsContainer.innerHTML = `<div class="error">${t('indexRequired')}</div>`;
+          postsContainer.innerHTML = `<div class="error">${t('indexRequired') || 'Требуется индекс БД'}</div>`;
         } else {
-          postsContainer.innerHTML = `<div class="error">${t('postsLoadError')}</div>`;
+          postsContainer.innerHTML = `<div class="error">${t('postsLoadError') || 'Ошибка загрузки постов'}</div>`;
         }
       });
   } catch (error) {
     console.error('Ошибка:', error);
-    postsContainer.innerHTML = `<div class="error">${t('postsLoadError')}</div>`;
+    postsContainer.innerHTML = `<div class="error">${t('postsLoadError') || 'Ошибка загрузки постов'}</div>`;
   }
 }
 
@@ -140,11 +181,11 @@ function updateSidebarUser(userData) {
   
   if (nameEl) {
     try {
-      nameEl.textContent = userData.nickname || t('users');
-      nameEl.removeAttribute('data-i18n'); // <--- ДОБАВИТЬ СЮДА
+      nameEl.textContent = userData.nickname || (t('users') || 'Users');
+      nameEl.removeAttribute('data-i18n');
     } catch (e) {
       nameEl.textContent = userData.nickname || 'Users';
-      nameEl.removeAttribute('data-i18n'); // <--- И СЮДА НА ВСЯКИЙ СЛУЧАЙ
+      nameEl.removeAttribute('data-i18n');
     }
   }
   
@@ -152,7 +193,6 @@ function updateSidebarUser(userData) {
   
   if (avatarEl) {
     if (userData.avatar) {
-      // Заменяем t('avatarAlt') на обычную строку, как в messenger.js, чтобы избежать падения скрипта
       avatarEl.innerHTML = `<img src="${userData.avatar}" alt="Аватар" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block;">`;
       avatarEl.style.background = 'transparent';
     } else {
@@ -185,5 +225,41 @@ window.toggleLike = async function(postId) {
     }
   } catch (error) {
     console.error('Ошибка при переключении лайка:', error);
+  }
+};
+
+window.toggleFollow = async function(targetUserId) {
+  if (!currentUser) return;
+  
+  const btnFollow = document.getElementById('btnFollow');
+  btnFollow.disabled = true;
+
+  const targetUserRef = db.collection('users').doc(targetUserId);
+  const currentUserRef = db.collection('users').doc(currentUser.uid);
+
+  try {
+    if (isFollowing) {
+      await Promise.all([
+        targetUserRef.update({
+          followers: firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
+        }),
+        currentUserRef.update({
+          following: firebase.firestore.FieldValue.arrayRemove(targetUserId)
+        })
+      ]);
+    } else {
+      await Promise.all([
+        targetUserRef.update({
+          followers: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+        }),
+        currentUserRef.update({
+          following: firebase.firestore.FieldValue.arrayUnion(targetUserId)
+        })
+      ]);
+    }
+  } catch (error) {
+    console.error("Ошибка при подписке/отписке:", error);
+  } finally {
+    btnFollow.disabled = false;
   }
 };

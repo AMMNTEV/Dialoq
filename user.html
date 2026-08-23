@@ -28,12 +28,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="TSA">
-<link rel="apple-touch-icon" href="img/user.png">
 </head>
 <body>
   <div class="messenger-container">
     
-    <!-- ===== ЛЕВАЯ ПАНЕЛЬ ===== -->
+    <!-- ===== ЛЕВАЯ ПАНЕЛЬ (Сайдбар) ===== -->
     <div class="nav-sidebar">
       <div class="nav-user-box">
         <div class="nav-user-info">
@@ -48,7 +47,7 @@
           <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           <span data-i18n="navProfile">Профиль</span>
         </a>
-        <a href="messenger.html" class="nav-button active">
+        <a href="messenger.html" class="nav-button">
           <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           <span data-i18n="navMessenger">Мессенджер</span>
         </a>
@@ -66,36 +65,91 @@
       </button>
     </div>
 
-    <!-- ===== КОНТЕНТ ПРОФИЛЯ ДРУГОГО ПОЛЬЗОВАТЕЛЯ ===== -->
+<!-- ===== КОНТЕНТ ПРОФИЛЯ ===== -->
     <div class="profile-container" style="flex: 1; overflow-y: auto; padding-bottom: 70px;">
+      
+      <!-- ПАРЯЩАЯ ШАПКА С КНОПКОЙ НАЗАД -->
       <div class="profile-header">
-  <button class="back-btn" id="backBtn" onclick="window.location.href='messenger.html'">
-    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M19 12H5M12 19l-7-7 7-7"/>
-    </svg>
-  </button>
+        <button onclick="window.history.back()" class="back-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- ИСПРАВЛЕННЫЙ КОНТЕЙНЕР (Добавлено overflow: visible; height: auto; для прокрутки на ПК) -->
+      <div class="profile-two-columns" style="flex-direction: column; align-items: center; gap: 0; overflow: visible; height: auto;">
+        
+        <!-- ВЕРХНЯЯ ЧАСТЬ: ИНФОРМАЦИЯ И КНОПКИ -->
+        <!-- ЗАМЕНИТЬ СТАРЫЙ .profile-left НА ЭТОТ БЛОК -->
+<div class="insta-profile-header">
+  <!-- Контейнер аватарки с градиентной обводкой -->
+  <div class="insta-avatar-wrapper">
+    <div id="userAvatar" class="insta-avatar">
+      <!-- Аватар загрузится через JS -->
+    </div>
+  </div>
+  
+  <!-- Информационный блок -->
+  <!-- Информационный блок -->
+  <div class="insta-info-block">
+    <div class="insta-title-row">
+      <h2 id="userNickname" class="insta-nickname" data-i18n="loading">Загрузка...</h2>
+      <span class="insta-options">•••</span>
+    </div>
+    
+    <div id="userTag" class="insta-tag">@tag</div>
+    
+    <!-- Счетчики (заменили хардкод на 0 и добавили локализацию) -->
+    <div class="insta-stats">
+      <span><strong id="statPostsCount">0</strong> <span data-i18n="statPosts">публикаций</span></span>
+      <span><strong id="statFollowersCount">0</strong> <span data-i18n="statFollowers">подписчиков</span></span>
+      <span><strong id="statFollowingCount">0</strong> <span data-i18n="statFollowing">подписок</span></span>
+    </div>
+    
+    <!-- Пустое по умолчанию био -->
+    <div class="insta-bio" id="userBio"></div>
+    
+    <!-- Кнопки действий с i18n -->
+    <div class="insta-actions">
+      <button id="btnFollow" class="btn-primary" data-i18n="btnFollow">Подписаться</button>
+      <button id="btnMessage" class="btn-secondary" data-i18n="btnMessage">Отправить сообщение</button>
+      <button class="btn-icon">
+         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+           <path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+         </svg>
+      </button>
+    </div>
+  </div>
 </div>
-      <div class="profile-two-columns" id="profileContent">
-        <div class="loading" style="width: 100%; align-self: flex-start; margin-top: 10px;" data-i18n="loadingProfile">Загрузка профиля...</div>
+        
+        <!-- НИЖНЯЯ ЧАСТЬ: ПОСТЫ -->
+        <div class="profile-right" style="width: 100%; max-width: 900px; overflow: visible; height: auto; border-top: 1px solid rgba(128, 128, 128, 0.2); padding-top: 20px;">
+          <div class="posts-header" style="display: flex; justify-content: flex-start; align-items: center; margin-bottom: 20px;">
+            <h2 id="userPostsTitle" data-i18n="userPosts">Посты пользователя</h2>
+          </div>
+          <div class="posts-container" id="userPostsContainer" style="overflow: visible; height: auto; padding-right: 0;">
+            <div class="skeleton-post"></div>
+            <div class="skeleton-post"></div>
+          </div>
+        </div>
+
       </div>
     </div>
 
-  </div>
 
-  <!-- ===== Мобильная нижняя панель ===== -->
-  <nav class="mobile-bottom-nav" id="mobileBottomNav">
-    <a href="messenger.html" class="nav-item active">
-      <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-    </a>
-    <a href="settings.html" class="nav-item">
-      <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    </a>
-    <a href="profile.html" class="nav-item">
-      <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-    </a>
-  </nav>
-
-
+<!-- Мобильная нижняя панель (Tab Bar) -->
+<nav class="mobile-bottom-nav" id="mobileBottomNav">
+  <a href="messenger.html" class="nav-item">
+    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  </a>
+  <a href="settings.html" class="nav-item">
+    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  </a>
+  <a href="profile.html" class="nav-item">
+    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+  </a>
+</nav>
 
 <!-- ЛОКАЛИЗАЦИЯ -->
 <script>
@@ -106,21 +160,20 @@ const userTranslations = {
     navMessenger: "Messenger",
     navSettings: "Settings",
     navLogout: "Log out",
-    loading: "Loading...",
-    loadingProfile: "Loading profile...",
+    userPosts: "User posts",
     lblNickname: "Nickname:",
     lblTag: "Tag:",
+    lblEmail: "Email:",
     notSpecified: "Not specified",
-    userPosts: "User posts",
-    loadingPosts: "Loading posts...",
-    noUserPosts: "This user has no posts yet.",
-    unknownDate: "Unknown date",
+    noPostsYet: "This user has no posts yet.",
     justNow: "Just now",
-    userNotFound: "User not found",
-    backToMessenger: "Back to messenger",
-    profileLoadError: "Error loading profile",
-    postsLoadError: "Error loading posts",
-    indexRequired: "Index required for posts query"
+    btnFollow: "Follow",
+    btnMessage: "Send message",
+    unfollow: "Unfollow",
+    statPosts: "posts",
+    statFollowers: "followers",
+    statFollowing: "following",
+    loading: "Loading..."
   },
   ru: {
     titleUserProfile: "Профиль пользователя",
@@ -128,36 +181,39 @@ const userTranslations = {
     navMessenger: "Мессенджер",
     navSettings: "Настройки",
     navLogout: "Выход",
-    loading: "Загрузка...",
-    loadingProfile: "Загрузка профиля...",
+    userPosts: "Посты пользователя",
     lblNickname: "Никнейм:",
     lblTag: "Тег:",
+    lblEmail: "Email:",
     notSpecified: "Не указан",
-    userPosts: "Посты пользователя",
-    loadingPosts: "Загрузка постов...",
-    noUserPosts: "У этого пользователя пока нет постов.",
-    unknownDate: "Неизвестная дата",
+    noPostsYet: "У пользователя пока нет постов.",
     justNow: "Только что",
-    userNotFound: "Пользователь не найден",
-    backToMessenger: "Вернуться в мессенджер",
-    profileLoadError: "Ошибка загрузки профиля",
-    postsLoadError: "Ошибка загрузки постов",
-    indexRequired: "Требуется индекс для запроса постов"
+    btnFollow: "Подписаться",
+    btnMessage: "Отправить сообщение",
+    unfollow: "Отписаться",
+    statPosts: "публикаций",
+    statFollowers: "подписчиков",
+    statFollowing: "подписок",
+    loading: "Загрузка..."
   }
 };
 
-// ЭТА ФУНКЦИЯ РЕШАЕТ ПРОБЛЕМУ "t is not defined"
 window.t = function(key) {
-  const savedLang = localStorage.getItem('app_lang') || 'en';
-  return userTranslations[savedLang] && userTranslations[savedLang][key] ? userTranslations[savedLang][key] : key;
+  const lang = localStorage.getItem('app_lang') || 'en';
+  if (userTranslations[lang] && userTranslations[lang][key]) {
+    return userTranslations[lang][key];
+  }
+  return key;
 };
 
 function applyUserLanguage(lang) {
+  document.documentElement.lang = lang;
+  const tObj = userTranslations[lang];
+  if (!tObj) return;
+
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
-    if (userTranslations[lang] && userTranslations[lang][key]) {
-      el.innerHTML = userTranslations[lang][key];
-    }
+    if (tObj[key]) el.innerHTML = tObj[key];
   });
 }
 

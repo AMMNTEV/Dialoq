@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (typeof updateSidebarUser === 'function') updateSidebarUser(currentUserData);
       
       // Если мы на странице профиля — мгновенно рисуем инфу профиля
-if (document.getElementById('profileInfo') && typeof loadProfileInfo === 'function') {
+if (document.getElementById('nickname') && typeof loadProfileInfo === 'function') {
   loadProfileInfo();
   const avatarDiv = document.getElementById('profileAvatar');
   if (avatarDiv) {
@@ -61,7 +61,7 @@ onAuthStateChanged(async (user) => {
     currentUserData = JSON.parse(cachedDataStr);
     updateSidebarUser(currentUserData); 
     
-    if (document.getElementById('profileInfo')) loadProfileInfo();
+    if (document.getElementById('nickname')) loadProfileInfo();
     const profileAvatarEl = document.getElementById('profileAvatar');
     if (profileAvatarEl && typeof renderAvatar === 'function') {
         renderAvatar(currentUserData.avatar);
@@ -113,33 +113,112 @@ onAuthStateChanged(async (user) => {
     if (window.userCache) userCache.set(user.uid, currentUserData);
     
     updateSidebarUser(currentUserData);
-    if (document.getElementById('profileInfo')) loadProfileInfo();
-    if (document.getElementById('postsContainer') && typeof listenForNewPosts === 'function') listenForNewPosts();
+    if (document.getElementById('nickname')) loadProfileInfo();
+    if (document.getElementById('userPostsContainer') && typeof listenForNewPosts === 'function') listenForNewPosts();
     
   } catch (error) {
     console.error('Ошибка загрузки профиля:', error);
   }
 });
 
+// Функция загрузки профиля (для нового Insta-дизайна)
 function loadProfileInfo() {
-  const profileInfo = document.getElementById('profileInfo');
-  profileInfo.innerHTML = `
-    <div class="info-row">
-      <label>${t('lblNickname')}</label>
-      <span id="nickname">${currentUserData.nickname || t('notSpecified')}</span>
-      <button onclick="editNickname()" class="edit-btn">✎</button>
-    </div>
-    <div class="info-row">
-      <label>${t('lblTag')}</label>
-      <span id="tag">${currentUserData.tag || t('notSpecified')}</span>
-      <button onclick="editTag()" class="edit-btn">✎</button>
-    </div>
-    <div class="info-row">
-      <label>${t('lblEmail')}</label>
-      <span>${currentUserData.email}</span>
+  const nickEl = document.getElementById('nickname');
+  const tagEl = document.getElementById('tag');
+  const bioEl = document.getElementById('userBio'); 
+  
+  if (nickEl) nickEl.textContent = currentUserData.nickname || t('notSpecified');
+  if (tagEl) tagEl.textContent = currentUserData.tag || t('notSpecified');
+  if (bioEl) bioEl.textContent = currentUserData.bio || ''; 
+
+  // Добавляем расчет подписок
+  const followers = currentUserData.followers || [];
+  const following = currentUserData.following || [];
+  
+  const statFollowersCount = document.getElementById('statFollowersCount');
+  const statFollowingCount = document.getElementById('statFollowingCount');
+  
+  if (statFollowersCount) statFollowersCount.textContent = followers.length;
+  if (statFollowingCount) statFollowingCount.textContent = following.length;
+}
+
+// Режим редактирования инста-шапки
+function editFullProfile() {
+  const nickSpan = document.getElementById('nickname');
+  const tagSpan = document.getElementById('tag');
+  const bioSpan = document.getElementById('userBio'); // Получаем контейнер био
+  
+  const currentNick = currentUserData.nickname || '';
+  const currentTag = (currentUserData.tag || '').replace(/^@+/, '');
+  const currentBio = currentUserData.bio || ''; // Получаем текущее био
+
+  nickSpan.innerHTML = `<input type="text" id="editNickname" value="${currentNick}" class="edit-input" style="font-size: 1.2rem; padding: 6px 12px; max-width: 250px;">`;
+  
+  tagSpan.innerHTML = `
+    <div style="display: flex; flex-direction: column; width: 100%; max-width: 250px;">
+      <div class="tag-input-wrapper">
+        <span class="tag-prefix">@</span>
+        <input type="text" id="editTag" value="${currentTag}" oninput="if(typeof handleTagInput === 'function') handleTagInput(this); validateProfileTag(this.value)" placeholder="tag" class="edit-input-borderless" autocomplete="off">
+      </div>
+      <div id="tagStatus" style="font-size: 0.8rem; margin-top: 4px; min-height: 16px; line-height: 1.2; font-weight: 500;"></div>
     </div>
   `;
+
+  // Добавляем поле ввода для био с maxlength="40"
+  bioSpan.innerHTML = `<input type="text" id="editBio" value="${currentBio}" maxlength="40" class="edit-input" placeholder="О себе (до 40 символов)" style="width: 100%; max-width: 250px; font-size: 0.9rem; padding: 6px 12px; margin-top: 5px;">`;
+
+  changes.nickname = true;
+  changes.tag = true;
+  changes.bio = true; // Отслеживаем изменения био
+  isTagValid = true; 
+  
+  // Прячем стандартные кнопки на время редактирования
+  document.getElementById('btnEditProfile').style.display = 'none';
+  if(document.getElementById('btnCreatePost')) document.getElementById('btnCreatePost').style.display = 'none';
+  showActionButtons();
 }
+
+function cancelEditing() {
+  changes = {};
+  const buttons = document.getElementById('profileActionButtons');
+  if (buttons) buttons.remove();
+  
+  const editBtn = document.getElementById('btnEditProfile');
+  if (editBtn) editBtn.style.display = 'block';
+  
+  const postBtn = document.getElementById('btnCreatePost');
+  if (postBtn) postBtn.style.display = 'block';
+  
+  loadProfileInfo(); 
+}
+
+function showActionButtons() {
+  if (!document.getElementById('profileActionButtons')) {
+    const container = document.createElement('div');
+    container.id = 'profileActionButtons';
+    container.style.display = 'flex';
+    container.style.gap = '10px';
+    container.style.width = '100%';
+
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'btn-primary';
+    saveBtn.textContent = t('saveBtn');
+    saveBtn.onclick = saveChanges;
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn-secondary';
+    cancelBtn.textContent = t('cancelBtn');
+    cancelBtn.onclick = cancelEditing;
+
+    container.appendChild(saveBtn);
+    container.appendChild(cancelBtn);
+    
+    // Добавляем кнопки в контейнер действий профиля
+    document.getElementById('actionButtonsContainer').appendChild(container);
+  }
+}
+
+
 
 function editNickname() {
   const span = document.getElementById('nickname');
@@ -172,6 +251,7 @@ async function saveChanges() {
   
   let newNickname = currentUserData.nickname;
   let newTag = currentUserData.tag;
+  let newBio = currentUserData.bio;
 
   if (changes.nickname) {
     newNickname = document.getElementById('editNickname').value.trim();
@@ -196,6 +276,10 @@ async function saveChanges() {
     newTag = '@' + rawInputTag;
   }
 
+  if (changes.bio) {
+    newBio = document.getElementById('editBio').value.trim();
+  }
+
   isSubmitting = true;
   const user = auth.currentUser;
   const messageDiv = document.createElement('div');
@@ -204,6 +288,7 @@ async function saveChanges() {
   
   if (changes.nickname) updates.nickname = newNickname;
   if (changes.tag) updates.tag = newTag;
+  if (changes.bio) updates.bio = newBio; // Сохраняем био в базу данных
 
   try {
     await db.collection('users').doc(user.uid).update(updates);
@@ -215,7 +300,11 @@ async function saveChanges() {
     localStorage.setItem(`cachedCurrentUser_${user.uid}`, JSON.stringify(currentUserData));
     
     messageDiv.innerHTML = `<div class="success">${t('changesSaved')}</div>`;
-    document.querySelector('.profile-left').appendChild(messageDiv);
+    
+    const leftProfile = document.querySelector('.profile-left');
+    if (leftProfile) {
+        leftProfile.appendChild(messageDiv);
+    }
     
     cancelEditing(); 
     
@@ -223,7 +312,12 @@ async function saveChanges() {
   } catch (error) {
     console.error('Ошибка сохранения:', error);
     messageDiv.innerHTML = `<div class="error">${t('saveError')}</div>`;
-    document.querySelector('.profile-left').appendChild(messageDiv);
+    
+    const leftProfile = document.querySelector('.profile-left');
+    if (leftProfile) {
+        leftProfile.appendChild(messageDiv);
+    }
+    
     setTimeout(() => messageDiv.remove(), 2000);
   } finally {
     isSubmitting = false;
@@ -498,7 +592,12 @@ function listenForNewPosts() {
     .where('userId', '==', currentUser.uid)
     .orderBy('createdAt', 'desc')
     .onSnapshot(snapshot => {
-      const postsContainer = document.getElementById('postsContainer');
+      const statPostsCount = document.getElementById('statPostsCount');
+      if (statPostsCount) {
+        statPostsCount.textContent = snapshot.size;
+      }
+      
+      const postsContainer = document.getElementById('userPostsContainer');
       if (snapshot.empty) {
         postsContainer.innerHTML = `<div class="no-posts">${t('noPostsYet')}</div>`;
         return;
@@ -546,62 +645,52 @@ window.onclick = function(event) {
   if (event.target === modal) modal.style.display = 'none';
 };
 
-// Добавляем async в обработчик события
 document.getElementById('avatarInput')?.addEventListener('change', async function(e) {
   let file = e.target.files[0];
   if (!file) return;
 
-  const isHeic = file.name.toLowerCase().endsWith('.heic') || 
-                 file.name.toLowerCase().endsWith('.heif') || 
-                 file.type === 'image/heic' || 
-                 file.type === 'image/heif';
-                 
-  if (isHeic) {
+  let base64Avatar;
+
+  try {
+    // ПОПЫТКА 1: Пробуем обработать файл как обычный (PNG, JPG, WEBP)
+    base64Avatar = await processAvatarFile(file);
+    
+  } catch (error) {
+    // ПОПЫТКА 2: Браузер не смог прочитать файл. Предполагаем, что это HEIC
+    console.warn('Обычное чтение аватара не удалось, пробуем heic2any...', error);
+    
     try {
-      const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.85 });
+      // Запускаем конвертацию
+      const convertedBlob = await heic2any({ 
+        blob: file, 
+        toType: "image/jpeg", 
+        quality: 0.85 
+      });
       const finalBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
-      file = new File([finalBlob], "avatar.jpg", { type: "image/jpeg" });
-    } catch (err) {
-      console.error('Ошибка конвертации HEIC для аватара:', err);
-      alert(t('fileError') || 'Не удалось обработать формат HEIC.');
+      const fallbackFile = new File([finalBlob], "avatar.jpg", { type: "image/jpeg" });
+
+      // Повторно прогоняем уже сконвертированный JPG через обрезку
+      base64Avatar = await processAvatarFile(fallbackFile);
+
+    } catch (heicErr) {
+      // ПОПЫТКА 3: Полный провал
+      console.error('Ошибка конвертации фолбэка HEIC для аватара:', heicErr);
+      alert(t('fileError') || 'Не удалось обработать изображение. Файл может быть поврежден или иметь неподдерживаемый формат.');
+      // Очищаем input, чтобы можно было попробовать выбрать этот же файл заново
+      e.target.value = ''; 
       return;
     }
   }
 
-  const reader = new FileReader();
-  reader.onload = function(event) {
-    const img = new Image();
-    img.onload = function() {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const targetSize = 800;
-      
-      canvas.width = targetSize;
-      canvas.height = targetSize;
-
-      // Белый фон под прозрачные PNG
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, targetSize, targetSize);
-
-      const minDim = Math.min(img.width, img.height);
-      const startX = (img.width - minDim) / 2;
-      const startY = (img.height - minDim) / 2;
-
-      ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, targetSize, targetSize);
-      
-      const base64Avatar = canvas.toDataURL('image/jpeg', 0.8);
-
-      if (base64Avatar.length > 1048576) {
-        alert(t('fileTooLarge') || 'Файл слишком большой');
-        return;
-      }
-      saveAvatarToFirebase(base64Avatar);
-    };
-    img.src = event.target.result;
-  };
-  reader.readAsDataURL(file);
+  // Если всё прошло успешно, проверяем лимит базы данных Firestore (~1 МБ)
+  if (base64Avatar.length > 1048576) {
+    alert(t('fileTooLarge') || 'Файл слишком большой после обработки');
+    e.target.value = '';
+    return;
+  }
+  
+  saveAvatarToFirebase(base64Avatar);
 });
-
 async function saveAvatarToFirebase(base64String) {
   const user = auth.currentUser;
   try {
@@ -627,39 +716,6 @@ function renderAvatar(avatarData) {
   }
 }
 
-function showActionButtons() {
-  if (!document.getElementById('profileActionButtons')) {
-    const container = document.createElement('div');
-    container.id = 'profileActionButtons';
-    container.style.display = 'flex';
-    container.style.gap = '10px';
-    container.style.marginTop = '16px';
-
-    const saveBtn = document.createElement('button');
-    saveBtn.className = 'save-btn';
-    saveBtn.style.marginTop = '0'; 
-    saveBtn.textContent = t('saveBtn');
-    saveBtn.onclick = saveChanges;
-
-    const cancelBtn = document.createElement('button');
-    cancelBtn.className = 'save-btn';
-    cancelBtn.style.marginTop = '0';
-    cancelBtn.style.background = '#94a3b8'; 
-    cancelBtn.textContent = t('cancelBtn');
-    cancelBtn.onclick = cancelEditing;
-
-    container.appendChild(saveBtn);
-    container.appendChild(cancelBtn);
-    document.querySelector('.profile-info').appendChild(container);
-  }
-}
-
-function cancelEditing() {
-  changes = {};
-  const buttons = document.getElementById('profileActionButtons');
-  if (buttons) buttons.remove();
-  loadProfileInfo(); 
-}
 
 function validateProfileTag(value) {
   const statusDiv = document.getElementById('tagStatus');
@@ -766,3 +822,42 @@ window.toggleLike = async function(postId) {
     console.error('Ошибка при переключении лайка:', error);
   }
 };
+
+// Вспомогательная функция для обработки, обрезки (квадрат) и сжатия аватара
+function processAvatarFile(file) {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+    
+    img.onload = function() {
+      URL.revokeObjectURL(objectUrl); // Очищаем память
+      
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const targetSize = 800;
+      
+      canvas.width = targetSize;
+      canvas.height = targetSize;
+
+      // Белый фон под прозрачные PNG
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, targetSize, targetSize);
+
+      // Вычисляем координаты для квадратной обрезки по центру
+      const minDim = Math.min(img.width, img.height);
+      const startX = (img.width - minDim) / 2;
+      const startY = (img.height - minDim) / 2;
+
+      ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, targetSize, targetSize);
+      
+      resolve(canvas.toDataURL('image/jpeg', 0.8));
+    };
+    
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Формат не поддерживается или файл поврежден'));
+    };
+    
+    img.src = objectUrl;
+  });
+}
