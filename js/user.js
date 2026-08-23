@@ -34,7 +34,15 @@ onAuthStateChanged(async (user) => {
   }
   
   try {
-    const userDoc = await db.collection('users').doc(userId).get();
+    let isFollowing = false;
+    db.collection('users').doc(userId).onSnapshot((doc) => {
+  if (!doc.exists) {
+    document.querySelector('.profile-two-columns').innerHTML = `
+      <div class="error" style="text-align: center; margin-top: 50px;">Пользователь не найден</div>
+    `;
+    return;
+  }
+  const userData = doc.data();
     if (!userDoc.exists) {
       // Если пользователя нет, показываем ошибку вместо профиля
       document.querySelector('.profile-two-columns').innerHTML = `
@@ -82,6 +90,39 @@ if (bioEl) {
   } catch (error) {
     console.error('Ошибка загрузки профиля:', error);
     document.querySelector('.profile-two-columns').innerHTML = `<div class="error" style="text-align: center; margin-top: 50px; width: 100%;">${t('profileLoadError') || 'Ошибка загрузки'}</div>`;
+  }
+// 1. Обновляем счетчики подписок
+  const followers = userData.followers || [];
+  const following = userData.following || [];
+  
+  const statFollowersCount = document.getElementById('statFollowersCount');
+  const statFollowingCount = document.getElementById('statFollowingCount');
+  if (statFollowersCount) statFollowersCount.textContent = followers.length;
+  if (statFollowingCount) statFollowingCount.textContent = following.length;
+
+  // 2. Логика кнопки "Подписаться"
+  const btnFollow = document.getElementById('btnFollow');
+  if (btnFollow && currentUser) {
+    // Проверяем, есть ли наш UID в массиве подписчиков этого юзера
+    isFollowing = followers.includes(currentUser.uid);
+    
+    if (isFollowing) {
+      btnFollow.textContent = t('unfollow') || 'Отписаться';
+      btnFollow.classList.remove('btn-primary');
+      btnFollow.classList.add('btn-secondary'); 
+    } else {
+      btnFollow.textContent = t('btnFollow') || 'Подписаться';
+      btnFollow.classList.remove('btn-secondary');
+      btnFollow.classList.add('btn-primary');
+    }
+    
+    // Вешаем обработчик клика
+    btnFollow.onclick = () => toggleFollow(userId);
+  }
+  
+  // Загружаем посты, если они еще не загружены
+  if (!unsubscribePosts) {
+    loadPosts(userId);
   }
 });
 
@@ -203,5 +244,43 @@ window.toggleLike = async function(postId) {
     }
   } catch (error) {
     console.error('Ошибка при переключении лайка:', error);
+  }
+};
+
+window.toggleFollow = async function(targetUserId) {
+  if (!currentUser) return;
+  
+  const btnFollow = document.getElementById('btnFollow');
+  btnFollow.disabled = true; // Защита от двойного клика
+
+  const targetUserRef = db.collection('users').doc(targetUserId);
+  const currentUserRef = db.collection('users').doc(currentUser.uid);
+
+  try {
+    if (isFollowing) {
+      // Отписываемся (выполняем два запроса одновременно)
+      await Promise.all([
+        targetUserRef.update({
+          followers: firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
+        }),
+        currentUserRef.update({
+          following: firebase.firestore.FieldValue.arrayRemove(targetUserId)
+        })
+      ]);
+    } else {
+      // Подписываемся
+      await Promise.all([
+        targetUserRef.update({
+          followers: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+        }),
+        currentUserRef.update({
+          following: firebase.firestore.FieldValue.arrayUnion(targetUserId)
+        })
+      ]);
+    }
+  } catch (error) {
+    console.error("Ошибка при подписке/отписке:", error);
+  } finally {
+    btnFollow.disabled = false; // Разблокируем кнопку
   }
 };

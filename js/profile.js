@@ -125,11 +125,21 @@ onAuthStateChanged(async (user) => {
 function loadProfileInfo() {
   const nickEl = document.getElementById('nickname');
   const tagEl = document.getElementById('tag');
-  const bioEl = document.getElementById('userBio'); // Изменено с emailBio
+  const bioEl = document.getElementById('userBio'); 
   
   if (nickEl) nickEl.textContent = currentUserData.nickname || t('notSpecified');
   if (tagEl) tagEl.textContent = currentUserData.tag || t('notSpecified');
-  if (bioEl) bioEl.textContent = currentUserData.bio || ''; // Выводим bio
+  if (bioEl) bioEl.textContent = currentUserData.bio || ''; 
+
+  // Добавляем расчет подписок
+  const followers = currentUserData.followers || [];
+  const following = currentUserData.following || [];
+  
+  const statFollowersCount = document.getElementById('statFollowersCount');
+  const statFollowingCount = document.getElementById('statFollowingCount');
+  
+  if (statFollowersCount) statFollowersCount.textContent = followers.length;
+  if (statFollowingCount) statFollowingCount.textContent = following.length;
 }
 
 // Режим редактирования инста-шапки
