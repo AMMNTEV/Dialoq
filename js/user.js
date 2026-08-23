@@ -17,6 +17,7 @@ const userId = urlParams.get('id');
 if (!userId) window.location.href = 'messenger.html';
 
 let unsubscribePosts = null;
+let isFollowing = false; // Выносим флаг на уровень модуля
 
 onAuthStateChanged(async (user) => {
   if (!user || !user.emailVerified) {
@@ -34,100 +35,81 @@ onAuthStateChanged(async (user) => {
   }
   
   try {
-    let isFollowing = false;
     db.collection('users').doc(userId).onSnapshot((doc) => {
-  if (!doc.exists) {
-    document.querySelector('.profile-two-columns').innerHTML = `
-      <div class="error" style="text-align: center; margin-top: 50px;">Пользователь не найден</div>
-    `;
-    return;
-  }
-  const userData = doc.data();
-    if (!userDoc.exists) {
-      // Если пользователя нет, показываем ошибку вместо профиля
-      document.querySelector('.profile-two-columns').innerHTML = `
-        <div class="error" style="text-align: center; margin-top: 50px; font-size: 1.2rem; width: 100%;">${t('userNotFound') || 'Пользователь не найден'}</div>
-        <a href="messenger.html" style="display: block; text-align: center; margin-top: 20px; color: #3b82f6; width: 100%;">${t('backToMessenger') || 'Вернуться в мессенджер'}</a>
-      `;
-      return;
-    }
-    const userData = userDoc.data();
-    
-    const firstLetter = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
-
-    const avatarHTML = userData.avatar 
-      ? `<img src="${userData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">` 
-      : firstLetter;
-
-    // 1. Точечно обновляем аватар
-    const avatarEl = document.getElementById('userAvatar');
-    if (avatarEl) {
-      avatarEl.innerHTML = avatarHTML;
-      if (!userData.avatar) {
-        avatarEl.style.background = '#3b82f6';
-        avatarEl.style.color = 'white';
+      if (!doc.exists) {
+        document.querySelector('.profile-two-columns').innerHTML = `
+          <div class="error" style="text-align: center; margin-top: 50px; font-size: 1.2rem; width: 100%;">${t('userNotFound') || 'Пользователь не найден'}</div>
+          <a href="messenger.html" style="display: block; text-align: center; margin-top: 20px; color: #3b82f6; width: 100%;">${t('backToMessenger') || 'Вернуться в мессенджер'}</a>
+        `;
+        return;
       }
-    }
+      
+      const userData = doc.data();
+      
+      // Аватар
+      const firstLetter = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
+      const avatarHTML = userData.avatar 
+        ? `<img src="${userData.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">` 
+        : firstLetter;
 
-    // 2. Точечно обновляем информацию профиля (никнейм и тег)
-    const nicknameEl = document.getElementById('userNickname');
-if (nicknameEl) {
-  nicknameEl.textContent = userData.nickname || t('notSpecified');
-}
+      const avatarEl = document.getElementById('userAvatar');
+      if (avatarEl) {
+        avatarEl.innerHTML = avatarHTML;
+        if (!userData.avatar) {
+          avatarEl.style.background = '#3b82f6';
+          avatarEl.style.color = 'white';
+        }
+      }
 
-const tagEl = document.getElementById('userTag');
-if (tagEl) {
-  tagEl.textContent = userData.tag || t('notSpecified');
-}
+      // Информация профиля
+      const nicknameEl = document.getElementById('userNickname');
+      if (nicknameEl) nicknameEl.textContent = userData.nickname || t('notSpecified');
 
-const bioEl = document.getElementById('userBio');
-if (bioEl) {
-  bioEl.textContent = userData.bio || '';
-}
+      const tagEl = document.getElementById('userTag');
+      if (tagEl) tagEl.textContent = userData.tag || t('notSpecified');
 
-    // Загружаем посты
-    loadPosts(userId);
+      const bioEl = document.getElementById('userBio');
+      if (bioEl) bioEl.textContent = userData.bio || '';
+
+      // Счетчики подписок
+      const followers = userData.followers || [];
+      const following = userData.following || [];
+      
+      const statFollowersCount = document.getElementById('statFollowersCount');
+      const statFollowingCount = document.getElementById('statFollowingCount');
+      if (statFollowersCount) statFollowersCount.textContent = followers.length;
+      if (statFollowingCount) statFollowingCount.textContent = following.length;
+
+      // Логика кнопки "Подписаться"
+      const btnFollow = document.getElementById('btnFollow');
+      if (btnFollow && currentUser) {
+        isFollowing = followers.includes(currentUser.uid);
+        
+        if (isFollowing) {
+          btnFollow.textContent = t('unfollow') || 'Отписаться';
+          btnFollow.classList.remove('btn-primary');
+          btnFollow.classList.add('btn-secondary'); 
+        } else {
+          btnFollow.textContent = t('btnFollow') || 'Подписаться';
+          btnFollow.classList.remove('btn-secondary');
+          btnFollow.classList.add('btn-primary');
+        }
+        
+        btnFollow.onclick = () => toggleFollow(userId);
+      }
+      
+      // Загружаем посты, если они еще не загружены
+      if (!unsubscribePosts) {
+        loadPosts(userId);
+      }
+    });
   } catch (error) {
     console.error('Ошибка загрузки профиля:', error);
     document.querySelector('.profile-two-columns').innerHTML = `<div class="error" style="text-align: center; margin-top: 50px; width: 100%;">${t('profileLoadError') || 'Ошибка загрузки'}</div>`;
   }
-// 1. Обновляем счетчики подписок
-  const followers = userData.followers || [];
-  const following = userData.following || [];
-  
-  const statFollowersCount = document.getElementById('statFollowersCount');
-  const statFollowingCount = document.getElementById('statFollowingCount');
-  if (statFollowersCount) statFollowersCount.textContent = followers.length;
-  if (statFollowingCount) statFollowingCount.textContent = following.length;
-
-  // 2. Логика кнопки "Подписаться"
-  const btnFollow = document.getElementById('btnFollow');
-  if (btnFollow && currentUser) {
-    // Проверяем, есть ли наш UID в массиве подписчиков этого юзера
-    isFollowing = followers.includes(currentUser.uid);
-    
-    if (isFollowing) {
-      btnFollow.textContent = t('unfollow') || 'Отписаться';
-      btnFollow.classList.remove('btn-primary');
-      btnFollow.classList.add('btn-secondary'); 
-    } else {
-      btnFollow.textContent = t('btnFollow') || 'Подписаться';
-      btnFollow.classList.remove('btn-secondary');
-      btnFollow.classList.add('btn-primary');
-    }
-    
-    // Вешаем обработчик клика
-    btnFollow.onclick = () => toggleFollow(userId);
-  }
-  
-  // Загружаем посты, если они еще не загружены
-  if (!unsubscribePosts) {
-    loadPosts(userId);
-  }
 });
 
 async function loadPosts(targetUserId) {
-  // Используем новый ID контейнера из нового HTML
   const postsContainer = document.getElementById('userPostsContainer');
   if (!postsContainer) return;
 
@@ -155,7 +137,6 @@ async function loadPosts(targetUserId) {
             try { date = new Date(post.createdAt.toDate()).toLocaleString(); } catch(e) { date = t('justNow') || 'Только что'; }
           }
           
-          // Логика лайков
           const likedBy = post.likedBy || [];
           const likesCount = likedBy.length;
           const isLiked = currentUser && likedBy.includes(currentUser.uid);
@@ -251,14 +232,13 @@ window.toggleFollow = async function(targetUserId) {
   if (!currentUser) return;
   
   const btnFollow = document.getElementById('btnFollow');
-  btnFollow.disabled = true; // Защита от двойного клика
+  btnFollow.disabled = true;
 
   const targetUserRef = db.collection('users').doc(targetUserId);
   const currentUserRef = db.collection('users').doc(currentUser.uid);
 
   try {
     if (isFollowing) {
-      // Отписываемся (выполняем два запроса одновременно)
       await Promise.all([
         targetUserRef.update({
           followers: firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
@@ -268,7 +248,6 @@ window.toggleFollow = async function(targetUserId) {
         })
       ]);
     } else {
-      // Подписываемся
       await Promise.all([
         targetUserRef.update({
           followers: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
@@ -281,6 +260,6 @@ window.toggleFollow = async function(targetUserId) {
   } catch (error) {
     console.error("Ошибка при подписке/отписке:", error);
   } finally {
-    btnFollow.disabled = false; // Разблокируем кнопку
+    btnFollow.disabled = false;
   }
 };
