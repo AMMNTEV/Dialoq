@@ -1057,3 +1057,214 @@ a:focus {
     height: 100px;
   }
 }
+
+/* ========== INSTA PROFILE DESIGN ========== */
+.insta-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  padding: 20px;
+  max-width: 800px;
+  width: 100%;
+  margin-bottom: 30px;
+  box-sizing: border-box;
+}
+
+/* Красивая градиентная обводка вместо черной рамки */
+.insta-avatar-wrapper {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  padding: 4px;
+  background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+}
+
+.insta-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: #3b82f6; 
+  border: 4px solid #fff; /* Вырез фона страницы (в светлой теме белый) */
+  box-sizing: border-box;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: white;
+}
+
+/* Перекрытие при наведении на аватарку для загрузки */
+.avatar-overlay {
+  position: absolute;
+  top: 4px; left: 4px; right: 4px; bottom: 4px;
+  background: rgba(0,0,0,0.5);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.insta-avatar-wrapper:hover .avatar-overlay {
+  opacity: 1;
+}
+
+.insta-info-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.insta-title-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Жестко задаем черный/темный цвет для светлой темы, чтобы не было серым */
+.insta-nickname {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #000000; 
+  margin: 0;
+}
+
+.insta-tag {
+  font-size: 1rem;
+  color: #2563eb; /* Яркий синий, лучше читается */
+  font-weight: 500;
+}
+
+.insta-stats {
+  display: flex;
+  gap: 24px;
+  font-size: 1.05rem;
+  color: #1a1a1a;
+}
+
+.insta-stats span {
+  display: flex;
+  gap: 6px;
+}
+
+.insta-stats strong {
+  font-weight: 600;
+  color: #000000;
+}
+
+.insta-bio {
+  font-size: 1rem;
+  color: #1a1a1a;
+  line-height: 1.5;
+}
+
+.insta-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.btn-primary, .btn-secondary {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: none;
+  transition: 0.2s;
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+}
+.btn-primary:hover {
+  background: #2563eb;
+}
+
+.btn-secondary {
+  background: #e5e7eb;
+  color: #000000;
+}
+.btn-secondary:hover {
+  background: #d1d5db;
+}
+
+/* Глобальное исправление серого текста в постах для светлой темы */
+.post-content, .info-row span, .edit-input, .edit-input-borderless {
+  color: #000000 !important;
+}
+
+/* ========== АДАПТАЦИЯ ДЛЯ ТЕМНОЙ ТЕМЫ ========== */
+body.dark-theme .insta-avatar {
+  border-color: #121212; /* Вырез в цвет фона темной темы */
+}
+body.dark-theme .insta-nickname,
+body.dark-theme .insta-stats,
+body.dark-theme .insta-stats strong,
+body.dark-theme .insta-bio,
+body.dark-theme .post-content,
+body.dark-theme .edit-input, 
+body.dark-theme .edit-input-borderless {
+  color: #ffffff !important;
+}
+body.dark-theme .insta-tag {
+  color: #60a5fa;
+}
+body.dark-theme .btn-secondary {
+  background: #363636;
+  color: white;
+}
+body.dark-theme .btn-secondary:hover {
+  background: #404040;
+}
+body.dark-theme .edit-input, 
+body.dark-theme .tag-input-wrapper {
+  background: #1e1e1e !important;
+  border-color: #333;
+}
+
+/* ========== МОБИЛЬНЫЙ ИНСТА-ПРОФИЛЬ ========== */
+@media (max-width: 768px) {
+  .insta-profile-header {
+    flex-direction: column;
+    gap: 20px;
+    padding: 16px;
+    align-items: flex-start;
+  }
+  .insta-avatar-wrapper {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto; /* Аватарка по центру на мобилках */
+  }
+  .insta-info-block {
+    width: 100%;
+  }
+  .insta-stats {
+    justify-content: space-around;
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 12px 0;
+    margin: 10px 0;
+  }
+  body.dark-theme .insta-stats {
+    border-color: #333;
+  }
+  .insta-stats span {
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.9rem;
+    gap: 4px;
+  }
+  .insta-actions {
+    width: 100%;
+  }
+  .insta-actions button {
+    flex: 1; /* Кнопки на всю ширину */
+  }
+}
