@@ -62,13 +62,15 @@ onAuthStateChanged(async (user) => {
     }
 
     // 2. Точечно обновляем информацию профиля (никнейм и тег)
-    const infoEl = document.getElementById('userInfo');
-    if (infoEl) {
-      infoEl.innerHTML = `
-        <div class="info-row" style="margin-bottom: 8px;"><label style="font-weight: bold; color: gray; margin-right: 8px;">${t('lblNickname')}</label><span>${userData.nickname || t('notSpecified')}</span></div>
-        <div class="info-row"><label style="font-weight: bold; color: gray; margin-right: 8px;">${t('lblTag')}</label><span>${userData.tag || t('notSpecified')}</span></div>
-      `;
-    }
+    const nicknameEl = document.getElementById('userNickname');
+if (nicknameEl) {
+  nicknameEl.textContent = userData.nickname || t('notSpecified');
+}
+
+const tagEl = document.getElementById('userTag');
+if (tagEl) {
+  tagEl.textContent = userData.tag || t('notSpecified');
+}
 
     // Загружаем посты
     loadPosts(userId);
