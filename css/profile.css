@@ -919,3 +919,141 @@ a:focus {
 .avatar-wrapper:hover .avatar-overlay {
   opacity: 1;
 }
+
+/* ===== INSTAGRAM STYLE HEADER ===== */
+.insta-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto 40px auto;
+}
+
+/* Жесткий размер аватарки и градиентный круг */
+.insta-avatar-wrapper {
+  width: 150px;
+  height: 150px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  padding: 3px; /* Толщина градиентной рамки */
+}
+
+/* Черная прослойка между градиентом и фото */
+.insta-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 4px solid var(--bg-primary, #0a0c10); 
+  background: #3b82f6;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: white;
+}
+
+.insta-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Фото обрезается аккуратно под круг */
+  display: block;
+}
+
+/* Типографика и расположение информации */
+.insta-info-block {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: var(--text-primary, #e2e6ed);
+}
+
+.insta-title-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.insta-nickname {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.insta-options {
+  color: var(--text-secondary, #8b93a5);
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+.insta-tag, .insta-bio {
+  font-size: 1rem;
+}
+
+.insta-stats {
+  display: flex;
+  gap: 24px;
+  font-size: 1rem;
+}
+
+.insta-stats strong {
+  font-weight: 600;
+}
+
+/* Дизайн кнопок (цвета скомпилированы из вашей темной темы) */
+.insta-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.btn-primary, .btn-secondary, .btn-icon {
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: none;
+  transition: 0.2s;
+}
+
+.btn-primary {
+  background: #4f46e5; /* Синий цвет кнопки подписки */
+  color: white;
+}
+
+.btn-secondary, .btn-icon {
+  background: #262626; /* Темно-серый как на макете */
+  color: white;
+}
+
+.btn-icon {
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Адаптив для смартфонов */
+@media (max-width: 768px) {
+  .insta-profile-header {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+    padding: 0 16px;
+  }
+  .insta-title-row {
+    justify-content: center;
+  }
+  .insta-stats {
+    justify-content: center;
+    gap: 16px;
+    font-size: 0.9rem;
+  }
+  .insta-avatar-wrapper {
+    width: 100px;
+    height: 100px;
+  }
+}
