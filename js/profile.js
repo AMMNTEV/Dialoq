@@ -121,28 +121,18 @@ onAuthStateChanged(async (user) => {
   }
 });
 
-// Функция загрузки профиля (без кнопок-карандашей)
+// Функция загрузки профиля (для нового Insta-дизайна)
 function loadProfileInfo() {
-  const profileInfo = document.getElementById('profileInfo');
-  if (!profileInfo) return; 
+  const nickEl = document.getElementById('nickname');
+  const tagEl = document.getElementById('tag');
+  const bioEl = document.getElementById('emailBio');
   
-  profileInfo.innerHTML = `
-    <div class="info-row">
-      <label>${t('lblNickname')}</label>
-      <span id="nickname">${currentUserData.nickname || t('notSpecified')}</span>
-    </div>
-    <div class="info-row">
-      <label>${t('lblTag')}</label>
-      <span id="tag">${currentUserData.tag || t('notSpecified')}</span>
-    </div>
-    <div class="info-row">
-      <label>${t('lblEmail')}</label>
-      <span>${currentUserData.email}</span>
-    </div>
-  `;
+  if (nickEl) nickEl.textContent = currentUserData.nickname || t('notSpecified');
+  if (tagEl) tagEl.textContent = currentUserData.tag || t('notSpecified');
+  if (bioEl) bioEl.textContent = currentUserData.email || '';
 }
 
-// Новая функция: включает режим редактирования сразу для всех полей
+// Новая функция: включает режим редактирования инста-шапки
 function editFullProfile() {
   const nickSpan = document.getElementById('nickname');
   const tagSpan = document.getElementById('tag');
@@ -150,10 +140,10 @@ function editFullProfile() {
   const currentNick = currentUserData.nickname || '';
   const currentTag = (currentUserData.tag || '').replace(/^@+/, '');
 
-  nickSpan.innerHTML = `<input type="text" id="editNickname" value="${currentNick}" class="edit-input">`;
+  nickSpan.innerHTML = `<input type="text" id="editNickname" value="${currentNick}" class="edit-input" style="font-size: 1.2rem; padding: 6px 12px; max-width: 250px;">`;
   
   tagSpan.innerHTML = `
-    <div style="display: flex; flex-direction: column; width: 100%;">
+    <div style="display: flex; flex-direction: column; width: 100%; max-width: 250px;">
       <div class="tag-input-wrapper">
         <span class="tag-prefix">@</span>
         <input type="text" id="editTag" value="${currentTag}" oninput="if(typeof handleTagInput === 'function') handleTagInput(this); validateProfileTag(this.value)" placeholder="tag" class="edit-input-borderless" autocomplete="off">
@@ -166,12 +156,12 @@ function editFullProfile() {
   changes.tag = true;
   isTagValid = true; 
   
-  // Прячем кнопку "Редактировать профиль" на время редактирования
+  // Прячем стандартные кнопки на время редактирования
   document.getElementById('btnEditProfile').style.display = 'none';
+  if(document.getElementById('btnCreatePost')) document.getElementById('btnCreatePost').style.display = 'none';
   showActionButtons();
 }
 
-// Обновляем cancelEditing, чтобы вернуть кнопку обратно
 function cancelEditing() {
   changes = {};
   const buttons = document.getElementById('profileActionButtons');
@@ -180,7 +170,36 @@ function cancelEditing() {
   const editBtn = document.getElementById('btnEditProfile');
   if (editBtn) editBtn.style.display = 'block';
   
+  const postBtn = document.getElementById('btnCreatePost');
+  if (postBtn) postBtn.style.display = 'block';
+  
   loadProfileInfo(); 
+}
+
+function showActionButtons() {
+  if (!document.getElementById('profileActionButtons')) {
+    const container = document.createElement('div');
+    container.id = 'profileActionButtons';
+    container.style.display = 'flex';
+    container.style.gap = '10px';
+    container.style.width = '100%';
+
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'btn-primary';
+    saveBtn.textContent = t('saveBtn');
+    saveBtn.onclick = saveChanges;
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn-secondary';
+    cancelBtn.textContent = t('cancelBtn');
+    cancelBtn.onclick = cancelEditing;
+
+    container.appendChild(saveBtn);
+    container.appendChild(cancelBtn);
+    
+    // Добавляем кнопки в контейнер действий профиля
+    document.getElementById('actionButtonsContainer').appendChild(container);
+  }
 }
 
 
@@ -658,33 +677,6 @@ function renderAvatar(avatarData) {
     avatarDiv.innerHTML = `<img src="${avatarData}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
   } else {
     avatarDiv.innerHTML = currentUserData.nickname ? currentUserData.nickname.charAt(0).toUpperCase() : '?';
-  }
-}
-
-function showActionButtons() {
-  if (!document.getElementById('profileActionButtons')) {
-    const container = document.createElement('div');
-    container.id = 'profileActionButtons';
-    container.style.display = 'flex';
-    container.style.gap = '10px';
-    container.style.marginTop = '16px';
-
-    const saveBtn = document.createElement('button');
-    saveBtn.className = 'save-btn';
-    saveBtn.style.marginTop = '0'; 
-    saveBtn.textContent = t('saveBtn');
-    saveBtn.onclick = saveChanges;
-
-    const cancelBtn = document.createElement('button');
-    cancelBtn.className = 'save-btn';
-    cancelBtn.style.marginTop = '0';
-    cancelBtn.style.background = '#94a3b8'; 
-    cancelBtn.textContent = t('cancelBtn');
-    cancelBtn.onclick = cancelEditing;
-
-    container.appendChild(saveBtn);
-    container.appendChild(cancelBtn);
-    document.querySelector('.profile-info').appendChild(container);
   }
 }
 
