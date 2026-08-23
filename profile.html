@@ -87,22 +87,22 @@
         <div class="profile-left" style="width: 100%; max-width: 800px; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 40px; padding-right: 0; margin-bottom: 30px; overflow: visible; height: auto;">
   
   <div class="profile-avatar-placeholder" style="margin-bottom: 0; text-align: center;">
-    <!-- Обертка аватарки -->
-    <div class="avatar-wrapper" onclick="document.getElementById('avatarInput').click()">
-      <div class="avatar-large" id="profileAvatar">
-        <!-- Аватар загрузится через JS -->
-      </div>
-      <!-- Прозрачный слой с иконкой фотоаппарата -->
-      <div class="avatar-overlay">
-        <svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-          <circle cx="12" cy="13" r="4"></circle>
-        </svg>
-      </div>
+  <!-- Обертка с обработчиком клика на скрытый инпут -->
+  <div class="avatar-wrapper" onclick="document.getElementById('avatarInput').click()">
+    <div class="avatar-large" id="profileAvatar">
+      <!-- Аватар загрузится через JS -->
     </div>
-    <!-- Скрытый инпут для загрузки -->
-    <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+    <!-- Прозрачный слой с иконкой фотоаппарата -->
+    <div class="avatar-overlay">
+      <svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+        <circle cx="12" cy="13" r="4"></circle>
+      </svg>
+    </div>
   </div>
+  <!-- Скрытый инпут -->
+  <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+</div>
   
   <div class="profile-info-block" style="flex: 1; min-width: 300px; max-width: 400px; display: flex; flex-direction: column; justify-content: center;">
     <!-- ИСПРАВЛЕН ID НА profileInfo -->
@@ -113,14 +113,14 @@
     </div>
 
     <!-- Новые кнопки взаимодействия -->
-    <div class="profile-actions" style="display: flex; gap: 10px;">
-      <button id="btnCreatePost" onclick="showCreatePostModal()" style="flex: 1; padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: 0.2s;" data-i18n="btnCreatePost">
-        Создать пост
-      </button>
-      <button id="btnEditProfile" onclick="editFullProfile()" style="flex: 1; padding: 8px 16px; background: #363636; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: 0.2s;" data-i18n="btnEditProfile">
-        Редактировать профиль
-      </button>
-    </div>
+    <div class="profile-actions" style="display: flex; gap: 10px; margin-top: 16px;">
+  <button id="btnCreatePost" onclick="showCreatePostModal()" style="flex: 1; padding: 10px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s;" data-i18n="btnCreatePost">
+    Создать пост
+  </button>
+  <button id="btnEditProfile" onclick="editFullProfile()" style="flex: 1; padding: 10px; background: #363636; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s;" data-i18n="btnEditProfile">
+    Редактировать профиль
+  </button>
+</div>
   </div>
 </div>
         
