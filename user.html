@@ -65,72 +65,59 @@
       </button>
     </div>
 
-<!-- ===== КОНТЕНТ ПРОФИЛЯ ===== -->
+    <!-- ===== КОНТЕНТ ПРОФИЛЯ ===== -->
     <div class="profile-container" style="flex: 1; overflow-y: auto; padding-bottom: 70px;">
       
-      <!-- ПАРЯЩАЯ ШАПКА С КНОПКОЙ НАЗАД -->
+      <!-- ШАПКА C ТЕГОМ ПОЛЬЗОВАТЕЛЯ -->
       <div class="profile-header">
-  <button onclick="window.history.back()" class="back-btn">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M19 12H5M12 19l-7-7 7-7"/>
-    </svg>
-  </button>
-  <span id="headerUserTag" class="header-user-tag"></span>
-</div>
+        <button onclick="window.history.back()" class="back-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <span id="headerUserTag" class="header-user-tag"></span>
+      </div>
 
       <div class="profile-two-columns" style="flex-direction: column; align-items: center; gap: 0; overflow: visible; height: auto;">
-  
-  <!-- ИНСТА-БЛОК ПРОФИЛЯ -->
-  <div class="insta-profile-header">
-    <div class="insta-top-row">
-      <!-- Слева: Аватарка -->
-      <div class="insta-avatar-wrapper">
-        <div id="userAvatar" class="insta-avatar"></div>
-      </div>
-      
-      <!-- Справа: Имя и счетчики -->
-      <div class="insta-right-block">
-        <h2 id="userNickname" class="insta-nickname" data-i18n="loading">Загрузка...</h2>
         
-        <div class="insta-stats">
-          <div class="stat-item">
-            <strong id="statPostsCount">0</strong>
-            <span data-i18n="statPosts">публикаций</span>
-          </div>
-          <div class="stat-item">
-            <strong id="statFollowersCount">0</strong>
-            <span data-i18n="statFollowers">подписчиков</span>
-          </div>
-          <div class="stat-item">
-            <strong id="statFollowingCount">0</strong>
-            <span data-i18n="statFollowing">подписок</span>
+        <!-- ИНСТА-БЛОК ПРОФИЛЯ -->
+        <div class="insta-profile-header">
+          <div class="insta-top-row">
+            <!-- Слева: Аватарка -->
+            <div class="insta-avatar-wrapper">
+              <div id="userAvatar" class="insta-avatar"></div>
+            </div>
+            
+            <!-- Справа: Имя, кнопки, счетчики и описание -->
+            <div class="insta-right-block">
+              <div class="insta-name-and-actions">
+                <h2 id="userNickname" class="insta-nickname" data-i18n="loading">Загрузка...</h2>
+                <div class="insta-actions">
+                  <button id="btnFollow" class="btn-primary" data-i18n="btnFollow">Подписаться</button>
+                  <button id="btnMessage" class="btn-secondary" data-i18n="btnMessage">Отправить сообщение</button>
+                </div>
+              </div>
+              
+              <div class="insta-stats">
+                <div class="stat-item">
+                  <strong id="statPostsCount">0</strong>
+                  <span data-i18n="statPosts">публикаций</span>
+                </div>
+                <div class="stat-item">
+                  <strong id="statFollowersCount">0</strong>
+                  <span data-i18n="statFollowers">подписчиков</span>
+                </div>
+                <div class="stat-item">
+                  <strong id="statFollowingCount">0</strong>
+                  <span data-i18n="statFollowing">подписок</span>
+                </div>
+              </div>
+
+              <!-- Описание -->
+              <div class="insta-bio" id="userBio"></div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Снизу: Описание (с поддержкой кликабельных ссылок) -->
-    <div class="insta-bio" id="userBio"></div>
-    
-    <!-- Кнопки действий -->
-    <div class="insta-actions">
-      <button id="btnFollow" class="btn-primary" data-i18n="btnFollow">Подписаться</button>
-      <button id="btnMessage" class="btn-secondary" data-i18n="btnMessage">Отправить сообщение</button>
-    </div>
-  </div>
-  
-  <!-- НИЖНЯЯ ЧАСТЬ: ПОСТЫ -->
-  <div class="profile-right" style="width: 100%; max-width: 900px; overflow: visible; height: auto; border-top: 1px solid rgba(128, 128, 128, 0.2); padding-top: 20px;">
-    <div class="posts-header" style="display: flex; justify-content: flex-start; align-items: center; margin-bottom: 20px;">
-      <h2 id="userPostsTitle" data-i18n="userPosts">Посты пользователя</h2>
-    </div>
-    <div class="posts-container" id="userPostsContainer" style="overflow: visible; height: auto; padding-right: 0;">
-      <div class="skeleton-post"></div>
-      <div class="skeleton-post"></div>
-    </div>
-  </div>
-
-</div>
         
         <!-- НИЖНЯЯ ЧАСТЬ: ПОСТЫ -->
         <div class="profile-right" style="width: 100%; max-width: 900px; overflow: visible; height: auto; border-top: 1px solid rgba(128, 128, 128, 0.2); padding-top: 20px;">
@@ -146,94 +133,94 @@
       </div>
     </div>
 
+    <!-- Мобильная нижняя панель (Tab Bar) -->
+    <nav class="mobile-bottom-nav" id="mobileBottomNav">
+      <a href="messenger.html" class="nav-item">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </a>
+      <a href="settings.html" class="nav-item">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </a>
+      <a href="profile.html" class="nav-item">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </a>
+    </nav>
 
-<!-- Мобильная нижняя панель (Tab Bar) -->
-<nav class="mobile-bottom-nav" id="mobileBottomNav">
-  <a href="messenger.html" class="nav-item">
-    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-  </a>
-  <a href="settings.html" class="nav-item">
-    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-  </a>
-  <a href="profile.html" class="nav-item">
-    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-  </a>
-</nav>
+    <!-- ЛОКАЛИЗАЦИЯ -->
+    <script>
+    const userTranslations = {
+      en: {
+        titleUserProfile: "User Profile",
+        navProfile: "Profile",
+        navMessenger: "Messenger",
+        navSettings: "Settings",
+        navLogout: "Log out",
+        userPosts: "User posts",
+        lblNickname: "Nickname:",
+        lblTag: "Tag:",
+        lblEmail: "Email:",
+        notSpecified: "Not specified",
+        noPostsYet: "This user has no posts yet.",
+        justNow: "Just now",
+        btnFollow: "Follow",
+        btnMessage: "Send message",
+        unfollow: "Unfollow",
+        statPosts: "posts",
+        statFollowers: "followers",
+        statFollowing: "following",
+        loading: "Loading..."
+      },
+      ru: {
+        titleUserProfile: "Профиль пользователя",
+        navProfile: "Профиль",
+        navMessenger: "Мессенджер",
+        navSettings: "Настройки",
+        navLogout: "Выход",
+        userPosts: "Посты пользователя",
+        lblNickname: "Никнейм:",
+        lblTag: "Тег:",
+        lblEmail: "Email:",
+        notSpecified: "Не указан",
+        noPostsYet: "У пользователя пока нет постов.",
+        justNow: "Только что",
+        btnFollow: "Подписаться",
+        btnMessage: "Отправить сообщение",
+        unfollow: "Отписаться",
+        statPosts: "публикаций",
+        statFollowers: "подписчиков",
+        statFollowing: "подписок",
+        loading: "Загрузка..."
+      }
+    };
 
-<!-- ЛОКАЛИЗАЦИЯ -->
-<script>
-const userTranslations = {
-  en: {
-    titleUserProfile: "User Profile",
-    navProfile: "Profile",
-    navMessenger: "Messenger",
-    navSettings: "Settings",
-    navLogout: "Log out",
-    userPosts: "User posts",
-    lblNickname: "Nickname:",
-    lblTag: "Tag:",
-    lblEmail: "Email:",
-    notSpecified: "Not specified",
-    noPostsYet: "This user has no posts yet.",
-    justNow: "Just now",
-    btnFollow: "Follow",
-    btnMessage: "Send message",
-    unfollow: "Unfollow",
-    statPosts: "posts",
-    statFollowers: "followers",
-    statFollowing: "following",
-    loading: "Loading..."
-  },
-  ru: {
-    titleUserProfile: "Профиль пользователя",
-    navProfile: "Профиль",
-    navMessenger: "Мессенджер",
-    navSettings: "Настройки",
-    navLogout: "Выход",
-    userPosts: "Посты пользователя",
-    lblNickname: "Никнейм:",
-    lblTag: "Тег:",
-    lblEmail: "Email:",
-    notSpecified: "Не указан",
-    noPostsYet: "У пользователя пока нет постов.",
-    justNow: "Только что",
-    btnFollow: "Подписаться",
-    btnMessage: "Отправить сообщение",
-    unfollow: "Отписаться",
-    statPosts: "публикаций",
-    statFollowers: "подписчиков",
-    statFollowing: "подписок",
-    loading: "Загрузка..."
-  }
-};
+    window.t = function(key) {
+      const lang = localStorage.getItem('app_lang') || 'en';
+      if (userTranslations[lang] && userTranslations[lang][key]) {
+        return userTranslations[lang][key];
+      }
+      return key;
+    };
 
-window.t = function(key) {
-  const lang = localStorage.getItem('app_lang') || 'en';
-  if (userTranslations[lang] && userTranslations[lang][key]) {
-    return userTranslations[lang][key];
-  }
-  return key;
-};
+    function applyUserLanguage(lang) {
+      document.documentElement.lang = lang;
+      const tObj = userTranslations[lang];
+      if (!tObj) return;
 
-function applyUserLanguage(lang) {
-  document.documentElement.lang = lang;
-  const tObj = userTranslations[lang];
-  if (!tObj) return;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (tObj[key]) el.innerHTML = tObj[key];
+      });
+    }
 
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    if (tObj[key]) el.innerHTML = tObj[key];
-  });
-}
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedLang = localStorage.getItem('app_lang') || 'en';
+      applyUserLanguage(savedLang);
+    });
+    </script>
 
-document.addEventListener('DOMContentLoaded', () => {
-  const savedLang = localStorage.getItem('app_lang') || 'en';
-  applyUserLanguage(savedLang);
-});
-</script>
-
-  <script src="js/firebase-config.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/user.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/user.js"></script>
+  </div>
 </body>
 </html>
