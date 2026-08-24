@@ -78,7 +78,7 @@
         <span id="headerUserTag" class="header-user-tag"></span>
       </div>
 
-      <div class="profile-two-columns" style="flex-direction: column; align-items: center; gap: 0; overflow: visible; height: auto;">
+      <div class="profile-two-columns">
         
         <!-- ИНСТА-БЛОК ПРОФИЛЯ -->
         <div class="insta-profile-header">
@@ -88,15 +88,9 @@
               <div id="userAvatar" class="insta-avatar"></div>
             </div>
             
-            <!-- Справа: Имя, кнопки, счетчики и описание -->
+            <!-- Справа: Имя, счетчики и био -->
             <div class="insta-right-block">
-              <div class="insta-name-and-actions">
-                <h2 id="userNickname" class="insta-nickname" data-i18n="loading">Загрузка...</h2>
-                <div class="insta-actions">
-                  <button id="btnFollow" class="btn-primary" data-i18n="btnFollow">Подписаться</button>
-                  <button id="btnMessage" class="btn-secondary" data-i18n="btnMessage">Отправить сообщение</button>
-                </div>
-              </div>
+              <h2 id="userNickname" class="insta-nickname" data-i18n="loading">Загрузка...</h2>
               
               <div class="insta-stats">
                 <div class="stat-item">
@@ -117,14 +111,20 @@
               <div class="insta-bio" id="userBio"></div>
             </div>
           </div>
+
+          <!-- Кнопки действий: Расположены снизу, перед постами -->
+          <div class="insta-actions">
+            <button id="btnFollow" class="btn-primary" data-i18n="btnFollow">Подписаться</button>
+            <button id="btnMessage" class="btn-secondary" data-i18n="btnMessage">Отправить сообщение</button>
+          </div>
         </div>
         
         <!-- НИЖНЯЯ ЧАСТЬ: ПОСТЫ -->
-        <div class="profile-right" style="width: 100%; max-width: 900px; overflow: visible; height: auto; border-top: 1px solid rgba(128, 128, 128, 0.2); padding-top: 20px;">
-          <div class="posts-header" style="display: flex; justify-content: flex-start; align-items: center; margin-bottom: 20px;">
+        <div class="profile-right">
+          <div class="posts-header">
             <h2 id="userPostsTitle" data-i18n="userPosts">Посты пользователя</h2>
           </div>
-          <div class="posts-container" id="userPostsContainer" style="overflow: visible; height: auto; padding-right: 0;">
+          <div class="posts-container" id="userPostsContainer">
             <div class="skeleton-post"></div>
             <div class="skeleton-post"></div>
           </div>
@@ -133,7 +133,7 @@
       </div>
     </div>
 
-    <!-- Мобильная нижняя панель (Tab Bar) -->
+    <!-- Мобильная нижняя панель -->
     <nav class="mobile-bottom-nav" id="mobileBottomNav">
       <a href="messenger.html" class="nav-item">
         <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
