@@ -13,9 +13,14 @@ function initEditPage() {
   if (lastUid) {
     const cachedUserStr = localStorage.getItem(`cachedCurrentUser_${lastUid}`);
     if (cachedUserStr) {
-      currentUserData = JSON.parse(cachedUserStr);
-      updateSidebarUser(currentUserData);
-      fillEditForm(currentUserData);
+      try {
+        currentUserData = JSON.parse(cachedUserStr);
+        updateSidebarUser(currentUserData);
+        fillEditForm(currentUserData);
+        console.log('✅ Данные загружены из кэша');
+      } catch (e) {
+        console.error('Ошибка парсинга кэша:', e);
+      }
     }
   }
 }
@@ -27,62 +32,97 @@ if (document.readyState === 'loading') {
   initEditPage();
 }
 
-onAuthStateChanged(async (user) => {
-  if (!user || !user.emailVerified) {
-    localStorage.removeItem('lastUid');
-    window.location.href = 'index.html';
+// Ждем загрузку Firebase и проверяем авторизацию
+document.addEventListener('DOMContentLoaded', function() {
+  // Проверяем, что Firebase загрузился
+  if (typeof firebase === 'undefined' || typeof auth === 'undefined') {
+    console.error('Firebase не загружен');
     return;
   }
-  currentUser = user;
-  localStorage.setItem('lastUid', user.uid);
-
-  // Пробуем загрузить из кэша
-  const cacheKey = `cachedCurrentUser_${user.uid}`;
-  const cachedDataStr = localStorage.getItem(cacheKey);
   
-  if (cachedDataStr) {
-    currentUserData = JSON.parse(cachedDataStr);
-    updateSidebarUser(currentUserData);
-    fillEditForm(currentUserData);
-  }
-
-  try {
-    const doc = await db.collection('users').doc(user.uid).get();
-    if (!doc.exists) {
-      window.location.href = 'profile.html';
+  // Подписываемся на изменение состояния авторизации
+  auth.onAuthStateChanged(async function(user) {
+    console.log('🔥 onAuthStateChanged вызван, user:', user ? user.uid : 'null');
+    
+    if (!user || !user.emailVerified) {
+      localStorage.removeItem('lastUid');
+      window.location.href = 'index.html';
       return;
     }
-    currentUserData = doc.data();
-    localStorage.setItem(cacheKey, JSON.stringify(currentUserData));
-    if (window.userCache) userCache.set(user.uid, currentUserData);
     
-    updateSidebarUser(currentUserData);
-    fillEditForm(currentUserData);
+    currentUser = user;
+    localStorage.setItem('lastUid', user.uid);
+
+    // Пробуем загрузить из кэша
+    const cacheKey = `cachedCurrentUser_${user.uid}`;
+    const cachedDataStr = localStorage.getItem(cacheKey);
     
-    // Проверяем текущий тег после загрузки данных
-    const tagInput = document.getElementById('editTag');
-    if (tagInput && tagInput.value) {
-      validateTag(tagInput.value);
+    if (cachedDataStr) {
+      try {
+        currentUserData = JSON.parse(cachedDataStr);
+        updateSidebarUser(currentUserData);
+        fillEditForm(currentUserData);
+        console.log('✅ Данные загружены из кэша (auth)');
+      } catch (e) {
+        console.error('Ошибка парсинга кэша:', e);
+      }
     }
-    
-  } catch (error) {
-    console.error('Ошибка загрузки профиля:', error);
-    showMessage(t('saveError') || 'Ошибка загрузки данных', 'error');
-  }
+
+    try {
+      console.log('📡 Загрузка данных из Firestore...');
+      const doc = await db.collection('users').doc(user.uid).get();
+      console.log('📡 Документ получен, exists:', doc.exists);
+      
+      if (!doc.exists) {
+        window.location.href = 'profile.html';
+        return;
+      }
+      
+      currentUserData = doc.data();
+      console.log('📡 Данные из Firestore:', currentUserData);
+      
+      localStorage.setItem(cacheKey, JSON.stringify(currentUserData));
+      if (window.userCache) userCache.set(user.uid, currentUserData);
+      
+      updateSidebarUser(currentUserData);
+      fillEditForm(currentUserData);
+      
+      // Проверяем текущий тег после загрузки данных
+      const tagInput = document.getElementById('editTag');
+      if (tagInput && tagInput.value) {
+        validateTag(tagInput.value);
+      }
+      
+      console.log('✅ Профиль успешно загружен');
+      
+    } catch (error) {
+      console.error('❌ Ошибка загрузки профиля:', error);
+      showMessage(t('saveError') || 'Ошибка загрузки данных', 'error');
+    }
+  });
 });
 
 function fillEditForm(data) {
+  console.log('📝 fillEditForm вызван с данными:', data);
+  
   const nickInput = document.getElementById('editNickname');
   const tagInput = document.getElementById('editTag');
   const bioTextarea = document.getElementById('editBio');
   const avatarDiv = document.getElementById('editAvatar');
 
-  if (nickInput) nickInput.value = data.nickname || '';
-  if (tagInput) tagInput.value = (data.tag || '').replace(/^@+/, '');
+  if (nickInput) {
+    nickInput.value = data.nickname || '';
+    console.log('📝 Никнейм установлен:', data.nickname);
+  }
+  if (tagInput) {
+    tagInput.value = (data.tag || '').replace(/^@+/, '');
+    console.log('📝 Тег установлен:', data.tag);
+  }
   if (bioTextarea) {
     bioTextarea.value = data.bio || '';
     updateBioCounter(bioTextarea);
     autoResize(bioTextarea);
+    console.log('📝 Био установлено:', data.bio);
   }
 
   // Аватар
@@ -90,6 +130,7 @@ function fillEditForm(data) {
     if (data.avatar) {
       avatarDiv.innerHTML = `<img src="${data.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
       avatarDiv.style.background = 'transparent';
+      console.log('📝 Аватар установлен (изображение)');
     } else {
       avatarDiv.innerHTML = data.nickname ? data.nickname.charAt(0).toUpperCase() : '?';
       avatarDiv.style.background = '#3b82f6';
@@ -99,6 +140,7 @@ function fillEditForm(data) {
       avatarDiv.style.justifyContent = 'center';
       avatarDiv.style.fontSize = '2.5rem';
       avatarDiv.style.fontWeight = '600';
+      console.log('📝 Аватар установлен (буква)');
     }
   }
 }
