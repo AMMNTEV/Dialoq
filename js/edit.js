@@ -62,16 +62,19 @@ onAuthStateChanged(async (user) => {
 });
 
 function fillEditForm(data) {
-  const nickInput = document.getElementById('editNickname');
-  const tagInput = document.getElementById('editTag');
-  const bioTextarea = document.getElementById('editBio');
-  const avatarDiv = document.getElementById('editAvatar');
+  // Ищем элементы по новым или старым ID
+  const nickInput = document.getElementById('editNickname') || document.getElementById('nickname');
+  const tagInput = document.getElementById('editTag') || document.getElementById('tag');
+  const bioTextarea = document.getElementById('editBio') || document.getElementById('userBio') || document.getElementById('bio');
+  const avatarDiv = document.getElementById('editAvatar') || document.getElementById('profileAvatar');
 
   if (nickInput) nickInput.value = data.nickname || '';
   if (tagInput) tagInput.value = (data.tag || '').replace(/^@+/, '');
+  
   if (bioTextarea) {
     bioTextarea.value = data.bio || '';
-    updateBioCounter(bioTextarea);
+    if (typeof updateBioCounter === 'function') updateBioCounter(bioTextarea);
+    if (typeof autoResize === 'function') autoResize(bioTextarea);
   }
 
   // Аватар
@@ -82,17 +85,21 @@ function fillEditForm(data) {
     } else {
       avatarDiv.innerHTML = data.nickname ? data.nickname.charAt(0).toUpperCase() : '?';
       avatarDiv.style.background = '#3b82f6';
+      avatarDiv.style.color = '#fff';
+      avatarDiv.style.display = 'flex';
+      avatarDiv.style.alignItems = 'center';
+      avatarDiv.style.justifyContent = 'center';
+      avatarDiv.style.fontSize = '2rem';
     }
   }
 }
 
-// ===== БИО СЧЕТЧИК =====
 document.addEventListener('DOMContentLoaded', () => {
-  const bioTextarea = document.getElementById('editBio');
+  const bioTextarea = document.getElementById('editBio') || document.getElementById('userBio') || document.getElementById('bio');
   if (bioTextarea) {
     bioTextarea.addEventListener('input', function() {
-      updateBioCounter(this);
-      if (typeof autoResize === 'function') autoResize(bioTextarea);
+      if (typeof updateBioCounter === 'function') updateBioCounter(this);
+      if (typeof autoResize === 'function') autoResize(this);
     });
   }
 });
@@ -110,16 +117,14 @@ function updateBioCounter(textarea) {
   }
 }
 
-// ===== ВАЛИДАЦИЯ ТЕГА (КАК НА РЕГИСТРАЦИИ) =====
 document.addEventListener('DOMContentLoaded', () => {
-  const tagInput = document.getElementById('editTag');
+  const tagInput = document.getElementById('editTag') || document.getElementById('tag');
   if (tagInput) {
     tagInput.addEventListener('input', function() {
-      // Очищаем ввод от @ и недопустимых символов
       let value = this.value.replace(/@/g, '').slice(0, 20);
       value = value.replace(/[^a-zA-Z0-9_]/g, '');
       this.value = value;
-      validateTag(value);
+      if (typeof validateTag === 'function') validateTag(value);
     });
   }
 });
@@ -289,9 +294,14 @@ function processAvatarFile(file) {
 async function saveChanges() {
   if (isSubmitting) return;
 
-  const nickInput = document.getElementById('editNickname');
-  const tagInput = document.getElementById('editTag');
-  const bioTextarea = document.getElementById('editBio');
+  const nickInput = document.getElementById('editNickname') || document.getElementById('nickname');
+  const tagInput = document.getElementById('editTag') || document.getElementById('tag');
+  const bioTextarea = document.getElementById('editBio') || document.getElementById('userBio') || document.getElementById('bio');
+
+  if (!nickInput || !tagInput || !bioTextarea) {
+    showMessage('Ошибка: Поля ввода не найдены', 'error');
+    return;
+  }
 
   const newNickname = nickInput.value.trim();
   const rawTag = tagInput.value.trim().replace(/^@+/, '');
