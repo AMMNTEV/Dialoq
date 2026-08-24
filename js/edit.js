@@ -3,8 +3,9 @@ let currentUser = null;
 let currentUserData = {};
 let isSubmitting = false;
 let tagCheckTimeout = null;
-let isTagValid = true;
+let isTagAvailable = false;
 let selectedAvatarFile = null;
+let currentTagValue = '';
 
 // ========== МГНОВЕННАЯ ОТРИСОВКА (ДО ЗАПУСКА FIREBASE) ==========
 document.addEventListener("DOMContentLoaded", () => {
@@ -40,6 +41,12 @@ onAuthStateChanged(async (user) => {
     
     updateSidebarUser(currentUserData);
     fillEditForm(currentUserData);
+    
+    // Проверяем текущий тег после загрузки данных
+    const tagInput = document.getElementById('editTag');
+    if (tagInput) {
+      validateTag(tagInput.value);
+    }
     
   } catch (error) {
     console.error('Ошибка загрузки профиля:', error);
@@ -95,12 +102,16 @@ function updateBioCounter(textarea) {
   }
 }
 
-// ===== ВАЛИДАЦИЯ ТЕГА =====
+// ===== ВАЛИДАЦИЯ ТЕГА (КАК НА РЕГИСТРАЦИИ) =====
 document.addEventListener('DOMContentLoaded', () => {
   const tagInput = document.getElementById('editTag');
   if (tagInput) {
     tagInput.addEventListener('input', function() {
-      validateTag(this.value);
+      // Очищаем ввод от @ и недопустимых символов
+      let value = this.value.replace(/@/g, '').slice(0, 20);
+      value = value.replace(/[^a-zA-Z0-9_]/g, '');
+      this.value = value;
+      validateTag(value);
     });
   }
 });
@@ -108,63 +119,68 @@ document.addEventListener('DOMContentLoaded', () => {
 function validateTag(value) {
   const statusDiv = document.getElementById('tagStatus');
   if (tagCheckTimeout) clearTimeout(tagCheckTimeout);
+  
+  const trimmedValue = value.trim();
 
-  const trimmedValue = value.trim().replace(/^@+/, '');
-
+  // Если поле пустое
   if (!trimmedValue) {
-    statusDiv.textContent = t('tagEmptyError');
-    statusDiv.style.color = '#dc2626';
-    isTagValid = false;
+    statusDiv.textContent = t('tagEmptyError') || 'Тег не может быть пустым';
+    statusDiv.className = 'edit-tag-status unavailable';
+    isTagAvailable = false;
     return;
   }
 
+  // Проверка минимальной длины (3 символа)
   if (trimmedValue.length < 3) {
-    statusDiv.textContent = t('tagMinLengthError');
-    statusDiv.style.color = '#dc2626';
-    isTagValid = false;
+    statusDiv.textContent = t('tagMinLengthError') || 'Тег должен содержать минимум 3 символа';
+    statusDiv.className = 'edit-tag-status unavailable';
+    isTagAvailable = false;
     return;
   }
 
+  // Проверка, не является ли это текущим тегом пользователя
   const fullTag = '@' + trimmedValue;
   if (fullTag === currentUserData.tag) {
-    statusDiv.textContent = t('tagCurrentError');
-    statusDiv.style.color = '#16a34a';
-    isTagValid = true;
+    statusDiv.textContent = t('tagCurrentError') || 'Это ваш текущий тег';
+    statusDiv.className = 'edit-tag-status available';
+    isTagAvailable = true;
     return;
   }
 
-  statusDiv.textContent = t('tagChecking');
-  statusDiv.style.color = '#666';
-  isTagValid = false;
+  // Показываем статус проверки
+  statusDiv.textContent = t('tagChecking') || 'Проверка тега...';
+  statusDiv.className = 'edit-tag-status loading';
+  currentTagValue = trimmedValue;
 
+  // Дебаунс 500мс перед проверкой
   tagCheckTimeout = setTimeout(async () => {
-    const isUnique = await checkTagUnique(trimmedValue);
-    if (isUnique) {
-      statusDiv.textContent = t('tagAvailable');
-      statusDiv.style.color = '#16a34a';
-      isTagValid = true;
-    } else {
-      statusDiv.textContent = t('tagTaken');
-      statusDiv.style.color = '#dc2626';
-      isTagValid = false;
+    // Проверяем, не изменился ли тег за время ожидания
+    if (currentTagValue !== trimmedValue) return;
+
+    try {
+      const snapshot = await db.collection('users')
+        .where('tag', '==', fullTag)
+        .get();
+
+      if (snapshot.empty) {
+        statusDiv.textContent = t('tagAvailable') || '✅ Тег доступен';
+        statusDiv.className = 'edit-tag-status available';
+        isTagAvailable = true;
+      } else {
+        statusDiv.textContent = t('tagTaken') || '❌ Тег уже занят';
+        statusDiv.className = 'edit-tag-status unavailable';
+        isTagAvailable = false;
+      }
+    } catch (error) {
+      console.error('Ошибка проверки тега:', error);
+      statusDiv.textContent = t('tagError') || '❌ Ошибка проверки';
+      statusDiv.className = 'edit-tag-status unavailable';
+      isTagAvailable = false;
     }
   }, 500);
 }
 
-async function checkTagUnique(tag) {
-  if (!currentUser) return false;
-  try {
-    const snapshot = await db.collection('users')
-      .where('tag', '==', '@' + tag)
-      .get();
-    return snapshot.empty || (snapshot.docs.length === 1 && snapshot.docs[0].id === currentUser.uid);
-  } catch (error) {
-    console.error('Ошибка проверки тега:', error);
-    return false;
-  }
-}
-
-// ===== АВАТАРКА =====
+// ===== АВАТАРКА (КАК В ПРОФИЛЕ) =====
 document.addEventListener('DOMContentLoaded', () => {
   const avatarInput = document.getElementById('avatarInput');
   if (avatarInput) {
@@ -179,10 +195,14 @@ async function handleAvatarSelect(event) {
   let base64Avatar;
 
   try {
+    // ПОПЫТКА 1: Пробуем обработать файл как обычный (PNG, JPG, WEBP)
     base64Avatar = await processAvatarFile(file);
   } catch (error) {
+    // ПОПЫТКА 2: Браузер не смог прочитать файл. Предполагаем, что это HEIC
     console.warn('Обычное чтение аватара не удалось, пробуем heic2any...', error);
+    
     try {
+      // Запускаем конвертацию HEIC
       const convertedBlob = await heic2any({
         blob: file,
         toType: "image/jpeg",
@@ -190,17 +210,22 @@ async function handleAvatarSelect(event) {
       });
       const finalBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
       const fallbackFile = new File([finalBlob], "avatar.jpg", { type: "image/jpeg" });
+
+      // Повторно прогоняем уже сконвертированный JPG через обрезку
       base64Avatar = await processAvatarFile(fallbackFile);
+      
     } catch (heicErr) {
+      // ПОПЫТКА 3: Полный провал
       console.error('Ошибка конвертации HEIC для аватара:', heicErr);
-      alert(t('fileError') || 'Не удалось обработать изображение.');
+      alert(t('fileError') || 'Не удалось обработать изображение. Файл может быть поврежден или иметь неподдерживаемый формат.');
       event.target.value = '';
       return;
     }
   }
 
+  // Проверяем лимит базы данных Firestore (~1 МБ)
   if (base64Avatar.length > 1048576) {
-    alert(t('fileTooLarge') || 'Файл слишком большой');
+    alert(t('fileTooLarge') || 'Файл слишком большой после обработки');
     event.target.value = '';
     return;
   }
@@ -222,6 +247,7 @@ function processAvatarFile(file) {
 
     img.onload = function() {
       URL.revokeObjectURL(objectUrl);
+      
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       const targetSize = 800;
@@ -229,9 +255,11 @@ function processAvatarFile(file) {
       canvas.width = targetSize;
       canvas.height = targetSize;
 
+      // Белый фон под прозрачные PNG
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, targetSize, targetSize);
 
+      // Квадратная обрезка по центру
       const minDim = Math.min(img.width, img.height);
       const startX = (img.width - minDim) / 2;
       const startY = (img.height - minDim) / 2;
@@ -242,7 +270,7 @@ function processAvatarFile(file) {
 
     img.onerror = () => {
       URL.revokeObjectURL(objectUrl);
-      reject(new Error('Формат не поддерживается'));
+      reject(new Error('Формат не поддерживается или файл поврежден'));
     };
 
     img.src = objectUrl;
@@ -258,23 +286,35 @@ async function saveChanges() {
   const bioTextarea = document.getElementById('editBio');
 
   const newNickname = nickInput.value.trim();
-  const newTag = '@' + tagInput.value.trim().replace(/^@+/, '');
+  const rawTag = tagInput.value.trim().replace(/^@+/, '');
+  const newTag = '@' + rawTag;
   const newBio = bioTextarea.value.trim();
 
-  // Валидация
+  // Валидация никнейма
   if (!newNickname) {
     showMessage('Введите никнейм', 'error');
     nickInput.focus();
     return;
   }
 
-  if (!isTagValid) {
+  // Валидация тега
+  if (!isTagAvailable) {
     showMessage('Пожалуйста, выберите доступный тег', 'error');
+    tagInput.focus();
     return;
   }
 
+  // Проверка, изменился ли тег
+  if (rawTag.length < 3 && newTag !== currentUserData.tag) {
+    showMessage('Тег должен содержать минимум 3 символа', 'error');
+    tagInput.focus();
+    return;
+  }
+
+  // Валидация био
   if (newBio.length > 150) {
     showMessage('Био не может превышать 150 символов', 'error');
+    bioTextarea.focus();
     return;
   }
 
@@ -294,7 +334,7 @@ async function saveChanges() {
 
     await db.collection('users').doc(currentUser.uid).update(updates);
 
-    // Обновляем displayName
+    // Обновляем displayName в Firebase Auth
     const newDisplayName = `${newNickname}|${newTag}`;
     await currentUser.updateProfile({ displayName: newDisplayName });
 
