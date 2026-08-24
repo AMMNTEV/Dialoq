@@ -8,24 +8,17 @@ let selectedAvatarFile = null;
 let currentTagValue = '';
 
 // ========== МГНОВЕННАЯ ОТРИСОВКА (ДО ЗАПУСКА FIREBASE) ==========
-function initEditPage() {
+document.addEventListener("DOMContentLoaded", () => {
   const lastUid = localStorage.getItem('lastUid');
   if (lastUid) {
     const cachedUserStr = localStorage.getItem(`cachedCurrentUser_${lastUid}`);
     if (cachedUserStr) {
       currentUserData = JSON.parse(cachedUserStr);
-      if (typeof updateSidebarUser === 'function') updateSidebarUser(currentUserData);
+      updateSidebarUser(currentUserData);
       fillEditForm(currentUserData);
     }
   }
-}
-
-// Запускаем сразу, если DOM уже загружен, либо ждем события
-if (document.readyState === 'loading') {
-  document.addEventListener("DOMContentLoaded", initEditPage);
-} else {
-  initEditPage();
-}
+});
 
 onAuthStateChanged(async (user) => {
   if (!user || !user.emailVerified) {
@@ -51,7 +44,7 @@ onAuthStateChanged(async (user) => {
     
     // Проверяем текущий тег после загрузки данных
     const tagInput = document.getElementById('editTag');
-    if (tagInput) {
+    if (tagInput && tagInput.value) {
       validateTag(tagInput.value);
     }
     
@@ -62,19 +55,17 @@ onAuthStateChanged(async (user) => {
 });
 
 function fillEditForm(data) {
-  // Ищем элементы по новым или старым ID
-  const nickInput = document.getElementById('editNickname') || document.getElementById('nickname');
-  const tagInput = document.getElementById('editTag') || document.getElementById('tag');
-  const bioTextarea = document.getElementById('editBio') || document.getElementById('userBio') || document.getElementById('bio');
-  const avatarDiv = document.getElementById('editAvatar') || document.getElementById('profileAvatar');
+  const nickInput = document.getElementById('editNickname');
+  const tagInput = document.getElementById('editTag');
+  const bioTextarea = document.getElementById('editBio');
+  const avatarDiv = document.getElementById('editAvatar');
 
   if (nickInput) nickInput.value = data.nickname || '';
   if (tagInput) tagInput.value = (data.tag || '').replace(/^@+/, '');
-  
   if (bioTextarea) {
     bioTextarea.value = data.bio || '';
-    if (typeof updateBioCounter === 'function') updateBioCounter(bioTextarea);
-    if (typeof autoResize === 'function') autoResize(bioTextarea);
+    updateBioCounter(bioTextarea);
+    autoResize(bioTextarea);
   }
 
   // Аватар
@@ -89,17 +80,19 @@ function fillEditForm(data) {
       avatarDiv.style.display = 'flex';
       avatarDiv.style.alignItems = 'center';
       avatarDiv.style.justifyContent = 'center';
-      avatarDiv.style.fontSize = '2rem';
+      avatarDiv.style.fontSize = '2.5rem';
+      avatarDiv.style.fontWeight = '600';
     }
   }
 }
 
+// ===== БИО СЧЕТЧИК =====
 document.addEventListener('DOMContentLoaded', () => {
-  const bioTextarea = document.getElementById('editBio') || document.getElementById('userBio') || document.getElementById('bio');
+  const bioTextarea = document.getElementById('editBio');
   if (bioTextarea) {
     bioTextarea.addEventListener('input', function() {
-      if (typeof updateBioCounter === 'function') updateBioCounter(this);
-      if (typeof autoResize === 'function') autoResize(this);
+      updateBioCounter(this);
+      autoResize(this);
     });
   }
 });
@@ -117,20 +110,29 @@ function updateBioCounter(textarea) {
   }
 }
 
+function autoResize(textarea) {
+  textarea.style.height = 'auto';
+  textarea.style.height = textarea.scrollHeight + 'px';
+}
+
+// ===== ВАЛИДАЦИЯ ТЕГА =====
 document.addEventListener('DOMContentLoaded', () => {
-  const tagInput = document.getElementById('editTag') || document.getElementById('tag');
+  const tagInput = document.getElementById('editTag');
   if (tagInput) {
     tagInput.addEventListener('input', function() {
+      // Очищаем ввод от @ и недопустимых символов
       let value = this.value.replace(/@/g, '').slice(0, 20);
       value = value.replace(/[^a-zA-Z0-9_]/g, '');
       this.value = value;
-      if (typeof validateTag === 'function') validateTag(value);
+      validateTag(value);
     });
   }
 });
 
 function validateTag(value) {
   const statusDiv = document.getElementById('tagStatus');
+  if (!statusDiv) return;
+  
   if (tagCheckTimeout) clearTimeout(tagCheckTimeout);
   
   const trimmedValue = value.trim();
@@ -193,7 +195,7 @@ function validateTag(value) {
   }, 500);
 }
 
-// ===== АВАТАРКА (КАК В ПРОФИЛЕ) =====
+// ===== АВАТАРКА =====
 document.addEventListener('DOMContentLoaded', () => {
   const avatarInput = document.getElementById('avatarInput');
   if (avatarInput) {
@@ -208,14 +210,11 @@ async function handleAvatarSelect(event) {
   let base64Avatar;
 
   try {
-    // ПОПЫТКА 1: Пробуем обработать файл как обычный (PNG, JPG, WEBP)
     base64Avatar = await processAvatarFile(file);
   } catch (error) {
-    // ПОПЫТКА 2: Браузер не смог прочитать файл. Предполагаем, что это HEIC
     console.warn('Обычное чтение аватара не удалось, пробуем heic2any...', error);
     
     try {
-      // Запускаем конвертацию HEIC
       const convertedBlob = await heic2any({
         blob: file,
         toType: "image/jpeg",
@@ -223,22 +222,18 @@ async function handleAvatarSelect(event) {
       });
       const finalBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
       const fallbackFile = new File([finalBlob], "avatar.jpg", { type: "image/jpeg" });
-
-      // Повторно прогоняем уже сконвертированный JPG через обрезку
       base64Avatar = await processAvatarFile(fallbackFile);
       
     } catch (heicErr) {
-      // ПОПЫТКА 3: Полный провал
       console.error('Ошибка конвертации HEIC для аватара:', heicErr);
-      alert(t('fileError') || 'Не удалось обработать изображение. Файл может быть поврежден или иметь неподдерживаемый формат.');
+      alert(t('fileError') || 'Не удалось обработать изображение.');
       event.target.value = '';
       return;
     }
   }
 
-  // Проверяем лимит базы данных Firestore (~1 МБ)
   if (base64Avatar.length > 1048576) {
-    alert(t('fileTooLarge') || 'Файл слишком большой после обработки');
+    alert(t('fileTooLarge') || 'Файл слишком большой');
     event.target.value = '';
     return;
   }
@@ -268,11 +263,9 @@ function processAvatarFile(file) {
       canvas.width = targetSize;
       canvas.height = targetSize;
 
-      // Белый фон под прозрачные PNG
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, targetSize, targetSize);
 
-      // Квадратная обрезка по центру
       const minDim = Math.min(img.width, img.height);
       const startX = (img.width - minDim) / 2;
       const startY = (img.height - minDim) / 2;
@@ -283,7 +276,7 @@ function processAvatarFile(file) {
 
     img.onerror = () => {
       URL.revokeObjectURL(objectUrl);
-      reject(new Error('Формат не поддерживается или файл поврежден'));
+      reject(new Error('Формат не поддерживается'));
     };
 
     img.src = objectUrl;
@@ -294,9 +287,9 @@ function processAvatarFile(file) {
 async function saveChanges() {
   if (isSubmitting) return;
 
-  const nickInput = document.getElementById('editNickname') || document.getElementById('nickname');
-  const tagInput = document.getElementById('editTag') || document.getElementById('tag');
-  const bioTextarea = document.getElementById('editBio') || document.getElementById('userBio') || document.getElementById('bio');
+  const nickInput = document.getElementById('editNickname');
+  const tagInput = document.getElementById('editTag');
+  const bioTextarea = document.getElementById('editBio');
 
   if (!nickInput || !tagInput || !bioTextarea) {
     showMessage('Ошибка: Поля ввода не найдены', 'error');
@@ -322,7 +315,7 @@ async function saveChanges() {
     return;
   }
 
-  // Проверка, изменился ли тег
+  // Проверка длины тега
   if (rawTag.length < 3 && newTag !== currentUserData.tag) {
     showMessage('Тег должен содержать минимум 3 символа', 'error');
     tagInput.focus();
@@ -352,22 +345,18 @@ async function saveChanges() {
 
     await db.collection('users').doc(currentUser.uid).update(updates);
 
-    // Обновляем displayName в Firebase Auth
     const newDisplayName = `${newNickname}|${newTag}`;
     await currentUser.updateProfile({ displayName: newDisplayName });
 
-    // Обновляем кэш
     currentUserData = { ...currentUserData, ...updates };
     if (selectedAvatarFile) currentUserData.avatar = selectedAvatarFile;
     localStorage.setItem(`cachedCurrentUser_${currentUser.uid}`, JSON.stringify(currentUserData));
     if (window.userCache) userCache.set(currentUser.uid, currentUserData);
 
-    // Обновляем сайдбар
     updateSidebarUser(currentUserData);
 
     showMessage(t('changesSaved') || 'Изменения успешно сохранены!', 'success');
 
-    // Перенаправляем на профиль через 1.5 секунды
     setTimeout(() => {
       window.location.href = 'profile.html';
     }, 1500);
@@ -424,8 +413,3 @@ function updateSidebarUser(userData) {
     }
   }
 }
-
-window.autoResize = function(textarea) {
-  textarea.style.height = 'auto';
-  textarea.style.height = textarea.scrollHeight + 'px';
-};
