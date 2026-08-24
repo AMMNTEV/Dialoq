@@ -104,7 +104,7 @@
           <!-- Никнейм -->
           <div class="edit-field">
             <label data-i18n="lblNickname">Никнейм</label>
-            <input type="text" id="editNickname" class="edit-input-field" maxlength="30" placeholder="Введите никнейм">
+            <input type="text" id="editNickname" class="edit-input-field" maxlength="30" placeholder="Введите никнейм" data-i18n-placeholder="placeholderNickname">
           </div>
 
           <!-- Тег -->
@@ -112,7 +112,7 @@
             <label data-i18n="lblTag">Тег</label>
             <div class="edit-tag-wrapper">
               <span class="edit-tag-prefix">@</span>
-              <input type="text" id="editTag" class="edit-input-field" maxlength="20" placeholder="tag" autocomplete="off">
+              <input type="text" id="editTag" class="edit-input-field" maxlength="20" placeholder="tag" autocomplete="off" data-i18n-placeholder="placeholderTag">
             </div>
             <div id="tagStatus" class="edit-tag-status"></div>
           </div>
@@ -120,7 +120,7 @@
           <!-- Био -->
           <div class="edit-field">
             <label data-i18n="lblBio">О себе</label>
-            <textarea id="editBio" class="edit-textarea" rows="3" maxlength="150" placeholder="Расскажите о себе..."></textarea>
+            <textarea id="editBio" class="edit-textarea" rows="1" maxlength="150" placeholder="Расскажите о себе..." data-i18n-placeholder="placeholderBio" oninput="autoResize(this)" style="resize: none; overflow: hidden;"></textarea>
             <div id="bioCounter" class="edit-bio-counter">0 / 150</div>
           </div>
 
@@ -177,7 +177,10 @@
         tagCurrentError: "This is your current tag",
         fileTooLarge: "File is too large",
         fileError: "Failed to process image",
-        avatarUploadError: "Error uploading avatar"
+        avatarUploadError: "Error uploading avatar",
+        placeholderNickname: "Enter nickname",
+   	placeholderTag: "tag",
+ 	placeholderBio: "Tell us about yourself..."
       },
       ru: {
         editTitle: "Редактирование профиля",
@@ -201,7 +204,10 @@
         tagCurrentError: "Это ваш текущий тег",
         fileTooLarge: "Файл слишком большой",
         fileError: "Не удалось обработать изображение",
-        avatarUploadError: "Ошибка загрузки аватарки"
+        avatarUploadError: "Ошибка загрузки аватарки",
+        placeholderNickname: "Введите никнейм",
+    	placeholderTag: "tag",
+    	placeholderBio: "Расскажите о себе..."
       }
     };
 
