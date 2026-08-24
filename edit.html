@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title data-i18n="editTitle">Редактирование профиля</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/><circle cx='12' cy='7' r='4'/></svg>">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/messenger.css">
+  <link rel="stylesheet" href="css/edit.css">
+  <link rel="stylesheet" href="css/dark-theme.css">
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        document.documentElement.style.backgroundColor = '#121212';
+        document.addEventListener('DOMContentLoaded', () => {
+          document.body.classList.add('dark-theme');
+        });
+      }
+    })();
+  </script>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#121212">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TSA">
+  <link rel="apple-touch-icon" href="img/user.png">
+</head>
+<body>
+  <div class="messenger-container">
+    
+    <!-- ===== ЛЕВАЯ ПАНЕЛЬ (Сайдбар) ===== -->
+    <div class="nav-sidebar">
+      <div class="nav-user-box">
+        <div class="nav-user-info">
+          <div class="nav-user-name" id="sidebarUserName">&nbsp;</div>
+          <div class="nav-user-tag" id="sidebarUserTag">&nbsp;</div>
+        </div>
+        <div class="nav-user-avatar" id="sidebarUserAvatar" style="background: transparent;"></div>
+      </div>
+
+      <div class="nav-buttons">
+        <a href="profile.html" class="nav-button">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span data-i18n="navProfile">Профиль</span>
+        </a>
+        <a href="messenger.html" class="nav-button">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span data-i18n="navMessenger">Мессенджер</span>
+        </a>
+        <a href="settings.html" class="nav-button">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span data-i18n="navSettings">Настройки</span>
+        </a>
+      </div>
+
+      <div class="nav-divider"></div>
+
+      <button onclick="logout()" class="nav-button logout-btn">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span data-i18n="navLogout">Выход</span>
+      </button>
+    </div>
+
+    <!-- ===== КОНТЕНТ РЕДАКТИРОВАНИЯ ===== -->
+    <div class="edit-container" style="flex: 1; overflow-y: auto; padding-bottom: 70px;">
+      
+      <!-- ШАПКА С КНОПКОЙ НАЗАД -->
+      <div class="edit-header">
+        <button onclick="window.location.href='profile.html'" class="back-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <h1 data-i18n="editTitle">Редактирование профиля</h1>
+      </div>
+
+      <div class="edit-content">
+        
+        <!-- АВАТАРКА -->
+        <div class="edit-avatar-section">
+          <div class="edit-avatar-wrapper" onclick="document.getElementById('avatarInput').click()" style="cursor: pointer;">
+            <div id="editAvatar" class="edit-avatar">
+              <!-- Аватар загрузится через JS -->
+            </div>
+            <div class="edit-avatar-overlay">
+              <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+              </svg>
+            </div>
+          </div>
+          <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+          <p class="edit-avatar-hint" data-i18n="clickToChange">Нажмите на аватар, чтобы изменить</p>
+        </div>
+
+        <!-- ФОРМА РЕДАКТИРОВАНИЯ -->
+        <div class="edit-form">
+          <!-- Никнейм -->
+          <div class="edit-field">
+            <label data-i18n="lblNickname">Никнейм</label>
+            <input type="text" id="editNickname" class="edit-input-field" maxlength="30" placeholder="Введите никнейм">
+          </div>
+
+          <!-- Тег -->
+          <div class="edit-field">
+            <label data-i18n="lblTag">Тег</label>
+            <div class="edit-tag-wrapper">
+              <span class="edit-tag-prefix">@</span>
+              <input type="text" id="editTag" class="edit-input-field" maxlength="20" placeholder="tag" autocomplete="off">
+            </div>
+            <div id="tagStatus" class="edit-tag-status"></div>
+          </div>
+
+          <!-- Био -->
+          <div class="edit-field">
+            <label data-i18n="lblBio">О себе</label>
+            <textarea id="editBio" class="edit-textarea" rows="3" maxlength="150" placeholder="Расскажите о себе..."></textarea>
+            <div id="bioCounter" class="edit-bio-counter">0 / 150</div>
+          </div>
+
+          <!-- КНОПКИ -->
+          <div class="edit-actions">
+            <button onclick="cancelEditing()" class="edit-cancel-btn" data-i18n="cancelBtn">Отмена</button>
+            <button onclick="saveChanges()" class="edit-save-btn" data-i18n="saveBtn">Сохранить</button>
+          </div>
+
+          <!-- СООБЩЕНИЯ -->
+          <div id="editMessage" class="edit-message" style="display: none;"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Мобильная нижняя панель (Tab Bar) -->
+    <nav class="mobile-bottom-nav" id="mobileBottomNav">
+      <a href="messenger.html" class="nav-item">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </a>
+      <a href="settings.html" class="nav-item">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </a>
+      <a href="profile.html" class="nav-item">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </a>
+    </nav>
+
+  </div>
+
+  <!-- ===== СКРИПТЫ ===== -->
+  <script>
+    const editTranslations = {
+      en: {
+        editTitle: "Edit Profile",
+        navProfile: "Profile",
+        navMessenger: "Messenger",
+        navSettings: "Settings",
+        navLogout: "Log out",
+        lblNickname: "Nickname",
+        lblTag: "Tag",
+        lblBio: "About me",
+        clickToChange: "Click on avatar to change",
+        saveBtn: "Save",
+        cancelBtn: "Cancel",
+        changesSaved: "Changes saved successfully!",
+        saveError: "Error saving changes",
+        tagAvailable: "✅ Tag available",
+        tagTaken: "❌ Tag already taken",
+        tagChecking: "Checking tag...",
+        tagEmptyError: "Tag cannot be empty",
+        tagMinLengthError: "Tag must be at least 3 characters",
+        tagCurrentError: "This is your current tag",
+        fileTooLarge: "File is too large",
+        fileError: "Failed to process image",
+        avatarUploadError: "Error uploading avatar"
+      },
+      ru: {
+        editTitle: "Редактирование профиля",
+        navProfile: "Профиль",
+        navMessenger: "Мессенджер",
+        navSettings: "Настройки",
+        navLogout: "Выход",
+        lblNickname: "Никнейм",
+        lblTag: "Тег",
+        lblBio: "О себе",
+        clickToChange: "Нажмите на аватар, чтобы изменить",
+        saveBtn: "Сохранить",
+        cancelBtn: "Отмена",
+        changesSaved: "Изменения успешно сохранены!",
+        saveError: "Ошибка при сохранении",
+        tagAvailable: "✅ Тег доступен",
+        tagTaken: "❌ Тег уже занят",
+        tagChecking: "Проверка тега...",
+        tagEmptyError: "Тег не может быть пустым",
+        tagMinLengthError: "Тег должен содержать минимум 3 символа",
+        tagCurrentError: "Это ваш текущий тег",
+        fileTooLarge: "Файл слишком большой",
+        fileError: "Не удалось обработать изображение",
+        avatarUploadError: "Ошибка загрузки аватарки"
+      }
+    };
+
+    function t(key) {
+      const lang = localStorage.getItem('app_lang') || 'en';
+      return editTranslations[lang]?.[key] || key;
+    }
+
+    function applyEditLanguage(lang) {
+      document.documentElement.lang = lang;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (editTranslations[lang]?.[key]) {
+          el.innerHTML = editTranslations[lang][key];
+        }
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (editTranslations[lang]?.[key]) {
+          el.placeholder = editTranslations[lang][key];
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedLang = localStorage.getItem('app_lang') || 'en';
+      applyEditLanguage(savedLang);
+    });
+  </script>
+
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/edit.js"></script>
+</body>
+</html>
