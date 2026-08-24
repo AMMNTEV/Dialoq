@@ -130,6 +130,7 @@ function loadProfileInfo() {
   if (nickEl) nickEl.textContent = currentUserData.nickname || t('notSpecified');
   if (tagEl) tagEl.textContent = currentUserData.tag || t('notSpecified');
   if (bioEl) bioEl.innerHTML = parseBioLinks(currentUserData.bio || ''); 
+  if (headerTagEl) headerTagEl.textContent = currentUserData.tag || ''; 
 
   const followers = currentUserData.followers || [];
   const following = currentUserData.following || [];
