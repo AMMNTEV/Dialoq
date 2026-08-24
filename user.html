@@ -70,12 +70,13 @@
       
       <!-- ПАРЯЩАЯ ШАПКА С КНОПКОЙ НАЗАД -->
       <div class="profile-header">
-        <button onclick="window.history.back()" class="back-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
-          </svg>
-        </button>
-      </div>
+  <button onclick="window.history.back()" class="back-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5M12 19l-7-7 7-7"/>
+    </svg>
+  </button>
+  <span id="headerUserTag" class="header-user-tag"></span>
+</div>
 
       <!-- ИСПРАВЛЕННЫЙ КОНТЕЙНЕР (Добавлено overflow: visible; height: auto; для прокрутки на ПК) -->
       <div class="profile-two-columns" style="flex-direction: column; align-items: center; gap: 0; overflow: visible; height: auto;">
@@ -90,37 +91,49 @@
     </div>
   </div>
   
-  <!-- Информационный блок -->
-  <!-- Информационный блок -->
-  <div class="insta-info-block">
-    <div class="insta-title-row">
+  <!-- ИНСТА-БЛОК ПРОФИЛЯ -->
+<div class="insta-profile-header">
+  <div class="insta-top-row">
+    <!-- Слева: Аватарка -->
+    <div class="insta-avatar-wrapper">
+      <div id="userAvatar" class="insta-avatar"></div>
+    </div>
+    
+    <!-- Справа: Имя и счетчики -->
+    <div class="insta-right-block">
       <h2 id="userNickname" class="insta-nickname" data-i18n="loading">Загрузка...</h2>
-      <span class="insta-options">•••</span>
-    </div>
-    
-    <div id="userTag" class="insta-tag">@tag</div>
-    
-    <!-- Счетчики (заменили хардкод на 0 и добавили локализацию) -->
-    <div class="insta-stats">
-      <span><strong id="statPostsCount">0</strong> <span data-i18n="statPosts">публикаций</span></span>
-      <span><strong id="statFollowersCount">0</strong> <span data-i18n="statFollowers">подписчиков</span></span>
-      <span><strong id="statFollowingCount">0</strong> <span data-i18n="statFollowing">подписок</span></span>
-    </div>
-    
-    <!-- Пустое по умолчанию био -->
-    <div class="insta-bio" id="userBio"></div>
-    
-    <!-- Кнопки действий с i18n -->
-    <div class="insta-actions">
-      <button id="btnFollow" class="btn-primary" data-i18n="btnFollow">Подписаться</button>
-      <button id="btnMessage" class="btn-secondary" data-i18n="btnMessage">Отправить сообщение</button>
-      <button class="btn-icon">
-         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-           <path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-         </svg>
-      </button>
+      
+      <div class="insta-stats">
+        <div class="stat-item">
+          <strong id="statPostsCount">0</strong>
+          <span data-i18n="statPosts">публикаций</span>
+        </div>
+        <div class="stat-item">
+          <strong id="statFollowersCount">0</strong>
+          <span data-i18n="statFollowers">подписчиков</span>
+        </div>
+        <div class="stat-item">
+          <strong id="statFollowingCount">0</strong>
+          <span data-i18n="statFollowing">подписок</span>
+        </div>
+      </div>
     </div>
   </div>
+
+  <!-- Снизу: Описание (с поддержкой ссылок) -->
+  <div class="insta-bio" id="userBio"></div>
+  
+  <!-- Кнопки действий -->
+  <div class="insta-actions">
+    <button id="btnFollow" class="btn-primary" data-i18n="btnFollow">Подписаться</button>
+    <button id="btnMessage" class="btn-secondary" data-i18n="btnMessage">Отправить сообщение</button>
+    <button class="btn-icon">
+       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+         <path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+       </svg>
+    </button>
+  </div>
+</div>
 </div>
         
         <!-- НИЖНЯЯ ЧАСТЬ: ПОСТЫ -->
