@@ -8,7 +8,7 @@ let selectedAvatarFile = null;
 let currentTagValue = '';
 
 // ========== МГНОВЕННАЯ ОТРИСОВКА (ДО ЗАПУСКА FIREBASE) ==========
-document.addEventListener("DOMContentLoaded", () => {
+function initEditPage() {
   const lastUid = localStorage.getItem('lastUid');
   if (lastUid) {
     const cachedUserStr = localStorage.getItem(`cachedCurrentUser_${lastUid}`);
@@ -18,7 +18,14 @@ document.addEventListener("DOMContentLoaded", () => {
       fillEditForm(currentUserData);
     }
   }
-});
+}
+
+// Запускаем сразу, если DOM уже загружен, либо ждем события
+if (document.readyState === 'loading') {
+  document.addEventListener("DOMContentLoaded", initEditPage);
+} else {
+  initEditPage();
+}
 
 onAuthStateChanged(async (user) => {
   if (!user || !user.emailVerified) {
@@ -85,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (bioTextarea) {
     bioTextarea.addEventListener('input', function() {
       updateBioCounter(this);
+      if (typeof autoResize === 'function') autoResize(bioTextarea);
     });
   }
 });
@@ -406,3 +414,8 @@ function updateSidebarUser(userData) {
     }
   }
 }
+
+window.autoResize = function(textarea) {
+  textarea.style.height = 'auto';
+  textarea.style.height = textarea.scrollHeight + 'px';
+};
