@@ -129,9 +129,8 @@ function loadProfileInfo() {
   
   if (nickEl) nickEl.textContent = currentUserData.nickname || t('notSpecified');
   if (tagEl) tagEl.textContent = currentUserData.tag || t('notSpecified');
-  if (bioEl) bioEl.textContent = currentUserData.bio || ''; 
+  if (bioEl) bioEl.innerHTML = parseBioLinks(currentUserData.bio || ''); 
 
-  // Добавляем расчет подписок
   const followers = currentUserData.followers || [];
   const following = currentUserData.following || [];
   
@@ -142,15 +141,15 @@ function loadProfileInfo() {
   if (statFollowingCount) statFollowingCount.textContent = following.length;
 }
 
-// Режим редактирования инста-шапки
+// Редактирование профиля с многострочным textarea для БИО
 function editFullProfile() {
   const nickSpan = document.getElementById('nickname');
   const tagSpan = document.getElementById('tag');
-  const bioSpan = document.getElementById('userBio'); // Получаем контейнер био
+  const bioSpan = document.getElementById('userBio');
   
   const currentNick = currentUserData.nickname || '';
   const currentTag = (currentUserData.tag || '').replace(/^@+/, '');
-  const currentBio = currentUserData.bio || ''; // Получаем текущее био
+  const currentBio = currentUserData.bio || '';
 
   nickSpan.innerHTML = `<input type="text" id="editNickname" value="${currentNick}" class="edit-input" style="font-size: 1.2rem; padding: 6px 12px; max-width: 250px;">`;
   
@@ -164,19 +163,27 @@ function editFullProfile() {
     </div>
   `;
 
-  // Добавляем поле ввода для био с maxlength="40"
-  bioSpan.innerHTML = `<input type="text" id="editBio" value="${currentBio}" maxlength="40" class="edit-input" placeholder="О себе (до 40 символов)" style="width: 100%; max-width: 250px; font-size: 0.9rem; padding: 6px 12px; margin-top: 5px;">`;
+  // Поле ввода био (textarea) с подстройкой высоты как в постах
+  bioSpan.innerHTML = `
+    <textarea id="editBio" rows="1" maxlength="150" oninput="autoResize(this)" class="edit-input" placeholder="О себе..." style="resize: none; overflow: hidden; width: 100%; max-width: 320px; min-height: 40px; box-sizing: border-box; font-family: inherit; font-size: 0.9rem; padding: 8px 10px; margin-top: 6px; border-radius: 8px;">${currentBio}</textarea>
+  `;
+
+  // Автовыравнивание высоты под существующий текст после отображения
+  setTimeout(() => {
+    const bioArea = document.getElementById('editBio');
+    if (bioArea) autoResize(bioArea);
+  }, 0);
 
   changes.nickname = true;
   changes.tag = true;
-  changes.bio = true; // Отслеживаем изменения био
+  changes.bio = true;
   isTagValid = true; 
   
-  // Прячем стандартные кнопки на время редактирования
   document.getElementById('btnEditProfile').style.display = 'none';
-  if(document.getElementById('btnCreatePost')) document.getElementById('btnCreatePost').style.display = 'none';
+  if (document.getElementById('btnCreatePost')) document.getElementById('btnCreatePost').style.display = 'none';
   showActionButtons();
 }
+
 
 function cancelEditing() {
   changes = {};
@@ -860,4 +867,14 @@ function processAvatarFile(file) {
     
     img.src = objectUrl;
   });
+}
+
+function parseBioLinks(text) {
+  if (!text) return '';
+  const escaped = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g;
+  return escaped.replace(urlRegex, (url) => {
+    const href = url.startsWith('http') ? url : `https://${url}`;
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="bio-link">${url}</a>`;
+  }).replace(/\n/g, '<br>');
 }
