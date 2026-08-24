@@ -83,49 +83,55 @@
       <!-- ИСПРАВЛЕННЫЙ КОНТЕЙНЕР (Добавлено overflow: visible; height: auto; для прокрутки на ПК) -->
       <div class="profile-two-columns" style="flex-direction: column; align-items: center; gap: 0; overflow: visible; height: auto;">
         
-        <!-- ВЕРХНЯЯ ЧАСТЬ: ИНФОРМАЦИЯ И КНОПКИ (Инста-дизайн) -->
+<!-- ИНСТА-БЛОК ПРОФИЛЯ -->
 <div class="insta-profile-header">
-  
-  <!-- Контейнер аватарки с градиентной обводкой и кликом для загрузки -->
-  <div class="insta-avatar-wrapper" onclick="document.getElementById('avatarInput').click()" style="cursor: pointer;">
-    <div id="profileAvatar" class="insta-avatar">
-      <!-- Аватар загрузится через JS -->
+  <div class="insta-top-row">
+    <!-- Слева: Аватарка -->
+    <div class="insta-avatar-wrapper" onclick="document.getElementById('avatarInput').click()" style="cursor: pointer;">
+      <div id="profileAvatar" class="insta-avatar">
+        <!-- Аватар загрузится через JS -->
+      </div>
+      <div class="avatar-overlay">
+        <svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+      </div>
     </div>
-    <!-- Прозрачный слой с иконкой фотоаппарата (появляется при наведении) -->
-    <div class="avatar-overlay">
-      <svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-        <circle cx="12" cy="13" r="4"></circle>
-      </svg>
-    </div>
-  </div>
-  <input type="file" id="avatarInput" accept="image/*" style="display: none;">
-  
-  <!-- Информационный блок -->
-  <!-- Информационный блок -->
-  <div class="insta-info-block">
-    <div class="insta-title-row">
+    <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+
+    <!-- Справа: Имя, тег, счетчики и био -->
+    <div class="insta-right-block">
       <h2 id="nickname" class="insta-nickname" data-i18n="loading">Загрузка...</h2>
-    </div>
-    
-    <div id="tag" class="insta-tag">@tag</div>
-    
-    <!-- Счетчики с поддержкой локализации -->
-    <div class="insta-stats">
-      <span><strong id="statPostsCount">0</strong> <span data-i18n="statPosts">публикаций</span></span>
-      <span><strong id="statFollowersCount">0</strong> <span data-i18n="statFollowers">подписчиков</span></span>
-      <span><strong id="statFollowingCount">0</strong> <span data-i18n="statFollowing">подписок</span></span>
-    </div>
-    
-    <!-- Пустое по умолчанию поле био -->
-    <div class="insta-bio" id="userBio"></div>
-    
-    <!-- Кнопки действий -->
-    <div class="insta-actions" id="actionButtonsContainer">
-      <button id="btnCreatePost" onclick="showCreatePostModal()" class="btn-primary" data-i18n="btnCreatePost">Создать пост</button>
-      <button id="btnEditProfile" onclick="editFullProfile()" class="btn-secondary" data-i18n="btnEditProfile">Редактировать профиль</button>
+      <div id="tag" class="insta-tag">@tag</div>
+
+      <!-- Счетчики -->
+      <div class="insta-stats">
+        <div class="stat-item">
+          <strong id="statPostsCount">0</strong>
+          <span data-i18n="statPosts">публикаций</span>
+        </div>
+        <div class="stat-item">
+          <strong id="statFollowersCount">0</strong>
+          <span data-i18n="statFollowers">подписчиков</span>
+        </div>
+        <div class="stat-item">
+          <strong id="statFollowingCount">0</strong>
+          <span data-i18n="statFollowing">подписок</span>
+        </div>
+      </div>
+
+      <!-- Био профиля -->
+      <div class="insta-bio" id="userBio"></div>
     </div>
   </div>
+
+  <!-- Кнопки действий -->
+  <div class="insta-actions" id="actionButtonsContainer">
+    <button id="btnCreatePost" onclick="showCreatePostModal()" class="btn-primary" data-i18n="btnCreatePost">Создать пост</button>
+    <button id="btnEditProfile" onclick="editFullProfile()" class="btn-secondary" data-i18n="btnEditProfile">Редактировать профиль</button>
+  </div>
+</div>
 </div>
         
         <!-- НИЖНЯЯ ЧАСТЬ: ПОСТЫ -->
