@@ -1919,3 +1919,8 @@ body.dark-theme .post-footer {
     font-size: 1.2rem;
   }
 }
+.profile-two-columns, 
+.profile-right {
+  display: flex;
+  align-items: flex-start; /* Заставляет высокие элементы расти только вниз */
+}
