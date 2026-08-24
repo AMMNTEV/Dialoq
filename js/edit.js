@@ -29,6 +29,17 @@ onAuthStateChanged(async (user) => {
   currentUser = user;
   localStorage.setItem('lastUid', user.uid);
 
+  // ===== НОВОЕ: Мгновенная подгрузка из кэша (как в profile.js) =====
+  const cacheKey = `cachedCurrentUser_${user.uid}`;
+  const cachedDataStr = localStorage.getItem(cacheKey);
+  
+  if (cachedDataStr) {
+    currentUserData = JSON.parse(cachedDataStr);
+    updateSidebarUser(currentUserData);
+    fillEditForm(currentUserData);
+  }
+  // =================================================================
+
   try {
     const doc = await db.collection('users').doc(user.uid).get();
     if (!doc.exists) {
@@ -36,7 +47,7 @@ onAuthStateChanged(async (user) => {
       return;
     }
     currentUserData = doc.data();
-    localStorage.setItem(`cachedCurrentUser_${user.uid}`, JSON.stringify(currentUserData));
+    localStorage.setItem(cacheKey, JSON.stringify(currentUserData));
     if (window.userCache) userCache.set(user.uid, currentUserData);
     
     updateSidebarUser(currentUserData);
@@ -390,18 +401,23 @@ function showMessage(text, type) {
   }
 }
 
-// ===== ОБНОВЛЕНИЕ САЙДБАРА =====
 function updateSidebarUser(userData) {
   const nameEl = document.getElementById('sidebarUserName');
   const tagEl = document.getElementById('sidebarUserTag');
   const avatarEl = document.getElementById('sidebarUserAvatar');
-
+  
   if (nameEl) {
-    nameEl.textContent = userData.nickname || 'Users';
-    nameEl.removeAttribute('data-i18n');
+    try {
+      nameEl.textContent = userData.nickname || t('users');
+      nameEl.removeAttribute('data-i18n');
+    } catch (e) {
+      nameEl.textContent = userData.nickname || 'Users';
+      nameEl.removeAttribute('data-i18n');
+    }
   }
+  
   if (tagEl) tagEl.textContent = userData.tag || '@user';
-
+  
   if (avatarEl) {
     if (userData.avatar) {
       avatarEl.innerHTML = `<img src="${userData.avatar}" alt="Аватар" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block;">`;
