@@ -8,7 +8,7 @@ let selectedAvatarFile = null;
 let currentTagValue = '';
 
 // ========== МГНОВЕННАЯ ОТРИСОВКА (ДО ЗАПУСКА FIREBASE) ==========
-document.addEventListener("DOMContentLoaded", () => {
+function initEditPage() {
   const lastUid = localStorage.getItem('lastUid');
   if (lastUid) {
     const cachedUserStr = localStorage.getItem(`cachedCurrentUser_${lastUid}`);
@@ -18,7 +18,14 @@ document.addEventListener("DOMContentLoaded", () => {
       fillEditForm(currentUserData);
     }
   }
-});
+}
+
+// Запускаем сразу, если DOM уже загружен, либо ждем события
+if (document.readyState === 'loading') {
+  document.addEventListener("DOMContentLoaded", initEditPage);
+} else {
+  initEditPage();
+}
 
 onAuthStateChanged(async (user) => {
   if (!user || !user.emailVerified) {
@@ -29,7 +36,7 @@ onAuthStateChanged(async (user) => {
   currentUser = user;
   localStorage.setItem('lastUid', user.uid);
 
-  // ===== НОВОЕ: Мгновенная подгрузка из кэша (как в profile.js) =====
+  // Пробуем загрузить из кэша
   const cacheKey = `cachedCurrentUser_${user.uid}`;
   const cachedDataStr = localStorage.getItem(cacheKey);
   
@@ -38,7 +45,6 @@ onAuthStateChanged(async (user) => {
     updateSidebarUser(currentUserData);
     fillEditForm(currentUserData);
   }
-  // =================================================================
 
   try {
     const doc = await db.collection('users').doc(user.uid).get();
@@ -401,6 +407,7 @@ function showMessage(text, type) {
   }
 }
 
+// ===== ОБНОВЛЕНИЕ САЙДБАРА =====
 function updateSidebarUser(userData) {
   const nameEl = document.getElementById('sidebarUserName');
   const tagEl = document.getElementById('sidebarUserTag');
@@ -408,7 +415,7 @@ function updateSidebarUser(userData) {
   
   if (nameEl) {
     try {
-      nameEl.textContent = userData.nickname || t('users');
+      nameEl.textContent = userData.nickname || 'Users';
       nameEl.removeAttribute('data-i18n');
     } catch (e) {
       nameEl.textContent = userData.nickname || 'Users';
