@@ -78,62 +78,58 @@
   <span id="headerUserTag" class="header-user-tag"></span>
 </div>
 
-      <!-- ИСПРАВЛЕННЫЙ КОНТЕЙНЕР (Добавлено overflow: visible; height: auto; для прокрутки на ПК) -->
       <div class="profile-two-columns" style="flex-direction: column; align-items: center; gap: 0; overflow: visible; height: auto;">
-        
-        <!-- ВЕРХНЯЯ ЧАСТЬ: ИНФОРМАЦИЯ И КНОПКИ -->
-        <!-- ЗАМЕНИТЬ СТАРЫЙ .profile-left НА ЭТОТ БЛОК -->
-<div class="insta-profile-header">
-  <!-- Контейнер аватарки с градиентной обводкой -->
-  <div class="insta-avatar-wrapper">
-    <div id="userAvatar" class="insta-avatar">
-      <!-- Аватар загрузится через JS -->
-    </div>
-  </div>
   
   <!-- ИНСТА-БЛОК ПРОФИЛЯ -->
-<div class="insta-profile-header">
-  <div class="insta-top-row">
-    <!-- Слева: Аватарка -->
-    <div class="insta-avatar-wrapper">
-      <div id="userAvatar" class="insta-avatar"></div>
-    </div>
-    
-    <!-- Справа: Имя и счетчики -->
-    <div class="insta-right-block">
-      <h2 id="userNickname" class="insta-nickname" data-i18n="loading">Загрузка...</h2>
+  <div class="insta-profile-header">
+    <div class="insta-top-row">
+      <!-- Слева: Аватарка -->
+      <div class="insta-avatar-wrapper">
+        <div id="userAvatar" class="insta-avatar"></div>
+      </div>
       
-      <div class="insta-stats">
-        <div class="stat-item">
-          <strong id="statPostsCount">0</strong>
-          <span data-i18n="statPosts">публикаций</span>
-        </div>
-        <div class="stat-item">
-          <strong id="statFollowersCount">0</strong>
-          <span data-i18n="statFollowers">подписчиков</span>
-        </div>
-        <div class="stat-item">
-          <strong id="statFollowingCount">0</strong>
-          <span data-i18n="statFollowing">подписок</span>
+      <!-- Справа: Имя и счетчики -->
+      <div class="insta-right-block">
+        <h2 id="userNickname" class="insta-nickname" data-i18n="loading">Загрузка...</h2>
+        
+        <div class="insta-stats">
+          <div class="stat-item">
+            <strong id="statPostsCount">0</strong>
+            <span data-i18n="statPosts">публикаций</span>
+          </div>
+          <div class="stat-item">
+            <strong id="statFollowersCount">0</strong>
+            <span data-i18n="statFollowers">подписчиков</span>
+          </div>
+          <div class="stat-item">
+            <strong id="statFollowingCount">0</strong>
+            <span data-i18n="statFollowing">подписок</span>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Снизу: Описание (с поддержкой кликабельных ссылок) -->
+    <div class="insta-bio" id="userBio"></div>
+    
+    <!-- Кнопки действий -->
+    <div class="insta-actions">
+      <button id="btnFollow" class="btn-primary" data-i18n="btnFollow">Подписаться</button>
+      <button id="btnMessage" class="btn-secondary" data-i18n="btnMessage">Отправить сообщение</button>
+    </div>
+  </div>
+  
+  <!-- НИЖНЯЯ ЧАСТЬ: ПОСТЫ -->
+  <div class="profile-right" style="width: 100%; max-width: 900px; overflow: visible; height: auto; border-top: 1px solid rgba(128, 128, 128, 0.2); padding-top: 20px;">
+    <div class="posts-header" style="display: flex; justify-content: flex-start; align-items: center; margin-bottom: 20px;">
+      <h2 id="userPostsTitle" data-i18n="userPosts">Посты пользователя</h2>
+    </div>
+    <div class="posts-container" id="userPostsContainer" style="overflow: visible; height: auto; padding-right: 0;">
+      <div class="skeleton-post"></div>
+      <div class="skeleton-post"></div>
+    </div>
   </div>
 
-  <!-- Снизу: Описание (с поддержкой ссылок) -->
-  <div class="insta-bio" id="userBio"></div>
-  
-  <!-- Кнопки действий -->
-  <div class="insta-actions">
-    <button id="btnFollow" class="btn-primary" data-i18n="btnFollow">Подписаться</button>
-    <button id="btnMessage" class="btn-secondary" data-i18n="btnMessage">Отправить сообщение</button>
-    <button class="btn-icon">
-       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-         <path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-       </svg>
-    </button>
-  </div>
-</div>
 </div>
         
         <!-- НИЖНЯЯ ЧАСТЬ: ПОСТЫ -->
