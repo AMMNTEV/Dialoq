@@ -72,7 +72,7 @@ onAuthStateChanged(async (user) => {
       if (headerTagEl) headerTagEl.textContent = userData.tag || '';
 
       const bioEl = document.getElementById('userBio');
-      if (bioEl) bioEl.textContent = userData.bio || '';
+      if (bioEl) bioEl.innerHTML = parseBioLinks(userData.bio || '');
 
       // Счетчики подписок
       const followers = userData.followers || [];
