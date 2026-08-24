@@ -68,6 +68,9 @@ onAuthStateChanged(async (user) => {
       const tagEl = document.getElementById('userTag');
       if (tagEl) tagEl.textContent = userData.tag || t('notSpecified');
 
+      const headerTagEl = document.getElementById('headerUserTag');
+      if (headerTagEl) headerTagEl.textContent = userData.tag || '';
+
       const bioEl = document.getElementById('userBio');
       if (bioEl) bioEl.textContent = userData.bio || '';
 
@@ -263,3 +266,13 @@ window.toggleFollow = async function(targetUserId) {
     btnFollow.disabled = false;
   }
 };
+
+function parseBioLinks(text) {
+  if (!text) return '';
+  const escaped = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g;
+  return escaped.replace(urlRegex, (url) => {
+    const href = url.startsWith('http') ? url : `https://${url}`;
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="bio-link">${url}</a>`;
+  });
+}
