@@ -3171,3 +3171,130 @@ body {
 .dark-theme body {
   background-color: #0a0c10 !important;
 }
+
+/* ==========================================
+   УНИФИКАЦИЯ МОДАЛЬНЫХ ОКОН (СОЗДАНИЕ И ИНФО О БЕСЕДЕ)
+   ========================================== */
+
+/* 1. Делаем контейнер модалки относительным для фиксации шапки */
+.tg-modal-content {
+  position: relative !important;
+}
+
+/* 2. Шапка модалки: парящая, абсолютно прозрачная, без полоски внизу */
+.tg-modal-header {
+  position: absolute !important;
+  top: 14px !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 70px !important;
+  z-index: 100 !important;
+  background: transparent !important; 
+  border-bottom: none !important; 
+  box-shadow: none !important;
+  padding: 0 16px !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  pointer-events: none !important; /* Пропускаем клики сквозь пустые места */
+}
+
+/* Мобильная адаптивность для шапки (как в основном чате) */
+@media (max-width: 768px) {
+  .tg-modal-header {
+    top: 0 !important;
+    height: 64px !important;
+    padding: 0 16px !important;
+  }
+}
+
+/* 3. Кнопка "Назад": стеклянный эффект, 1 в 1 как в чатах */
+.tg-back-btn {
+  pointer-events: auto !important; /* Возвращаем кликабельность кнопке */
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  border-radius: 50% !important;
+  box-sizing: border-box !important;
+  
+  /* Стеклянный дизайн (Светлая тема) */
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  color: #1a1a1a !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  outline: none !important;
+}
+
+.tg-back-btn:hover {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #3b82f6 !important;
+}
+
+/* Фиксируем размер иконки внутри (перезаписываем инлайн-стили HTML) */
+.tg-back-btn svg {
+  width: 24px !important;
+  height: 24px !important;
+  stroke-width: 1.8 !important;
+}
+
+/* Темная тема для кнопки */
+body.dark-theme .tg-back-btn {
+  background: rgba(22, 25, 32, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}
+
+/* 4. Оформление заголовка "Создать новую беседу" (стеклянная плашка) */
+.tg-modal-header .tg-group-name {
+  pointer-events: auto !important; 
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 28px !important;
+  padding: 0 16px !important;
+  height: 48px !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  color: #1a1a1a !important;
+  box-sizing: border-box !important;
+  box-shadow: none !important;
+}
+
+/* Темная тема для заголовка */
+body.dark-theme .tg-modal-header .tg-group-name {
+  background: rgba(22, 25, 32, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}
+
+/* 5. Отступы в самом окне, чтобы контент плавно уезжал под парящую кнопку */
+.tg-modal-body {
+  padding-top: 90px !important; /* Отступ = высота шапки (70) + зазор (20) */
+  height: 100% !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 768px) {
+  .tg-modal-body {
+    padding-top: 76px !important; /* Отступ = высота моб. шапки (64) + зазор (12) */
+  }
+}
