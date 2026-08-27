@@ -1317,20 +1317,24 @@ async function openChatInfo(chatId) {
     });
 
     const participantsData = await Promise.all(participantPromises);
+    const isCurrentUserAdmin = chat.createdBy === currentUser.uid;
 
     // 3. Формирование списка участников за один раз
     let participantsHTML = '<ul class="participants-list">';
-    for (const { userId, userData } of participantsData) {
-      if (userData) {
-        const isCreator = userId === chat.createdBy ? ' (создатель)' : '';
-        const canRemove = userId !== currentUser.uid && userId !== chat.createdBy;
-        participantsHTML += `<li>
-          ${userData.nickname} ${userData.tag}${isCreator}
-          ${canRemove ? `<button class="remove-participant-btn" onclick="removeParticipant('${userId}')">×</button>` : ''}
-        </li>`;
-      }
-    }
-    participantsHTML += '</ul>';
+for (const { userId, userData } of participantsData) {
+  if (userData) {
+    const isCreator = userId === chat.createdBy ? ' (создатель)' : '';
+    
+    // Кнопку удаления видит только администратор, и он не может исключить сам себя
+    const canRemove = isCurrentUserAdmin && userId !== chat.createdBy;
+
+    participantsHTML += `<li>
+      ${userData.nickname} ${userData.tag}${isCreator}
+      ${canRemove ? `<button class="remove-participant-btn" onclick="removeParticipant('${userId}')">×</button>` : ''}
+    </li>`;
+  }
+}
+participantsHTML += '</ul>';
 
     document.getElementById('groupParticipants').innerHTML = participantsHTML;
 
@@ -1362,6 +1366,10 @@ function hideGroupInfoModal() {
 // ========== УПРАВЛЕНИЕ УЧАСТНИКАМИ ГРУППЫ ==========
 async function removeParticipant(userId) {
   if (!selectedChat || !selectedChat.isGroup) return;
+  if (selectedChat.createdBy !== currentUser.uid) {
+    alert('Только администратор беседы может исключать участников');
+    return;
+  }
   if (!confirm(t('confirmRemoveUser'))) return;
   try {
     await db.collection('chats').doc(selectedChat.id).update({
