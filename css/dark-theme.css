@@ -1100,58 +1100,92 @@ a:focus {
   color: #ef4444 !important;
 }
 
-/* ========== ТЁМНАЯ ТЕМА ========== */
-.dark-theme .tg-modal-content {
-  background: #17212b;
-  color: #ffffff;
+/* ==========================================
+   ОКНО ИНФОРМАЦИИ О БЕСЕДЕ (CHAT INFO MODAL)
+   ========================================== */
+
+/* Контейнер модального окна и боковой панели */
+.dark-theme .chat-info-modal,
+.dark-theme .chat-info-drawer,
+.dark-theme .chat-info-sidebar,
+.dark-theme .chat-details-popup {
+  background-color: #17212b !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45) !important;
 }
 
-.dark-theme .tg-back-btn {
-  color: #6c7883;
+/* Шапка окна информации (прозрачная, без лишних подложек) */
+.dark-theme .chat-info-header,
+.dark-theme .chat-details-header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
 }
 
-.dark-theme .tg-back-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
+/* Название беседы и заголовки */
+.dark-theme .chat-info-title,
+.dark-theme .chat-info-header h2,
+.dark-theme .chat-info-header h3,
+.dark-theme .chat-member-name {
+  color: #ffffff !important;
+  font-weight: 600;
 }
 
-.dark-theme .tg-modal-body {
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+/* Подписи (количество участников, статус, медиа) */
+.dark-theme .chat-info-subtitle,
+.dark-theme .chat-member-status,
+.dark-theme .chat-info-section-title,
+.dark-theme .chat-info-label {
+  color: #7f91a4 !important;
 }
 
-.dark-theme .tg-avatar {
-  background: #2b3948;
+/* Список участников и пункты меню */
+.dark-theme .chat-member-item,
+.dark-theme .chat-info-option {
+  background: transparent !important;
+  border-radius: 8px;
+  transition: background-color 0.15s ease;
 }
 
-.dark-theme .tg-group-name {
-  color: #ffffff;
+.dark-theme .chat-member-item:hover,
+.dark-theme .chat-info-option:hover {
+  background-color: #202b36 !important;
 }
 
-.dark-theme .tg-group-count {
-  color: #7f91a4;
+/* Поле ввода / настройки внутри окна */
+.dark-theme .chat-info-input,
+.dark-theme .chat-info-field {
+  background-color: #0e1621 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
-.dark-theme .tg-section-box {
-  background: #0e1621;
+/* Красные кнопки действий (Выйти из беседы, Очистить историю и т.д.) */
+.dark-theme .chat-info-leave-btn,
+.dark-theme .chat-info-action-danger,
+.dark-theme .chat-info-modal .btn-primary {
+  background: #e53935 !important;
+  color: #ffffff !important;
+  border: none !important;
 }
 
-.dark-theme .tg-add-member-btn {
-  color: #5288c1;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+.dark-theme .chat-info-leave-btn:hover,
+.dark-theme .chat-info-action-danger:hover,
+.dark-theme .chat-info-modal .btn-primary:hover {
+  background: #d32f2f !important;
+  box-shadow: 0 4px 12px rgba(229, 57, 53, 0.3) !important;
 }
 
-.dark-theme .tg-cancel-btn {
-  color: #5288c1;
+/* Кнопка закрытия (крестик) */
+.dark-theme .chat-info-close-btn {
+  color: #7f91a4 !important;
 }
 
-.dark-theme .tg-action-btn.tg-danger {
-  background: #0e1621;
-  color: #e53935;
+.dark-theme .chat-info-close-btn:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.08) !important;
 }
 
-.dark-theme .tg-action-btn.tg-danger:hover {
-  background: rgba(229, 57, 53, 0.12);
-}
 /* ==========================================
    КОНЕЦ DARK THEME
    ========================================== */
