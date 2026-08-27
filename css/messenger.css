@@ -2059,20 +2059,84 @@ a:focus {
   box-shadow: none !important;
 }
 
-/* --- Красные кнопки "Покинуть" и "Удалить" --- */
-.tg-actions-section .tg-action-btn.tg-danger {
-  background-color: #ef4444 !important; /* Сплошной красный фон */
-  color: #ffffff !important; /* Белый текст */
-  border: none !important; /* Убираем рамку */
+/* ==========================================
+   1. СМЯГЧЕНИЕ КРАСНЫХ КНОПОК ("Покинуть" и "Удалить")
+   ========================================== */
+
+/* Светлая тема (мягкая красноватая плашка как при ховере на Logout) */
+.tg-actions-section .tg-action-btn.tg-danger,
+.modal-leave-btn,
+.tg-action-btn.danger,
+.modal-delete-btn {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+  border: 1px solid #fecaca !important;
+  box-shadow: none !important;
 }
 
-/* Цвет иконок внутри кнопок */
-.tg-actions-section .tg-action-btn.tg-danger svg {
-  stroke: #ffffff !important; 
+.tg-actions-section .tg-action-btn.tg-danger svg,
+.modal-leave-btn svg,
+.tg-action-btn.danger svg,
+.modal-delete-btn svg {
+  stroke: #dc2626 !important;
 }
 
-/* Эффект при наведении на красные кнопки */
-.tg-actions-section .tg-action-btn.tg-danger:hover {
-  background-color: #dc2626 !important; /* Чуть более темный красный */
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3) !important;
+.tg-actions-section .tg-action-btn.tg-danger:hover,
+.modal-leave-btn:hover,
+.tg-action-btn.danger:hover,
+.modal-delete-btn:hover {
+  background: #fca5a5 !important;
+  color: #b91c1c !important;
+}
+
+/* Тёмная тема (полупрозрачный красноватый оттенок) */
+.dark-theme .tg-actions-section .tg-action-btn.tg-danger,
+.dark-theme .modal-leave-btn,
+.dark-theme .tg-action-btn.danger,
+.dark-theme .modal-delete-btn {
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #ef4444 !important;
+  border: 1px solid rgba(239, 68, 68, 0.25) !important;
+  box-shadow: none !important;
+}
+
+.dark-theme .tg-actions-section .tg-action-btn.tg-danger svg,
+.dark-theme .modal-leave-btn svg,
+.dark-theme .tg-action-btn.danger svg,
+.dark-theme .modal-delete-btn svg {
+  stroke: #ef4444 !important;
+}
+
+.dark-theme .tg-actions-section .tg-action-btn.tg-danger:hover,
+.dark-theme .modal-leave-btn:hover,
+.dark-theme .tg-action-btn.danger:hover,
+.dark-theme .modal-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.22) !important;
+  color: #fca5a5 !important;
+}
+
+
+/* ==========================================
+   2. УБИРАЕМ ПОДЛОЖКУ СПИСКА УЧАСТНИКОВ В СВЕТЛОЙ ТЕМЕ
+   ========================================== */
+
+/* Убираем серый фон и рамку у подложки */
+.group-participants-list,
+.group-info-section,
+.tg-section-box {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Возвращаем темный цвет текста участникам для светлой темы */
+.group-participants-list,
+.group-participants-list * {
+  color: #1a1a1a !important;
+}
+
+
+.dark-theme .group-participants-list,
+.dark-theme .group-participants-list * {
+  color: #ffffff !important;
 }
