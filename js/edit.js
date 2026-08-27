@@ -321,7 +321,11 @@ async function saveChanges() {
   const newNickname = nickInput.value.trim();
   const rawTag = tagInput.value.trim().replace(/^@+/, '');
   const newTag = '@' + rawTag;
-  const newBio = bioTextarea.value.trim();
+  const newBio = bioTextarea.value
+  .split('\n')
+  .map(line => line.trim())
+  .filter(line => line.length > 0)
+  .join('\n');
 
   if (!newNickname) {
     showMessage('Введите никнейм', 'error');
