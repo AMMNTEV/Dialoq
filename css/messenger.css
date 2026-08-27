@@ -3378,17 +3378,68 @@ body.dark-theme .tg-modal-header .tg-group-name {
 }
 
 /* ==========================================
-   ФИНАЛЬНЫЕ ПРАВКИ: ВЫРАВНИВАНИЕ ПОИСКА И УДАЛЕНИЕ ПОЛОСОК
+   ПОДГОНКА ПОИСКА И ШАПКИ ПОД ВЫСОТУ КНОПКИ (44PX)
    ========================================== */
 
-/* 1. Выравниваем поиск по высоте карточки собеседника (48px) */
-.search-box input {
-  height: 48px !important;
-  min-height: 48px !important;
+/* 1. Поиск: высота 44px и явная черная полоска снизу */
+.search-box {
+  height: 44px !important;
+  border-bottom: 1px solid #000000 !important; /* Та самая черная полоска */
 }
 
-/* 2. Принудительно отключаем нижнюю границу-полоску у шапки чата */
-.chat-header {
-  border-bottom: none !important;
-  box-shadow: none !important;
+.search-box input {
+  height: 44px !important;
+}
+
+/* Компенсируем уменьшение поиска отступом для списка чатов */
+.chats-list {
+  padding-top: 70px !important; 
+}
+
+/* 2. Шапка чата: высота строго 44px */
+.chat-header,
+.profile-header {
+  height: 44px !important;
+  min-height: 44px !important;
+  padding: 0 16px !important; /* Убираем вертикальные отступы */
+}
+
+/* 3. Панель с информацией о собеседнике */
+.selected-chat {
+  height: 44px !important;
+  padding: 4px 12px 4px 4px !important;
+}
+
+/* Уменьшаем аватар в шапке, чтобы он не разрывал высоту 44px */
+.selected-chat .chat-avatar-placeholder,
+.selected-chat .user-avatar-placeholder {
+  width: 36px !important;
+  height: 36px !important;
+  margin-right: 8px !important;
+}
+
+/* Делаем шрифты чуть компактнее, чтобы ник и тег идеально встали друг над другом */
+.selected-chat .chat-name,
+.selected-chat .user-name {
+  font-size: 0.95rem !important;
+  line-height: 1.1 !important;
+}
+
+.selected-chat .chat-tag,
+.selected-chat .user-tag {
+  font-size: 0.75rem !important;
+  line-height: 1.1 !important;
+}
+
+/* 4. Адаптив для мобильных устройств */
+@media (max-width: 768px) {
+  .chat-header,
+  .profile-header {
+    height: 44px !important;
+    padding: 0 4px !important; /* Чуть меньше отступов по бокам для мобилок */
+  }
+  
+  .chats-list {
+    padding-top: 56px !important; /* Приподнимаем список чатов */
+  }
 }
