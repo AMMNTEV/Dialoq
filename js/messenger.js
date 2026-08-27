@@ -1936,18 +1936,20 @@ function hideAddParticipantsView() {
 const originalHideGroupInfoModal = hideGroupInfoModal;
 hideGroupInfoModal = function() {
   hideAddParticipantsView();
-  if (typeof originalHideGroupInfoModal === 'function') {
-    originalHideGroupInfoModal();
-  } else {
-    document.getElementById('groupInfoModal').style.display = 'none';
-  }
-
-  if (history.state && history.state.modal === 'groupInfo') {
-    history.back();
+  const modal = document.getElementById('groupInfoModal');
+  
+  if (modal) {
+    // Если в истории есть запись об окне, просто вызываем "назад". 
+    // Слушатель popstate сам перехватит событие и скроет окно.
+    if (history.state && history.state.modal === 'groupInfo') {
+      history.back(); 
+    } else {
+      // Запасной вариант, если записи в истории по какой-то причине нет
+      modal.style.display = 'none';
+    }
   }
 };
 
-// Добавляем обработчик для закрытия модалки по клику вне её
 // Добавляем обработчик для закрытия модалок по клику вне их области
 document.addEventListener('DOMContentLoaded', function() {
   // Закрытие окна создания беседы
@@ -1986,12 +1988,11 @@ window.showCreateGroupModal = function() {
 window.hideCreateGroupModal = function() {
   const modal = document.getElementById('createGroupModal');
   if (modal) {
-    modal.style.display = 'none';
-    document.body.style.overflow = '';
-    
-    // Если закрыли кнопкой (а не свайпом), убираем фиктивную запись
     if (history.state && history.state.modal === 'createGroup') {
       history.back();
+    } else {
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
     }
   }
 };
