@@ -1936,3 +1936,20 @@ body.dark-theme .post-footer {
   display: flex;
   align-items: flex-start; /* Заставляет высокие элементы расти только вниз */
 }
+
+/* ===== ФИКС АВАТАРКИ В ПРОФИЛЕ ===== */
+
+/* 1. Прижимаем аватарку к верхнему краю, чтобы она не съезжала от длинного БИО */
+.insta-top-row {
+  align-items: flex-start !important;
+}
+
+/* 2. Полностью убираем градиентное кольцо и рамку вокруг аватарки */
+.insta-avatar-wrapper {
+  padding: 0 !important;
+  background: none !important;
+}
+
+.insta-avatar {
+  border: none !important;
+}
