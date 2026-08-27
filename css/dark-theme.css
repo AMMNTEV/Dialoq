@@ -303,16 +303,7 @@
   background-size: 200% 100% !important;
 }
 
-/* --- Аватары --- */
-.dark-theme .user-avatar,
-.dark-theme .nav-user-avatar,
-.dark-theme .chat-avatar-placeholder,
-.dark-theme .user-avatar-placeholder,
-.dark-theme .avatar-large,
-.dark-theme .settings-item-icon {
-  background: var(--accent-light) !important;
-  color: var(--accent-hover) !important;
-}
+
 
 /* --- Тоггл-свитч --- */
 .dark-theme .slider {
@@ -743,15 +734,26 @@
   color: var(--text-primary) !important;
 }
 
-/* --- Кнопка "Удалить аккаунт" (красная) --- */
-.dark-theme .settings-danger-btn {
-  background: rgba(184, 74, 74, 0.12) !important;
-  color: var(--danger) !important;
-  border: 1px solid rgba(184, 74, 74, 0.2) !important;
+/* --- Кнопка "Удалить аккаунт" (красная, как в светлой теме) --- */
+.dark-theme .settings-danger-btn,
+.dark-theme .modal-delete-btn {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+  border: 1px solid transparent !important;
 }
 
-.dark-theme .settings-danger-btn:hover {
-  background: rgba(184, 74, 74, 0.22) !important;
+.dark-theme .settings-danger-btn:hover,
+.dark-theme .modal-delete-btn:hover {
+  background: #fecaca !important;
+  color: #b91c1c !important;
+}
+
+/* --- Красная иконка и подложка в пункте удаления --- */
+.dark-theme .settings-item.danger .settings-item-icon,
+.dark-theme .settings-item-icon.danger,
+.dark-theme .danger .settings-item-icon {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
 }
 
 /* ==========================================
