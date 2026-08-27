@@ -293,7 +293,7 @@ function renderBio(container, text) {
 
   const shortText = lines.slice(0, 3).join('\n');
 
-  container.innerHTML = `<div class="bio-short">${parseBioLinks(shortText)}<div class="bio-toggle-btn" onclick="toggleBio(this, 'full')">${t('bioMore')}</div></div><div class="bio-full" style="display: none;">${parseBioLinks(text)}<div class="bio-toggle-btn" onclick="toggleBio(this, 'short')">${t('bioHide')}</div></div>`;
+  container.innerHTML = `<div class="bio-short">${parseBioLinks(shortText)}\n<div class="bio-toggle-btn" onclick="toggleBio(this, 'full')">${t('bioMore')}</div></div><div class="bio-full" style="display: none;">${parseBioLinks(text)}\n<div class="bio-toggle-btn" onclick="toggleBio(this, 'short')">${t('bioHide')}</div></div>`;
 }
 
 function toggleBio(btn, mode) {
