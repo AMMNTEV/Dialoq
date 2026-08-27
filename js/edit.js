@@ -328,25 +328,25 @@ async function saveChanges() {
   .join('\n');
 
   if (!newNickname) {
-    showMessage('Введите никнейм', 'error');
+    showMessage(typeof t === 'function' ? t('enterNicknameError') : 'Введите никнейм', 'error');
     nickInput.focus();
     return;
   }
 
   if (!isTagAvailable) {
-    showMessage('Пожалуйста, выберите доступный тег', 'error');
+    showMessage(typeof t === 'function' ? t('tagSelectAvailableError') : 'Пожалуйста, выберите доступный тег', 'error');
     tagInput.focus();
     return;
   }
 
   if (rawTag.length < 3 && newTag !== currentUserData.tag) {
-    showMessage('Тег должен содержать минимум 3 символа', 'error');
+    showMessage(typeof t === 'function' ? t('tagMinLengthError') : 'Тег должен содержать минимум 3 символа', 'error');
     tagInput.focus();
     return;
   }
 
   if (newBio.length > 150) {
-    showMessage('Био не может превышать 150 символов', 'error');
+    showMessage(typeof t === 'function' ? t('bioMaxLengthError') : 'Био не может превышать 150 символов', 'error');
     bioTextarea.focus();
     return;
   }
