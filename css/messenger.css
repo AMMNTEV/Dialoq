@@ -2002,9 +2002,9 @@ a:focus {
 
 .tg-add-header {
   display: flex;
-  gap: 10px;
   align-items: center;
-  margin-bottom: 10px;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
 /* ==========================================
@@ -2199,4 +2199,64 @@ a:focus {
     /* Увеличиваем отступ снизу, чтобы элементы не прятались за системным баром */
     padding-bottom: calc(24px + env(safe-area-inset-bottom, 24px)) !important;
   }
+}
+
+.tg-add-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tg-add-header .search-input {
+  margin-bottom: 0 !important;
+  flex: 1;
+  height: 44px;
+}
+
+.tg-cancel-btn {
+  height: 44px;
+  padding: 0 16px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.tg-cancel-btn:hover {
+  background: #e2e8f0;
+  color: #1a1a1a;
+}
+
+.tg-modal-header {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background: transparent !important;
+  position: relative;
+  z-index: 10;
+}
+
+@media (max-width: 768px) {
+  body {
+    background-color: #ffffff !important;
+  }
+
+  .messenger-container {
+    background: #ffffff !important;
+  }
+}
+
+body.dark-theme {
+  background-color: #121212 !important;
+}
+
+body.dark-theme .messenger-container {
+  background: #121212 !important;
 }
