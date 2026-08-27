@@ -1887,3 +1887,26 @@ function formatMessageText(text) {
   // Заменяем переносы строк на теги <br>
   return linkedText.replace(/\n/g, '<br>');
 }
+
+function showAddParticipantsView() {
+  document.getElementById('tgParticipantsView').style.display = 'none';
+  document.getElementById('tgAddView').style.display = 'block';
+  document.getElementById('searchUsersToAdd').focus();
+}
+
+function hideAddParticipantsView() {
+  document.getElementById('tgAddView').style.display = 'none';
+  document.getElementById('tgParticipantsView').style.display = 'block';
+  document.getElementById('searchUsersToAdd').value = '';
+}
+
+// При закрытии модального окна сбрасываем вид
+const originalHideGroupInfoModal = hideGroupInfoModal;
+hideGroupInfoModal = function() {
+  hideAddParticipantsView();
+  if (typeof originalHideGroupInfoModal === 'function') {
+    originalHideGroupInfoModal();
+  } else {
+    document.getElementById('groupInfoModal').style.display = 'none';
+  }
+};
