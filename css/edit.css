@@ -367,13 +367,14 @@ body.dark-theme .edit-bio-counter {
   line-height: 1.3;
   font-weight: 500;
   
-  /* ✅ Принудительно ставим по левому краю и делаем отступ только сверху */
+  width: 100% !important;
+  align-self: flex-start !important;
   text-align: left !important;
   margin: 4px 0 0 0 !important;
   padding: 0 !important;
 }
 
-/* На случай, если JS вставляет внутрь дополнительный <div> или <p> с отступами */
+/* На случай, если JS вставляет внутрь дочерние теги */
 .edit-tag-status * {
   text-align: left !important;
   margin: 0 !important;
