@@ -68,8 +68,11 @@ onAuthStateChanged(async (user) => {
       const tagEl = document.getElementById('userTag');
       if (tagEl) tagEl.textContent = userData.tag || t('notSpecified');
 
+      const headerTagEl = document.getElementById('headerUserTag');
+      if (headerTagEl) headerTagEl.textContent = userData.tag || '';
+
       const bioEl = document.getElementById('userBio');
-      if (bioEl) bioEl.textContent = userData.bio || '';
+      if (bioEl) renderBio(bioEl, userData.bio || '');
 
       // Счетчики подписок
       const followers = userData.followers || [];
@@ -263,3 +266,47 @@ window.toggleFollow = async function(targetUserId) {
     btnFollow.disabled = false;
   }
 };
+
+function parseBioLinks(text) {
+  if (!text) return '';
+  const escaped = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g;
+  return escaped.replace(urlRegex, (url) => {
+    const href = url.startsWith('http') ? url : `https://${url}`;
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="bio-link">${url}</a>`;
+  });
+}
+
+function renderBio(container, text) {
+  if (!container) return;
+  if (!text) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const lines = text.split('\n');
+  
+  if (lines.length <= 3) {
+    container.innerHTML = parseBioLinks(text);
+    return;
+  }
+
+  const shortText = lines.slice(0, 3).join('\n');
+
+  container.innerHTML = `<div class="bio-short">${parseBioLinks(shortText)}\n<div class="bio-toggle-btn" onclick="toggleBio(this, 'full')">${t('bioMore')}</div></div><div class="bio-full" style="display: none;">${parseBioLinks(text)}\n<div class="bio-toggle-btn" onclick="toggleBio(this, 'short')">${t('bioHide')}</div></div>`;
+}
+
+function toggleBio(btn, mode) {
+  const parent = btn.closest('.insta-bio');
+  if (!parent) return;
+  const shortDiv = parent.querySelector('.bio-short');
+  const fullDiv = parent.querySelector('.bio-full');
+
+  if (mode === 'full') {
+    shortDiv.style.display = 'none';
+    fullDiv.style.display = 'block';
+  } else {
+    shortDiv.style.display = 'block';
+    fullDiv.style.display = 'none';
+  }
+}

@@ -120,6 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.pathname.includes('messenger.html') || 
     window.location.pathname.includes('profile.html') ||
     window.location.pathname.includes('settings.html') ||
+    window.location.pathname.includes('edit.html') ||
     window.location.pathname.includes('user.html');
   
   if (lastUid && !isAlreadyOnMessenger) {

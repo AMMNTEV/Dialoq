@@ -858,15 +858,18 @@ a:focus {
 /* Прозрачный серый слой поверх аватара */
 .avatar-overlay {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   opacity: 0;
-  transition: opacity 0.2s ease;
-  backdrop-filter: blur(2px);
+  transition: opacity 0.2s;
 }
 
 .avatar-wrapper:hover .avatar-overlay {
@@ -1267,4 +1270,700 @@ body.dark-theme .tag-input-wrapper {
   .insta-actions button {
     flex: 1; /* Кнопки на всю ширину */
   }
+}
+
+/* Тег в верхней шапке */
+.header-user-tag {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #000;
+  pointer-events: auto;
+}
+body.dark-theme .header-user-tag {
+  color: #fff;
+}
+
+/* Ссылки в био */
+.bio-link {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+  word-break: break-all;
+}
+.bio-link:hover {
+  text-decoration: underline;
+}
+
+/* Мобильный сетка Instagram */
+@media (max-width: 768px) {
+  .insta-profile-header {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 16px;
+    gap: 12px;
+  }
+
+  .insta-top-row {
+  display: flex;
+  align-items: flex-start !important; /* Прижимает аватарку к верхнему краю */
+  gap: 32px;
+  width: 100%;
+}
+
+  .insta-avatar-wrapper {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  padding: 0 !important;
+  background: none !important;
+  box-sizing: border-box;
+}
+
+  .insta-right-block {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .insta-nickname {
+    font-size: 1.2rem;
+    text-align: left;
+  }
+
+  .insta-stats {
+    display: flex !important;
+    justify-content: space-between !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    gap: 8px !important;
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.75rem;
+  }
+
+  .stat-item strong {
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .insta-bio {
+    text-align: left;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .insta-actions {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+}
+
+/* Общий контейнер профиля */
+.profile-two-columns {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+/* Шапка профиля */
+.insta-profile-header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 0;
+}
+
+/* Верхний ряд (Аватарка + Инфо) */
+.insta-top-row {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  width: 100%;
+}
+
+/* Аватарка */
+.insta-avatar-wrapper {
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  padding: 3px;
+  background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  box-sizing: border-box;
+}
+
+.insta-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: bold;
+  border: none !important;
+}
+
+.insta-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Блок справа (Имя, Статистика, Био) */
+.insta-right-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.insta-nickname {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0;
+  word-break: break-word;
+}
+
+.insta-stats {
+  display: flex;
+  gap: 24px;
+}
+
+.stat-item {
+  display: flex;
+  gap: 5px;
+  font-size: 0.95rem;
+}
+
+.stat-item strong {
+  font-weight: 700;
+}
+
+.insta-bio {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  white-space: pre-line;
+  word-break: break-word;
+}
+
+/* Нижний блок с кнопками */
+.insta-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.insta-actions button {
+  flex: 1;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+  text-align: center;
+}
+
+.btn-primary {
+  background-color: #0095f6;
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background-color: #1877f2;
+}
+
+.btn-secondary {
+  background-color: #efefef;
+  color: #000000;
+}
+
+.btn-secondary:hover {
+  background-color: #dbdbdb;
+}
+
+/* Темная тема для кнопок */
+body.dark-theme .btn-secondary {
+  background-color: #262626;
+  color: #ffffff;
+}
+
+body.dark-theme .btn-secondary:hover {
+  background-color: #363636;
+}
+
+/* Секция постов */
+.profile-right {
+  width: 100%;
+  border-top: 1px solid rgba(128, 128, 128, 0.2);
+  padding-top: 20px;
+  margin-top: 10px;
+}
+
+.posts-header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.posts-header h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.posts-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Мобильный адаптив */
+@media (max-width: 600px) {
+  .insta-top-row {
+    align-items: flex-start !important;
+    gap: 16px;
+  }
+
+  .insta-avatar-wrapper {
+    width: 80px;
+    height: 80px;
+  }
+
+  .insta-stats {
+    gap: 14px;
+    font-size: 0.85rem;
+  }
+
+  .insta-nickname {
+    font-size: 1.2rem;
+  }
+}
+
+/* ========== КОНТЕЙНЕР ПРОФИЛЯ (ЕДИНЫЙ СКРОЛЛ) ========== */
+.profile-container {
+  flex: 1;
+  height: 100%;
+  overflow-y: auto;
+  padding-bottom: 40px;
+  box-sizing: border-box;
+  position: relative;
+  scrollbar-gutter: stable;
+  width: 100%;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
+/* Парящая шапка с кнопкой "Назад" */
+.profile-header {
+  position: absolute;
+  top: 14px;
+  left: 0;
+  right: 0;
+  height: 60px;
+  z-index: 100;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.profile-header .back-btn {
+  pointer-events: auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+body.dark-theme .profile-header .back-btn {
+  background: rgba(30, 30, 30, 0.85);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.header-user-tag {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #000000;
+  pointer-events: auto;
+}
+
+body.dark-theme .header-user-tag {
+  color: #ffffff;
+}
+
+/* Центральная колонка профиля */
+.profile-two-columns {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 80px 16px 20px 16px;
+  box-sizing: border-box;
+  height: auto;
+  overflow: visible;
+}
+
+/* Шапка профиля */
+.insta-profile-header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.insta-top-row {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  width: 100%;
+}
+
+.insta-avatar-wrapper {
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  padding: 3px;
+  background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  box-sizing: border-box;
+}
+
+.insta-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+body.dark-theme .insta-avatar {
+  background: #121212;
+}
+
+.insta-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.insta-right-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.insta-nickname {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0;
+  word-break: break-word;
+  color: #000000;
+}
+
+body.dark-theme .insta-nickname {
+  color: #ffffff;
+}
+
+.insta-stats {
+  display: flex;
+  gap: 24px;
+  color: #1a1a1a;
+}
+
+body.dark-theme .insta-stats {
+  color: #ffffff;
+}
+
+.stat-item {
+  display: flex;
+  gap: 5px;
+  font-size: 0.95rem;
+}
+
+.stat-item strong {
+  font-weight: 700;
+}
+
+.insta-bio {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  white-space: pre-line;
+  word-break: break-word;
+  color: #1a1a1a;
+}
+
+body.dark-theme .insta-bio {
+  color: #ffffff;
+}
+
+.bio-link {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.bio-link:hover {
+  text-decoration: underline;
+}
+
+/* Кнопки действий */
+.insta-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.insta-actions button {
+  flex: 1;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+  text-align: center;
+}
+
+.btn-primary {
+  background-color: #0095f6;
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background-color: #1877f2;
+}
+
+.btn-secondary {
+  background-color: #efefef;
+  color: #000000;
+}
+
+.btn-secondary:hover {
+  background-color: #dbdbdb;
+}
+
+body.dark-theme .btn-secondary {
+  background-color: #262626;
+  color: #ffffff;
+}
+
+body.dark-theme .btn-secondary:hover {
+  background-color: #363636;
+}
+
+.profile-right {
+  width: 100%;
+  border-top: none !important; /* Убирает горизонтальную черту */
+  padding-top: 0 !important;   /* Убирает внутренний отступ сверху */
+  margin-top: 0 !important;    /* Убирает внешний отступ сверху */
+  height: auto;
+  overflow: visible;
+}
+
+.posts-header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.posts-header h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  color: #000000;
+}
+
+body.dark-theme .posts-header h2 {
+  color: #ffffff;
+}
+
+/* Контейнер постов без собственного скроллбара */
+.posts-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.post-card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  position: relative;
+}
+
+body.dark-theme .post-card {
+  background: #1e1e1e;
+  border-color: #333333;
+}
+
+.post-header {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+.post-content {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #000000;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  padding-right: 28px;
+}
+
+body.dark-theme .post-content {
+  color: #ffffff !important;
+}
+
+.post-footer {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+body.dark-theme .post-footer {
+  border-top-color: #2a2a2a;
+}
+
+.like-btn {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #999;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.like-btn.liked {
+  color: #ef4444;
+}
+
+.like-btn.liked svg {
+  fill: #ef4444;
+  stroke: #ef4444;
+}
+
+/* Мобильный адаптив */
+@media (max-width: 600px) {
+  .profile-two-columns {
+    padding: 70px 16px calc(80px + env(safe-area-inset-bottom, 0px)) 16px;
+  }
+
+  .insta-top-row {
+    gap: 16px;
+  }
+
+  .insta-avatar-wrapper {
+    width: 90px;
+    height: 90px;
+  }
+
+  .insta-stats {
+    gap: 14px;
+    font-size: 0.85rem;
+  }
+
+  .insta-nickname {
+    font-size: 1.2rem;
+  }
+}
+.profile-two-columns, 
+.profile-right {
+  display: flex;
+  align-items: flex-start; /* Заставляет высокие элементы расти только вниз */
+}
+
+/* ===== ФИКС АВАТАРКИ В ПРОФИЛЕ ===== */
+
+/* 1. Прижимаем аватарку к верхнему краю, чтобы она не съезжала от длинного БИО */
+.insta-top-row {
+  align-items: flex-start !important;
+}
+
+/* 2. Полностью убираем градиентное кольцо и рамку вокруг аватарки */
+.insta-avatar-wrapper {
+  padding: 0 !important;
+  background: none !important;
+}
+
+.insta-avatar {
+  border: none !important;
+}
+
+.bio-toggle-btn {
+  color: #8e8e8e;
+  cursor: pointer;
+  font-weight: 500;
+  margin-top: 4px;
+  display: inline-block;
+  font-size: 0.9em;
+  user-select: none;
+}
+
+.bio-toggle-btn:hover {
+  opacity: 0.8;
 }
