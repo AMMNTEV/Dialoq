@@ -385,19 +385,19 @@ body.dark-theme .edit-bio-counter {
   flex: 1;
   overflow-y: auto;
   scrollbar-gutter: stable; 
-  position: relative; /* Необходим для абсолютного позиционирования шапки */
-  padding: 80px 16px 80px 16px;
+  position: relative;
+  padding: 90px 16px 80px 16px; /* 14px top + 70px height + 6px gap */
   width: 100%;
   box-sizing: border-box;
 }
 
-/* Парящая шапка (точно как на profile.html) */
+/* Парящая шапка (полностью идентично profile.html) */
 .edit-header {
   position: absolute;
   top: 14px;
   left: 0;
   right: 0;
-  height: 60px;
+  height: 70px; /* Было 60px — приведено к 70px, как в profile */
   z-index: 100;
   padding: 0 16px;
   margin: 0;
@@ -406,7 +406,7 @@ body.dark-theme .edit-bio-counter {
   gap: 12px;
   box-sizing: border-box;
   width: 100%;
-  pointer-events: none; /* Пропускает клики сквозь свободное пространство */
+  pointer-events: none;
 }
 
 /* Заголовок шапки */
@@ -466,10 +466,20 @@ body.dark-theme .edit-header .back-btn {
   color: #ffffff;
 }
 
-/* ===== АДАПТИВ ===== */
-@media (max-width: 600px) {
+/* ===== АДАПТИВ (ПОД МОБИЛЬНЫЕ УСТРОЙСТВА) ===== */
+@media (max-width: 768px) {
+  .edit-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    padding: 0 16px;
+    margin: 0;
+  }
+
   .edit-container {
-    padding: 70px 16px calc(80px + env(safe-area-inset-bottom, 0px)) 16px;
+    padding: 76px 16px calc(80px + env(safe-area-inset-bottom, 0px)) 16px;
   }
 
   .edit-avatar-wrapper {
