@@ -1,6 +1,6 @@
 // ========== РЕДАКТИРОВАНИЕ ПРОФИЛЯ ==========
-let currentUser = null;
-let currentUserData = {};
+currentUser = null;
+currentUserData = {};
 let isSubmitting = false;
 let tagCheckTimeout = null;
 let isTagAvailable = true;
