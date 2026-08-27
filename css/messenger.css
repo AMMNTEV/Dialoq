@@ -2076,9 +2076,3 @@ a:focus {
   background-color: #dc2626 !important; /* Чуть более темный красный */
   box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3) !important;
 }
-
-/* --- Белые имена участников --- */
-.group-participants-list,
-.group-participants-list * {
-  color: #ffffff !important; /* Принудительно делаем весь текст внутри списка белым */
-}
