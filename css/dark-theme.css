@@ -1187,5 +1187,75 @@ a:focus {
 }
 
 /* ==========================================
+   ИСПРАВЛЕНИЕ МОДАЛЬНОГО ОКНА БЕСЕДЫ (TG-MODAL)
+   ========================================== */
+
+/* Контейнер модального окна и центральный блок */
+.dark-theme .tg-modal-content {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.dark-theme .tg-section-box {
+  background: var(--bg-tertiary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+/* Кнопка "Добавить участников" (текст и иконка) */
+.dark-theme .tg-add-member-btn {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .tg-add-member-btn svg {
+  stroke: var(--text-primary) !important;
+}
+
+.dark-theme .tg-add-member-btn:hover {
+  color: var(--accent-hover) !important;
+}
+
+.dark-theme .tg-add-member-btn:hover svg {
+  stroke: var(--accent-hover) !important;
+}
+
+/* Список участников и их имена */
+.dark-theme .group-participants-list,
+.dark-theme .group-participants-list *,
+.dark-theme .tg-group-name {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .tg-group-count {
+  color: var(--text-secondary) !important;
+}
+
+/* Белые кнопки действий ("Покинуть беседу", "Удалить беседу") */
+.dark-theme .tg-actions-section .tg-action-btn,
+.dark-theme .tg-action-btn {
+  background: var(--bg-tertiary) !important;
+  border: 1px solid var(--border-color) !important;
+  color: #ef4444 !important;
+}
+
+.dark-theme .tg-actions-section .tg-action-btn svg,
+.dark-theme .tg-action-btn svg {
+  stroke: #ef4444 !important;
+}
+
+.dark-theme .tg-actions-section .tg-action-btn:hover,
+.dark-theme .tg-action-btn:hover {
+  background: rgba(184, 74, 74, 0.18) !important;
+  border-color: rgba(184, 74, 74, 0.3) !important;
+  color: #f87171 !important;
+}
+
+/* Поле поиска участников в режиме добавления */
+.dark-theme .tg-add-header input {
+  background: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* ==========================================
    КОНЕЦ DARK THEME
    ========================================== */
