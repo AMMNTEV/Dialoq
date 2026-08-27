@@ -3376,3 +3376,19 @@ body.dark-theme .tg-modal-header .tg-group-name {
     padding-top: 76px !important; /* 64px высота поиска + 12px отступ */
   }
 }
+
+/* ==========================================
+   ФИНАЛЬНЫЕ ПРАВКИ: ВЫРАВНИВАНИЕ ПОИСКА И УДАЛЕНИЕ ПОЛОСОК
+   ========================================== */
+
+/* 1. Выравниваем поиск по высоте карточки собеседника (48px) */
+.search-box input {
+  height: 48px !important;
+  min-height: 48px !important;
+}
+
+/* 2. Принудительно отключаем нижнюю границу-полоску у шапки чата */
+.chat-header {
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
