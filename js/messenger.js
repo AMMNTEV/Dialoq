@@ -1360,6 +1360,7 @@ async function openChatInfo(chatId) {
   document.getElementById('groupInfoName').textContent = selectedChat.displayName || t('defaultGroupName');
   document.getElementById('groupParticipants').innerHTML = `<div class="loading">${t('loading')}</div>`;
   document.getElementById('groupInfoModal').style.display = 'flex';
+  history.pushState({ modal: 'groupInfo' }, '', window.location.href);
 
   try {
     const chatDoc = await db.collection('chats').doc(chatId).get();
@@ -1695,6 +1696,23 @@ function exitChatMode() {
 }
 
 window.addEventListener('popstate', function(event) {
+  // 1. Проверяем, открыто ли окно создания беседы
+  const createModal = document.getElementById('createGroupModal');
+  if (createModal && createModal.style.display === 'flex') {
+    createModal.style.display = 'none';
+    document.body.style.overflow = '';
+    return; // Останавливаем выполнение, так как свайп уже отработал
+  }
+
+  // 2. Проверяем, открыто ли окно информации о беседе
+  const infoModal = document.getElementById('groupInfoModal');
+  if (infoModal && infoModal.style.display === 'flex') {
+    hideAddParticipantsView();
+    infoModal.style.display = 'none';
+    return;
+  }
+
+  // 3. Старая логика (если окна закрыты, выходим из чата)
   if (isChatMode) exitChatMode();
 });
 
@@ -1924,6 +1942,10 @@ hideGroupInfoModal = function() {
   } else {
     document.getElementById('groupInfoModal').style.display = 'none';
   }
+
+  if (history.state && history.state.modal === 'groupInfo') {
+    history.back();
+  }
 };
 
 // Добавляем обработчик для закрытия модалки по клику вне её
@@ -1939,13 +1961,15 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-// Функция показа модального окна с корректным z-index
 window.showCreateGroupModal = function() {
   const modal = document.getElementById('createGroupModal');
   if (modal) {
     modal.style.display = 'flex';
     modal.style.zIndex = '9999';
     document.body.style.overflow = 'hidden';
+    
+    // Добавляем состояние в историю при открытии
+    history.pushState({ modal: 'createGroup' }, '', window.location.href);
   }
 };
 
@@ -1954,5 +1978,10 @@ window.hideCreateGroupModal = function() {
   if (modal) {
     modal.style.display = 'none';
     document.body.style.overflow = '';
+    
+    // Если закрыли кнопкой (а не свайпом), убираем фиктивную запись
+    if (history.state && history.state.modal === 'createGroup') {
+      history.back();
+    }
   }
 };
