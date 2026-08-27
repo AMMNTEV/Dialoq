@@ -1917,7 +1917,10 @@ body.dark-theme .post-footer {
     gap: 16px;
   }
 
-
+  .insta-avatar-wrapper {
+    width: 90px;
+    height: 90px;
+  }
 
   .insta-stats {
     gap: 14px;
