@@ -444,7 +444,7 @@ function listenForChats() {
 
           if (chat.isGroup) {
             chatName = chat.name || t('defaultGroupName');
-            chatAvatar = '👥';
+            chatAvatar = '';
             chatImage = chat.avatar || chat.bitmap || chat.photo || chat.profileImage || null;
           } else {
   const otherUserId = chat.participants.find(id => id !== currentUser.uid);
@@ -1372,7 +1372,7 @@ async function openChatInfo(chatId) {
       if (chat.avatar) {
         avatarDiv.innerHTML = `<img src="${chat.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
       } else {
-        avatarDiv.innerHTML = chat.name ? chat.name.charAt(0).toUpperCase() : '👥';
+        avatarDiv.innerHTML = chat.name ? chat.name.charAt(0).toUpperCase() : '';
       }
     }
 
@@ -1923,5 +1923,36 @@ hideGroupInfoModal = function() {
     originalHideGroupInfoModal();
   } else {
     document.getElementById('groupInfoModal').style.display = 'none';
+  }
+};
+
+// Добавляем обработчик для закрытия модалки по клику вне её
+document.addEventListener('DOMContentLoaded', function() {
+  // Закрытие модального окна при клике на оверлей
+  const modal = document.getElementById('createGroupModal');
+  if (modal) {
+    modal.addEventListener('click', function(e) {
+      if (e.target === this) {
+        hideCreateGroupModal();
+      }
+    });
+  }
+});
+
+// Функция показа модального окна с корректным z-index
+window.showCreateGroupModal = function() {
+  const modal = document.getElementById('createGroupModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.style.zIndex = '9999';
+    document.body.style.overflow = 'hidden';
+  }
+};
+
+window.hideCreateGroupModal = function() {
+  const modal = document.getElementById('createGroupModal');
+  if (modal) {
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
   }
 };
