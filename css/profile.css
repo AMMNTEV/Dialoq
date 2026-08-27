@@ -1953,3 +1953,17 @@ body.dark-theme .post-footer {
 .insta-avatar {
   border: none !important;
 }
+
+.bio-toggle-btn {
+  color: #8e8e8e;
+  cursor: pointer;
+  font-weight: 500;
+  margin-top: 4px;
+  display: inline-block;
+  font-size: 0.9em;
+  user-select: none;
+}
+
+.bio-toggle-btn:hover {
+  opacity: 0.8;
+}
