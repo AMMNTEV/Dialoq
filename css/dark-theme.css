@@ -1099,6 +1099,59 @@ a:focus {
 .dark-theme .danger-title {
   color: #ef4444 !important;
 }
+
+/* ========== ТЁМНАЯ ТЕМА ========== */
+.dark-theme .tg-modal-content {
+  background: #17212b;
+  color: #ffffff;
+}
+
+.dark-theme .tg-back-btn {
+  color: #6c7883;
+}
+
+.dark-theme .tg-back-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.dark-theme .tg-modal-body {
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.dark-theme .tg-avatar {
+  background: #2b3948;
+}
+
+.dark-theme .tg-group-name {
+  color: #ffffff;
+}
+
+.dark-theme .tg-group-count {
+  color: #7f91a4;
+}
+
+.dark-theme .tg-section-box {
+  background: #0e1621;
+}
+
+.dark-theme .tg-add-member-btn {
+  color: #5288c1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dark-theme .tg-cancel-btn {
+  color: #5288c1;
+}
+
+.dark-theme .tg-action-btn.tg-danger {
+  background: #0e1621;
+  color: #e53935;
+}
+
+.dark-theme .tg-action-btn.tg-danger:hover {
+  background: rgba(229, 57, 53, 0.12);
+}
 /* ==========================================
    КОНЕЦ DARK THEME
    ========================================== */

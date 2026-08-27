@@ -1893,14 +1893,15 @@ a:focus {
   background: rgba(255, 255, 255, 0.35);
 }
 
-/* Модальное окно Telegram Style */
+/* ========== СВЕТЛАЯ ТЕМА ========== */
 .tg-modal-content {
   max-width: 420px;
   border-radius: 16px;
   padding: 0;
   overflow: hidden;
-  background: #17212b;
-  color: #fff;
+  background: #ffffff;
+  color: #000000;
+  box-shadow: none !important;
 }
 
 .tg-modal-header {
@@ -1912,7 +1913,7 @@ a:focus {
 .tg-back-btn {
   background: transparent;
   border: none;
-  color: #6c7883;
+  color: #707579;
   cursor: pointer;
   padding: 6px;
   border-radius: 50%;
@@ -1923,8 +1924,8 @@ a:focus {
 }
 
 .tg-back-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
+  background: rgba(0, 0, 0, 0.05);
+  color: #000000;
 }
 
 .tg-modal-body {
@@ -1932,7 +1933,7 @@ a:focus {
   max-height: 80vh;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 }
 
 /* Профиль группы */
@@ -1947,7 +1948,7 @@ a:focus {
   width: 90px;
   height: 90px;
   border-radius: 50%;
-  background: #2b3948;
+  background: #f0f2f5;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1961,19 +1962,19 @@ a:focus {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: #fff;
+  color: #000000;
   text-align: center;
 }
 
 .tg-group-count {
   font-size: 0.85rem;
-  color: #7f91a4;
+  color: #707579;
   margin-top: 4px;
 }
 
 /* Блок списков */
 .tg-section-box {
-  background: #0e1621;
+  background: #f4f4f5;
   border-radius: 12px;
   padding: 8px 12px;
   margin-bottom: 16px;
@@ -1983,7 +1984,7 @@ a:focus {
   width: 100%;
   background: transparent;
   border: none;
-  color: #5288c1;
+  color: #3390ec;
   font-size: 0.95rem;
   font-weight: 500;
   padding: 10px 4px;
@@ -1991,7 +1992,7 @@ a:focus {
   align-items: center;
   gap: 12px;
   cursor: pointer;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   transition: opacity 0.2s;
 }
 
@@ -2009,7 +2010,7 @@ a:focus {
 .tg-cancel-btn {
   background: transparent;
   border: none;
-  color: #5288c1;
+  color: #3390ec;
   cursor: pointer;
   font-size: 0.9rem;
   padding: 6px 8px;
@@ -2037,10 +2038,23 @@ a:focus {
 }
 
 .tg-action-btn.tg-danger {
-  background: #0e1621;
+  background: #f4f4f5;
   color: #e53935;
 }
 
 .tg-action-btn.tg-danger:hover {
-  background: rgba(229, 57, 53, 0.12);
+  background: rgba(229, 57, 53, 0.08);
+}
+
+.tg-action-btn,
+.tg-cancel-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  gap: 8px;
+}
+
+.modal-content {
+  box-shadow: none !important;
 }
