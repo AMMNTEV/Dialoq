@@ -2406,3 +2406,231 @@ a:focus {
     z-index: 100 !important;
   }
 }
+
+/* ==========================================
+   ИСПРАВЛЕНИЕ - МОДАЛЬНЫЕ ОКНА НА ВЕСЬ ЭКРАН (МОБИЛКИ)
+   ========================================== */
+
+@media (max-width: 768px) {
+  /* Все модальные окна - на весь экран */
+  .modal {
+    padding: 0 !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+    z-index: 9999 !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+  }
+  
+  .modal-content,
+  .tg-modal-content {
+    width: 100% !important;
+    height: 100vh !important;
+    height: -webkit-fill-available !important;
+    height: 100dvh !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: #ffffff !important;
+    position: relative !important;
+  }
+  
+  .dark-theme .modal-content,
+  .dark-theme .tg-modal-content {
+    background: #0a0c10 !important;
+  }
+  
+  /* Шапка модалки - фиксированная сверху */
+  .tg-modal-header {
+    padding: 12px 16px !important;
+    flex-shrink: 0 !important;
+    background: transparent !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+    z-index: 10 !important;
+    min-height: 56px !important;
+  }
+  
+  .dark-theme .tg-modal-header {
+    border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+  }
+  
+  /* Тело модалки - скроллится, занимает всё оставшееся место */
+  .modal-body,
+  .tg-modal-body {
+    flex: 1 1 auto !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    padding: 16px 16px calc(24px + env(safe-area-inset-bottom, 24px)) !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  /* Убираем лишние отступы у секций */
+  .tg-section-box {
+    margin-bottom: 16px !important;
+  }
+  
+  /* Кнопка "Создать" внизу */
+  .modal-save-btn {
+    margin-top: 16px !important;
+    width: 100% !important;
+    padding: 14px !important;
+  }
+  
+  /* Список участников в модалке */
+  .users-checkbox-list {
+    max-height: 250px !important;
+  }
+  
+  /* Убираем дырку под нижней панелью - контент не должен перекрываться */
+  .chats-list {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  
+  /* Мобильная нижняя панель - фон непрозрачный */
+  .mobile-bottom-nav {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.05) !important;
+  }
+  
+  .dark-theme .mobile-bottom-nav {
+    background: rgba(22, 25, 32, 0.95) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.3) !important;
+  }
+}
+
+/* ==========================================
+   ИСПРАВЛЕНИЕ ДЛЯ #groupInfoModal (информация о беседе)
+   ========================================== */
+
+@media (max-width: 768px) {
+  #groupInfoModal .modal-content,
+  #groupInfoModal .tg-modal-content {
+    height: 100vh !important;
+    height: -webkit-fill-available !important;
+    height: 100dvh !important;
+  }
+  
+  #groupInfoModal .tg-profile-section {
+    padding-top: 8px !important;
+  }
+  
+  #groupInfoModal .tg-avatar {
+    width: 80px !important;
+    height: 80px !important;
+    font-size: 2rem !important;
+  }
+  
+  #groupInfoModal .tg-group-name {
+    font-size: 1.1rem !important;
+  }
+  
+  /* Кнопки действий внизу модалки */
+  #groupInfoModal .tg-actions-section {
+    padding-bottom: env(safe-area-inset-bottom, 20px) !important;
+  }
+  
+  #groupInfoModal .tg-action-btn {
+    padding: 14px 16px !important;
+    font-size: 1rem !important;
+  }
+}
+
+/* ==========================================
+   ИСПРАВЛЕНИЕ ДЛЯ #createGroupModal (создание беседы)
+   ========================================== */
+
+@media (max-width: 768px) {
+  #createGroupModal .modal-content,
+  #createGroupModal .tg-modal-content {
+    height: 100vh !important;
+    height: -webkit-fill-available !important;
+    height: 100dvh !important;
+  }
+  
+  #createGroupModal .modal-input {
+    font-size: 1rem !important;
+    padding: 14px 16px !important;
+  }
+  
+  #createGroupModal .search-input {
+    font-size: 1rem !important;
+    padding: 12px 16px !important;
+  }
+  
+  #createGroupModal .users-checkbox-list {
+    max-height: 200px !important;
+  }
+  
+  #createGroupModal .user-checkbox {
+    padding: 12px !important;
+  }
+  
+  #createGroupModal .user-checkbox span {
+    font-size: 1rem !important;
+  }
+}
+
+/* ==========================================
+   УБИРАЕМ ДЫРКУ ПОД НИЖНЕЙ ПАНЕЛЬЮ НАВИГАЦИИ
+   ========================================== */
+
+/* Убеждаемся, что фон под панелью есть */
+.mobile-bottom-nav {
+  z-index: 1005 !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.04) !important;
+}
+
+.dark-theme .mobile-bottom-nav {
+  background: rgba(22, 25, 32, 0.92) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Дополнительный фон под панелью для iOS */
+body {
+  background-color: #ffffff !important;
+}
+
+.dark-theme body {
+  background-color: #0a0c10 !important;
+}
+
+/* Модальные окна на весь экран */
+.modal-fullscreen .modal-content,
+.modal-fullscreen .tg-modal-content {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+}
+
+@media (max-width: 768px) {
+  .modal-fullscreen {
+    padding: 0 !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+  }
+  
+  .modal-fullscreen .modal-content,
+  .modal-fullscreen .tg-modal-content {
+    width: 100% !important;
+    height: 100vh !important;
+    height: -webkit-fill-available !important;
+    height: 100dvh !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+  }
+}
