@@ -72,7 +72,7 @@ onAuthStateChanged(async (user) => {
       if (headerTagEl) headerTagEl.textContent = userData.tag || '';
 
       const bioEl = document.getElementById('userBio');
-      if (bioEl) bioEl.innerHTML = parseBioLinks(userData.bio || '');
+      if (bioEl) renderBio(bioEl, userData.bio || '');
 
       // Счетчики подписок
       const followers = userData.followers || [];
@@ -275,4 +275,49 @@ function parseBioLinks(text) {
     const href = url.startsWith('http') ? url : `https://${url}`;
     return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="bio-link">${url}</a>`;
   });
+}
+
+function renderBio(container, text) {
+  if (!container) return;
+  if (!text) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const lines = text.split('\n');
+  
+  // Если строк 3 или меньше — выводим целиком
+  if (lines.length <= 3) {
+    container.innerHTML = parseBioLinks(text);
+    return;
+  }
+
+  // Если больше 3 строк — создаем сокращенную и полную версии
+  const shortText = lines.slice(0, 3).join('\n');
+
+  container.innerHTML = `
+    <div class="bio-short">
+      ${parseBioLinks(shortText)}
+      <div class="bio-toggle-btn" onclick="toggleBio(this, 'full')">${t('bioMore')}</div>
+    </div>
+    <div class="bio-full" style="display: none;">
+      ${parseBioLinks(text)}
+      <div class="bio-toggle-btn" onclick="toggleBio(this, 'short')">${t('bioHide')}</div>
+    </div>
+  `;
+}
+
+function toggleBio(btn, mode) {
+  const parent = btn.closest('.insta-bio');
+  if (!parent) return;
+  const shortDiv = parent.querySelector('.bio-short');
+  const fullDiv = parent.querySelector('.bio-full');
+
+  if (mode === 'full') {
+    shortDiv.style.display = 'none';
+    fullDiv.style.display = 'block';
+  } else {
+    shortDiv.style.display = 'block';
+    fullDiv.style.display = 'none';
+  }
 }
