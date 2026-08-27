@@ -669,12 +669,21 @@ function searchUsersInCreate() {
   const usersList = document.getElementById('usersListModal');
   if (!usersList) return;
 
+  // 1. Показываем сообщение о взаимной подписке, если строка пуста
   if (!searchText) { 
-    usersList.innerHTML = `<div class="no-users">${t('startTypingToSearch')}</div>`;
+    usersList.innerHTML = `<div class="no-users">${t('searchMutualOnly')}</div>`;
     return; 
   }
 
-  const filtered = allUsersForModal.filter(user =>
+  // 2. Оставляем только пользователей со взаимной подпиской
+  const mutualUsers = allUsersForModal.filter(user => {
+    const userFollowers = user.followers || [];
+    const userFollowing = user.following || [];
+    return userFollowers.includes(currentUser.uid) && userFollowing.includes(currentUser.uid);
+  });
+
+  // 3. Выполняем поиск среди взаимных друзей
+  const filtered = mutualUsers.filter(user =>
     (user.nickname && user.nickname.toLowerCase().includes(searchText)) ||
     (user.tag && user.tag.toLowerCase().includes(searchText))
   );
@@ -686,7 +695,6 @@ function searchUsersInCreate() {
 
   let html = '';
   filtered.forEach(user => {
-    // Проверяем, есть ли ID в нашем глобальном хранилище
     const isChecked = selectedUsersForCreate.has(user.id) ? 'checked' : '';
     html += `<label class="user-checkbox"><input type="checkbox" value="${user.id}" onchange="toggleUserSelection('${user.id}', this.checked, 'create')" ${isChecked}><span>${user.nickname} ${user.tag}</span></label>`;
   });
@@ -1293,11 +1301,17 @@ async function sendMessage() {
 
 // ========== СОЗДАНИЕ ГРУППЫ ==========
 function showCreateGroupModal() {
-  selectedUsersForCreate.clear(); // Очищаем выбранных людей перед открытием окна
+  selectedUsersForCreate.clear();
   const usersList = document.getElementById('usersListModal');
   if (!usersList) return;
+  
+  // Очищаем поля ввода
   document.getElementById('searchUsersInCreate').value = '';
-  usersList.innerHTML = `<div class="no-users">${t('startTypingToSearch')}</div>`;
+  document.getElementById('groupName').value = ''; 
+  
+  // Устанавливаем стартовую заглушку-предупреждение
+  usersList.innerHTML = `<div class="no-users">${t('searchMutualOnly')}</div>`;
+  
   document.getElementById('createGroupModal').style.display = 'flex';
 }
 function hideCreateGroupModal() {
