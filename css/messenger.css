@@ -3320,3 +3320,23 @@ body.dark-theme .tg-modal-header .tg-group-name {
     box-sizing: border-box;
   }
 }
+
+@media (max-width: 768px) {
+  /* 1. Скрываем просвечивающую линию от заголовка под поиском */
+  .chats-header {
+    border-bottom: none !important;
+  }
+
+  /* 2. Синхронизируем позицию и высоту поиска с шапкой чата (.chat-header) */
+  .search-box {
+    top: 0 !important;         /* Сбрасываем унаследованные 14px */
+    height: 64px !important;   /* Уравниваем с высотой шапки чата */
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  /* 3. Слегка увеличиваем отступ списка, чтобы первый чат не залезал под поиск */
+  .chats-list {
+    padding-top: 72px !important;
+  }
+}
