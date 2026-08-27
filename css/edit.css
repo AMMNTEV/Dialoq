@@ -501,3 +501,16 @@ body.dark-theme .edit-header .back-btn {
     padding: 14px;
   }
 }
+
+#tagStatus,
+#tagStatus.edit-tag-status,
+.edit-tag-status.loading,
+.edit-tag-status.available,
+.edit-tag-status.unavailable {
+  display: block !important;
+  text-align: left !important;
+  width: 100% !important;
+  margin: 4px 0 0 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
