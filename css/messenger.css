@@ -1720,7 +1720,7 @@ a:focus {
 
 /* 4. Сдвигаем сообщения вверх, чтобы они плавно уходили под парящую панель ввода */
 .messages-container {
-  /* Компенсируем высоту панели (48px) + отступ снизу (16px) */
+  /* Компенсируем высоту panel (48px) + отступ снизу (16px) */
   padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
@@ -2007,13 +2007,30 @@ a:focus {
   margin-bottom: 10px;
 }
 
+/* ==========================================
+   ОБНОВЛЕНИЕ: КНОПКА ОТМЕНЫ
+   ========================================== */
 .tg-cancel-btn {
-  background: transparent;
+  width: 100%;
+  background: #f1f5f9;
   border: none;
-  color: #3390ec;
+  color: #64748b;
+  border-radius: 12px;
   cursor: pointer;
-  font-size: 0.9rem;
-  padding: 6px 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 12px 16px;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  margin: 12px auto 0 auto;
+  transition: background 0.2s, color 0.2s;
+}
+
+.tg-cancel-btn:hover {
+  background: #e2e8f0;
+  color: #334155;
 }
 
 /* Кнопки действий внизу */
@@ -2046,8 +2063,7 @@ a:focus {
   background: rgba(229, 57, 53, 0.08);
 }
 
-.tg-action-btn,
-.tg-cancel-btn {
+.tg-action-btn {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -2139,4 +2155,48 @@ a:focus {
 .dark-theme .group-participants-list,
 .dark-theme .group-participants-list * {
   color: #ffffff !important;
+}
+
+/* ==========================================
+   ОБНОВЛЕНИЕ: КНОПКА ОТМЕНЫ (ТЁМНАЯ ТЕМА)
+   ========================================== */
+.dark-theme .tg-cancel-btn {
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+}
+.dark-theme .tg-cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+/* ==========================================
+   ОБНОВЛЕНИЕ: ПОЛНОЭКРАННЫЕ МОДАЛЬНЫЕ ОКНА (МОБИЛКИ)
+   ========================================== */
+@media (max-width: 768px) {
+  .modal {
+    padding: 0 !important;
+    align-items: flex-start !important; /* Окно прижимается к верху */
+  }
+  
+  .modal-content, 
+  .tg-modal-content {
+    width: 100% !important;
+    height: 100vh !important;
+    height: -webkit-fill-available;
+    height: 100dvh !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .modal-body,
+  .tg-modal-body {
+    flex: 1 1 auto !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    /* Увеличиваем отступ снизу, чтобы элементы не прятались за системным баром */
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 24px)) !important;
+  }
 }
