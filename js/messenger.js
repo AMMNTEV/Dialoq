@@ -1395,7 +1395,6 @@ for (const { userId, userData } of participantsData) {
   if (userData) {
     const isCreator = userId === chat.createdBy ? ' (создатель)' : '';
     
-    // Кнопку удаления видит только администратор, и он не может исключить сам себя
     const canRemove = isCurrentUserAdmin && userId !== chat.createdBy;
 
     participantsHTML += `<li>
@@ -1949,13 +1948,24 @@ hideGroupInfoModal = function() {
 };
 
 // Добавляем обработчик для закрытия модалки по клику вне её
+// Добавляем обработчик для закрытия модалок по клику вне их области
 document.addEventListener('DOMContentLoaded', function() {
-  // Закрытие модального окна при клике на оверлей
-  const modal = document.getElementById('createGroupModal');
-  if (modal) {
-    modal.addEventListener('click', function(e) {
+  // Закрытие окна создания беседы
+  const createModal = document.getElementById('createGroupModal');
+  if (createModal) {
+    createModal.addEventListener('click', function(e) {
       if (e.target === this) {
         hideCreateGroupModal();
+      }
+    });
+  }
+
+  // Закрытие окна информации/управления беседой
+  const infoModal = document.getElementById('groupInfoModal');
+  if (infoModal) {
+    infoModal.addEventListener('click', function(e) {
+      if (e.target === this) {
+        hideGroupInfoModal();
       }
     });
   }
