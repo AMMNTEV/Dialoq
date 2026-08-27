@@ -1287,11 +1287,18 @@ async function createGroupChat() {
 // ========== ИНФОРМАЦИЯ О ГРУППЕ ==========
 async function openChatInfo(chatId) {
   if (!selectedChat || !selectedChat.isGroup) return;
+
+  // 1. СРАЗУ показываем модальное окно с индикатором загрузки
+  document.getElementById('groupInfoName').textContent = selectedChat.displayName || t('defaultGroupName');
+  document.getElementById('groupParticipants').innerHTML = `<div class="loading">${t('loading')}</div>`;
+  document.getElementById('groupInfoModal').style.display = 'flex';
+
   try {
     const chatDoc = await db.collection('chats').doc(chatId).get();
     const chat = chatDoc.data();
     selectedChat = { ...selectedChat, participants: chat.participants, name: chat.name };
 
+    // Установка аватарки
     const avatarDiv = document.getElementById('groupInfoAvatar');
     if (avatarDiv) {
       if (chat.avatar) {
@@ -1301,9 +1308,19 @@ async function openChatInfo(chatId) {
       }
     }
 
-    let participantsHTML = '<ul class="participants-list">';
-    for (const userId of chat.participants) {
+    document.getElementById('groupInfoName').textContent = chat.name || t('defaultGroupName');
+
+    // 2. ПАРАЛЛЕЛЬНАЯ загрузка всех участников через Promise.all
+    const participantPromises = chat.participants.map(async (userId) => {
       const userData = await getUserById(userId);
+      return { userId, userData };
+    });
+
+    const participantsData = await Promise.all(participantPromises);
+
+    // 3. Формирование списка участников за один раз
+    let participantsHTML = '<ul class="participants-list">';
+    for (const { userId, userData } of participantsData) {
       if (userData) {
         const isCreator = userId === chat.createdBy ? ' (создатель)' : '';
         const canRemove = userId !== currentUser.uid && userId !== chat.createdBy;
@@ -1315,32 +1332,29 @@ async function openChatInfo(chatId) {
     }
     participantsHTML += '</ul>';
 
-    document.getElementById('groupInfoName').textContent = chat.name || t('defaultGroupName');
     document.getElementById('groupParticipants').innerHTML = participantsHTML;
 
+    // Управление кнопками Выйти / Удалить
     const leaveBtn = document.getElementById('leaveGroupBtn');
-    if (chat.createdBy === currentUser.uid) {
-      leaveBtn.style.display = 'none';
-    } else {
-      leaveBtn.style.display = 'block';
+    if (leaveBtn) {
+      leaveBtn.style.display = chat.createdBy === currentUser.uid ? 'none' : 'block';
     }
 
     document.getElementById('searchUsersToAdd').value = '';
     document.getElementById('addParticipantsList').innerHTML = `<div class="no-users">${t('searchMutualOnly')}</div>`;
-    selectedUsersForAdd.clear(); // Очищаем список добавления
+    selectedUsersForAdd.clear();
 
     const deleteBtn = document.getElementById('deleteGroupBtn');
-    if (chat.createdBy === currentUser.uid) {
-      deleteBtn.style.display = 'inline-block';
-    } else {
-      deleteBtn.style.display = 'none';
+    if (deleteBtn) {
+      deleteBtn.style.display = chat.createdBy === currentUser.uid ? 'inline-block' : 'none';
     }
 
-    document.getElementById('groupInfoModal').style.display = 'flex';
   } catch (error) {
     console.error('Ошибка загрузки информации о беседе:', error);
+    document.getElementById('groupParticipants').innerHTML = '<div class="error">Ошибка загрузки</div>';
   }
 }
+
 function hideGroupInfoModal() {
   document.getElementById('groupInfoModal').style.display = 'none';
 }
