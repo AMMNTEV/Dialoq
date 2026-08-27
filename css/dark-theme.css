@@ -1256,6 +1256,68 @@ a:focus {
   border-color: var(--border-color) !important;
 }
 
+/* Имена участников в списках, модалках и чекбоксах */
+.dark-theme .group-participants-list,
+.dark-theme .group-participants-list *,
+.dark-theme .participants-list li,
+.dark-theme .user-checkbox span,
+.dark-theme .chat-member-name,
+.dark-theme .tg-group-name,
+.dark-theme .tg-add-member-btn {
+  color: #ffffff !important;
+}
+
+/* Иконка плюс / добавить */
+.dark-theme .tg-add-member-btn svg,
+.dark-theme .add-participant-btn svg {
+  stroke: #ffffff !important;
+}
+
+/* Все варианты кнопок выхода, удаления и покидания беседы */
+.dark-theme .modal-leave-btn,
+.dark-theme .tg-action-btn,
+.dark-theme .tg-actions-section .tg-action-btn,
+.dark-theme .chat-info-leave-btn,
+.dark-theme .modal-delete-btn,
+.dark-theme .modal-option-btn.delete,
+.dark-theme .settings-danger-btn,
+.dark-theme .nav-button.logout-btn,
+.dark-theme .popup-item.logout {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #ef4444 !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+}
+
+.dark-theme .modal-leave-btn:hover,
+.dark-theme .tg-action-btn:hover,
+.dark-theme .tg-actions-section .tg-action-btn:hover,
+.dark-theme .chat-info-leave-btn:hover,
+.dark-theme .modal-delete-btn:hover,
+.dark-theme .modal-option-btn.delete:hover,
+.dark-theme .settings-danger-btn:hover,
+.dark-theme .nav-button.logout-btn:hover,
+.dark-theme .popup-item.logout:hover {
+  background: rgba(239, 68, 68, 0.28) !important;
+  color: #fca5a5 !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+}
+
+/* Красный цвет для иконок внутри этих кнопок */
+.dark-theme .tg-action-btn svg,
+.dark-theme .modal-leave-btn svg,
+.dark-theme .logout-btn svg {
+  stroke: #ef4444 !important;
+}
+
+/* Сделать контейнер списка участников чуть светлее основного фона модалки (#161920) */
+.dark-theme .group-participants-list,
+.dark-theme .users-checkbox-list,
+.dark-theme .group-info-section,
+.dark-theme .tg-section-box {
+  background-color: #1e2430 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
 /* ==========================================
    КОНЕЦ DARK THEME
    ========================================== */
