@@ -163,47 +163,48 @@
   </div>
 
 <!-- Модальное окно информации о беседе -->
-  <div id="groupInfoModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 id="groupInfoName" data-i18n="groupInfoTitle">Информация о беседе</h3>
-        <button onclick="hideGroupInfoModal()" class="modal-close">&times;</button>
+<div id="groupInfoModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="groupInfoName" data-i18n="groupInfoTitle">Информация о беседе</h3>
+      <button onclick="hideGroupInfoModal()" class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="group-avatar-section" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
+        <div class="avatar-large" id="groupInfoAvatar" style="width: 100px; height: 100px; border-radius: 50%; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; cursor: pointer; overflow: hidden; border: 2px solid #333;" onclick="document.getElementById('groupAvatarInput').click()">
+          👥
+        </div>
+        <input type="file" id="groupAvatarInput" accept="image/png, image/jpeg, image/webp" style="display: none;">
+        <span data-i18n="clickToChange" style="font-size: 0.8rem; color: #888; margin-top: 8px; cursor: pointer;" onclick="document.getElementById('groupAvatarInput').click()">
+          Нажмите, чтобы изменить
+        </span>
       </div>
-      <div class="modal-body">
-        <div class="group-avatar-section" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
-          <div class="avatar-large" id="groupInfoAvatar" style="width: 100px; height: 100px; border-radius: 50%; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; cursor: pointer; overflow: hidden; border: 2px solid #333;" onclick="document.getElementById('groupAvatarInput').click()">
-            👥
-          </div>
-          <input type="file" id="groupAvatarInput" accept="image/png, image/jpeg, image/webp" style="display: none;">
-          <span data-i18n="clickToChange" style="font-size: 0.8rem; color: #888; margin-top: 8px; cursor: pointer;" onclick="document.getElementById('groupAvatarInput').click()">
-            Нажмите, чтобы изменить
-          </span>
-        </div>
 
-        <div class="group-info-section">
-          <h4 data-i18n="participantsTitle">Участники:</h4>
-          <div id="groupParticipants" class="group-participants-list"></div>
-          <button onclick="leaveCurrentGroup()" id="leaveGroupBtn" class="modal-leave-btn" style="display: inline-flex; align-items: center; gap: 8px;">
-            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-            <span data-i18n="leaveGroupBtn">Покинуть беседу</span>
-          </button>
-        </div>
-
-        <div class="group-info-section">
-          <h4 data-i18n="addParticipantsTitle">Добавить участников:</h4>
-          <input type="text" id="searchUsersToAdd" data-i18n-placeholder="searchUsersPlaceholder" placeholder="Поиск пользователей..." class="search-input" onkeyup="searchUsersToAdd()">
-          <div id="addParticipantsList" class="users-checkbox-list">
-            <div class="no-users" data-i18n="startTypingToSearch">Начните вводить имя для поиска</div>
-          </div>
-          <button onclick="addSelectedParticipants()" class="modal-save-btn" data-i18n="addSelectedBtn">Добавить выбранных</button>
-        </div>
+      <div class="group-info-section">
+        <h4 data-i18n="participantsTitle">Участники:</h4>
+        <div id="groupParticipants" class="group-participants-list"></div>
       </div>
-      <div class="modal-footer">
-        <button onclick="hideGroupInfoModal()" class="modal-cancel-btn" data-i18n="closeBtn">Закрыть</button>
-        <button onclick="deleteCurrentGroup()" id="deleteGroupBtn" class="modal-delete-btn" data-i18n="deleteGroupBtn">Удалить беседу</button>
+
+      <div class="group-info-section">
+        <h4 data-i18n="addParticipantsTitle">Добавить участников:</h4>
+        <input type="text" id="searchUsersToAdd" data-i18n-placeholder="searchUsersPlaceholder" placeholder="Поиск пользователей..." class="search-input" onkeyup="searchUsersToAdd()">
+        <div id="addParticipantsList" class="users-checkbox-list">
+          <div class="no-users" data-i18n="startTypingToSearch">Начните вводить имя для поиска</div>
+        </div>
+        <button onclick="addSelectedParticipants()" class="modal-save-btn" data-i18n="addSelectedBtn">Добавить выбранных</button>
       </div>
     </div>
+    
+    <div class="modal-footer">
+      <button onclick="leaveCurrentGroup()" id="leaveGroupBtn" class="modal-leave-btn">
+        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        <span data-i18n="leaveGroupBtn">Покинуть беседу</span>
+      </button>
+      <button onclick="hideGroupInfoModal()" class="modal-cancel-btn" data-i18n="closeBtn">Закрыть</button>
+      <button onclick="deleteCurrentGroup()" id="deleteGroupBtn" class="modal-delete-btn" data-i18n="deleteGroupBtn">Удалить беседу</button>
+    </div>
   </div>
+</div>
 
   <!-- Модальное окно для управления сообщением -->
   <div id="messageOptionsModal" class="modal">
