@@ -734,28 +734,33 @@
   color: var(--text-primary) !important;
 }
 
-/* --- Кнопка "Удалить аккаунт" (красная, как в светлой теме) --- */
+/* --- Кнопка подтверждения удаления (полупрозрачный тёмно-красный) --- */
 .dark-theme .settings-danger-btn,
-.dark-theme .modal-delete-btn {
-  background: #fee2e2 !important;
-  color: #dc2626 !important;
-  border: 1px solid transparent !important;
+.dark-theme .modal-delete-btn,
+.dark-theme .modal-option-btn.delete {
+  background: rgba(184, 74, 74, 0.18) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(184, 74, 74, 0.3) !important;
 }
 
 .dark-theme .settings-danger-btn:hover,
-.dark-theme .modal-delete-btn:hover {
-  background: #fecaca !important;
-  color: #b91c1c !important;
+.dark-theme .modal-delete-btn:hover,
+.dark-theme .modal-option-btn.delete:hover {
+  background: rgba(184, 74, 74, 0.3) !important;
+  color: #fca5a5 !important;
+  border-color: rgba(184, 74, 74, 0.5) !important;
 }
 
-/* --- Красная иконка и подложка в пункте удаления --- */
-.dark-theme .settings-item.danger .settings-item-icon,
-.dark-theme .settings-item-icon.danger,
-.dark-theme .danger .settings-item-icon {
-  background: #fee2e2 !important;
-  color: #dc2626 !important;
+/* --- Заголовок и описание в блоке удаления --- */
+.dark-theme .settings-item.danger .settings-item-title,
+.dark-theme .danger .settings-item-title {
+  color: #f87171 !important;
 }
 
+.dark-theme .settings-item.danger .settings-item-desc,
+.dark-theme .danger .settings-item-desc {
+  color: #9ca3af !important;
+}
 /* ==========================================
    НАСТРОЙКИ — ИСПРАВЛЕННАЯ СЕТКА И ФОНЫ
    ========================================== */
