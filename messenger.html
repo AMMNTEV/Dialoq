@@ -138,11 +138,11 @@
   </a>
 </nav>
 
-<div id="createGroupModal" class="modal">
+<div id="createGroupModal" class="modal" style="z-index: 9999;">
   <div class="modal-content tg-modal-content">
     
-    <!-- Шапка со стрелкой назад, скопированная из информации о группе -->
-    <div class="tg-modal-header">
+    <!-- Шапка со стрелкой назад, прозрачный фон -->
+    <div class="tg-modal-header" style="background: transparent !important;">
       <button onclick="hideCreateGroupModal()" class="tg-back-btn" aria-label="Назад">
         <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
@@ -159,11 +159,11 @@
         </div>
 
         <!-- Поиск и добавление участников -->
-        <div class="tg-add-header" style="margin-bottom: 12px;">
-          <input type="text" id="searchUsersInCreate" data-i18n-placeholder="searchUsersPlaceholder" placeholder="Поиск пользователей..." class="search-input" onkeyup="searchUsersInCreate()" style="width: 100%;">
+        <div class="tg-add-header" style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <input type="text" id="searchUsersInCreate" data-i18n-placeholder="searchUsersPlaceholder" placeholder="Поиск пользователей..." class="search-input" onkeyup="searchUsersInCreate()" style="flex: 1; margin-bottom: 0;">
         </div>
         
-        <div id="usersListModal" class="users-checkbox-list">
+        <div id="usersListModal" class="users-checkbox-list" style="max-height: 200px; overflow-y: auto;">
           <!-- Заглушка изменена на текст о взаимной подписке -->
           <div class="no-users" data-i18n="searchMutualOnly">Вы можете добавить только тех людей, с которыми у вас взаимная подписка</div>
         </div>
