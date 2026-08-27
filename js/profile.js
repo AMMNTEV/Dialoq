@@ -596,7 +596,7 @@ function parseBioLinks(text) {
   return escaped.replace(urlRegex, (url) => {
     const href = url.startsWith('http') ? url : `https://${url}`;
     return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="bio-link">${url}</a>`;
-  }).replace(/\n/g, '<br>');
+  });
 }
 
 function renderBio(container, text) {
@@ -608,25 +608,14 @@ function renderBio(container, text) {
 
   const lines = text.split('\n');
   
-  // Если строк 3 или меньше — выводим целиком
   if (lines.length <= 3) {
     container.innerHTML = parseBioLinks(text);
     return;
   }
 
-  // Если больше 3 строк — создаем сокращенную и полную версии
   const shortText = lines.slice(0, 3).join('\n');
 
-  container.innerHTML = `
-    <div class="bio-short">
-      ${parseBioLinks(shortText)}
-      <div class="bio-toggle-btn" onclick="toggleBio(this, 'full')">${t('bioMore')}</div>
-    </div>
-    <div class="bio-full" style="display: none;">
-      ${parseBioLinks(text)}
-      <div class="bio-toggle-btn" onclick="toggleBio(this, 'short')">${t('bioHide')}</div>
-    </div>
-  `;
+  container.innerHTML = `<div class="bio-short">${parseBioLinks(shortText)}<div class="bio-toggle-btn" onclick="toggleBio(this, 'full')">${t('bioMore')}</div></div><div class="bio-full" style="display: none;">${parseBioLinks(text)}<div class="bio-toggle-btn" onclick="toggleBio(this, 'short')">${t('bioHide')}</div></div>`;
 }
 
 function toggleBio(btn, mode) {
