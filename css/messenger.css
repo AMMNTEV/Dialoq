@@ -2058,3 +2058,27 @@ a:focus {
 .modal-content {
   box-shadow: none !important;
 }
+
+/* --- Красные кнопки "Покинуть" и "Удалить" --- */
+.tg-actions-section .tg-action-btn.tg-danger {
+  background-color: #ef4444 !important; /* Сплошной красный фон */
+  color: #ffffff !important; /* Белый текст */
+  border: none !important; /* Убираем рамку */
+}
+
+/* Цвет иконок внутри кнопок */
+.tg-actions-section .tg-action-btn.tg-danger svg {
+  stroke: #ffffff !important; 
+}
+
+/* Эффект при наведении на красные кнопки */
+.tg-actions-section .tg-action-btn.tg-danger:hover {
+  background-color: #dc2626 !important; /* Чуть более темный красный */
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3) !important;
+}
+
+/* --- Белые имена участников --- */
+.group-participants-list,
+.group-participants-list * {
+  color: #ffffff !important; /* Принудительно делаем весь текст внутри списка белым */
+}
