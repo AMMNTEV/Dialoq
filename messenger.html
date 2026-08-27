@@ -162,46 +162,74 @@
     </div>
   </div>
 
-<!-- Модальное окно информации о беседе -->
 <div id="groupInfoModal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3 id="groupInfoName" data-i18n="groupInfoTitle">Информация о беседе</h3>
-      <button onclick="hideGroupInfoModal()" class="modal-close">&times;</button>
+  <div class="modal-content tg-modal-content">
+    
+    <!-- Шапка со стрелкой назад -->
+    <div class="tg-modal-header">
+      <button onclick="hideGroupInfoModal()" class="tg-back-btn" aria-label="Назад">
+        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+        </svg>
+      </button>
     </div>
-    <div class="modal-body">
-      <div class="group-avatar-section" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
-        <div class="avatar-large" id="groupInfoAvatar" style="width: 100px; height: 100px; border-radius: 50%; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; cursor: pointer; overflow: hidden; border: 2px solid #333;" onclick="document.getElementById('groupAvatarInput').click()">
+
+    <div class="tg-modal-body">
+      <!-- Профиль группы -->
+      <div class="tg-profile-section">
+        <div class="avatar-large tg-avatar" id="groupInfoAvatar" onclick="document.getElementById('groupAvatarInput').click()">
           👥
         </div>
-        <input type="file" id="groupAvatarInput" accept="image/png, image/jpeg, image/webp" style="display: none;">
-        <span data-i18n="clickToChange" style="font-size: 0.8rem; color: #888; margin-top: 8px; cursor: pointer;" onclick="document.getElementById('groupAvatarInput').click()">
-          Нажмите, чтобы изменить
-        </span>
+        <input type="file" id="groupAvatarInput" accept="image/*" style="display: none;">
+        <h3 id="groupInfoName" class="tg-group-name">Название беседы</h3>
+        <span id="groupInfoCount" class="tg-group-count">0 участников</span>
       </div>
 
-      <div class="group-info-section">
-        <h4 data-i18n="participantsTitle">Участники:</h4>
-        <div id="groupParticipants" class="group-participants-list"></div>
-      </div>
-
-      <div class="group-info-section">
-        <h4 data-i18n="addParticipantsTitle">Добавить участников:</h4>
-        <input type="text" id="searchUsersToAdd" data-i18n-placeholder="searchUsersPlaceholder" placeholder="Поиск пользователей..." class="search-input" onkeyup="searchUsersToAdd()">
-        <div id="addParticipantsList" class="users-checkbox-list">
-          <div class="no-users" data-i18n="startTypingToSearch">Начните вводить имя для поиска</div>
+      <!-- Основная секция участников / Поиска -->
+      <div class="tg-section-box">
+        
+        <!-- Режим 1: Список участников + Кнопка добавить -->
+        <div id="tgParticipantsView">
+          <button onclick="showAddParticipantsView()" class="tg-add-member-btn">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/>
+            </svg>
+            <span data-i18n="addParticipantsTitle">Добавить участников</span>
+          </button>
+          <div id="groupParticipants" class="group-participants-list"></div>
         </div>
-        <button onclick="addSelectedParticipants()" class="modal-save-btn" data-i18n="addSelectedBtn">Добавить выбранных</button>
+
+        <!-- Режим 2: Поиск и добавление новых участников -->
+        <div id="tgAddView" style="display: none;">
+          <div class="tg-add-header">
+            <input type="text" id="searchUsersToAdd" data-i18n-placeholder="searchUsersPlaceholder" placeholder="Поиск пользователей..." class="search-input" onkeyup="searchUsersToAdd()">
+            <button onclick="hideAddParticipantsView()" class="tg-cancel-btn" data-i18n="cancelBtn">Отмена</button>
+          </div>
+          <div id="addParticipantsList" class="users-checkbox-list">
+            <div class="no-users" data-i18n="startTypingToSearch">Начните вводить имя для поиска</div>
+          </div>
+          <button onclick="addSelectedParticipants()" class="modal-save-btn" data-i18n="addSelectedBtn" style="margin-top: 12px; width: 100%;">Добавить выбранных</button>
+        </div>
+
       </div>
-    </div>
-    
-    <div class="modal-footer">
-      <button onclick="leaveCurrentGroup()" id="leaveGroupBtn" class="modal-leave-btn">
-        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        <span data-i18n="leaveGroupBtn">Покинуть беседу</span>
-      </button>
-      <button onclick="hideGroupInfoModal()" class="modal-cancel-btn" data-i18n="closeBtn">Закрыть</button>
-      <button onclick="deleteCurrentGroup()" id="deleteGroupBtn" class="modal-delete-btn" data-i18n="deleteGroupBtn">Удалить беседу</button>
+
+      <!-- Кнопки действий (Выйти / Удалить) -->
+      <div class="tg-actions-section">
+        <button onclick="leaveCurrentGroup()" id="leaveGroupBtn" class="tg-action-btn tg-danger">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          <span data-i18n="leaveGroupBtn">Покинуть беседу</span>
+        </button>
+
+        <button onclick="deleteCurrentGroup()" id="deleteGroupBtn" class="tg-action-btn tg-danger">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+          <span data-i18n="deleteGroupBtn">Удалить беседу</span>
+        </button>
+      </div>
+
     </div>
   </div>
 </div>
