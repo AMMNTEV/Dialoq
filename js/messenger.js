@@ -1169,28 +1169,82 @@ function listenForNewMessages() {
     }, error => console.error('Ошибка слушателя новых сообщений:', error));
 }
 
+function updateChatListOptimistically(chatId, text) {
+  const now = new Date();
+
+  // Обновляем данные текущего выбранного чата в памяти
+  if (selectedChat && selectedChat.id === chatId) {
+    selectedChat.lastMessage = text;
+    selectedChat.lastMessageTime = now;
+  }
+
+  // Находим чат в общем массиве и обновляем его превью
+  let chatItem = allChats.find(c => c.id === chatId);
+  if (chatItem) {
+    chatItem.lastMessage = text;
+    chatItem.lastMessageTime = now;
+  } else if (selectedChat) {
+    chatItem = { ...selectedChat, lastMessage: text, lastMessageTime: now };
+    allChats.push(chatItem);
+  }
+
+  // Сортируем чаты: самый свежий поднимается наверх
+  allChats.sort((a, b) => {
+    const timeA = a.lastMessageTime ? new Date(a.lastMessageTime).getTime() : 0;
+    const timeB = b.lastMessageTime ? new Date(b.lastMessageTime).getTime() : 0;
+    return timeB - timeA;
+  });
+
+  // Сохраняем обновленный список в localStorage
+  if (currentUser) {
+    try {
+      localStorage.setItem(`cachedChats_${currentUser.uid}`, JSON.stringify(allChats));
+    } catch (e) {
+      console.warn('Ошибка сохранения кэша чатов:', e);
+    }
+  }
+
+  // Перерисовываем список чатов на экране мгновенно
+  displayChats(allChats);
+}
+
 // ========== ОТПРАВКА СООБЩЕНИЯ ==========
 async function sendMessage() {
   const input = document.getElementById('messageInput');
   const text = input.value.trim();
   if (!text || !selectedChat) return;
+
+  // Очищаем поле ввода сразу
   input.value = '';
   input.style.height = 'auto';
 
+  // Фиксируем ссылки на текущий чат, чтобы выход из него не сбивал логику
+  const targetChat = { ...selectedChat };
+  const chatId = targetChat.id;
+
+  // 1. МГНОВЕННО обновляем UI списка чатов (чат поднимается вверх)
+  updateChatListOptimistically(chatId, text);
+
   try {
-    if (selectedChat.isNew) {
-      const otherUserId = selectedChat.participants.find(id => id !== currentUser.uid);
+    if (targetChat.isNew) {
+      const otherUserId = targetChat.participants.find(id => id !== currentUser.uid);
       const newChatRef = await db.collection('chats').add({
         participants: [currentUser.uid, otherUserId],
         isGroup: false,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        lastMessage: null,
-        lastMessageTime: null
+        lastMessage: text,
+        lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
       });
-      const chatId = newChatRef.id;
-      selectedChat.id = chatId;
-      selectedChat.isNew = false;
-      currentChatId = chatId;
+      const newId = newChatRef.id;
+
+      targetChat.id = newId;
+      targetChat.isNew = false;
+      
+      if (selectedChat && selectedChat.id === chatId) {
+        selectedChat.id = newId;
+        selectedChat.isNew = false;
+        currentChatId = newId;
+      }
       isNewChatPending = false;
 
       const messageData = {
@@ -1200,14 +1254,13 @@ async function sendMessage() {
         receiverId: otherUserId,
         read: false
       };
-      await db.collection('chats').doc(chatId).collection('messages').add(messageData);
-      await db.collection('chats').doc(chatId).update({
-        lastMessage: text,
-        lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
-      });
 
-      await loadMessages(false);
-      updateChatHeader(selectedChat);
+      await db.collection('chats').doc(newId).collection('messages').add(messageData);
+
+      if (selectedChat && selectedChat.id === newId) {
+        await loadMessages(false);
+        updateChatHeader(selectedChat);
+      }
       return;
     }
 
@@ -1216,24 +1269,25 @@ async function sendMessage() {
       senderId: currentUser.uid,
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
-    if (selectedChat.isGroup) {
+
+    if (targetChat.isGroup) {
       messageData.readBy = [currentUser.uid];
     } else {
-      const otherUserId = selectedChat.participants.find(id => id !== currentUser.uid);
+      const otherUserId = targetChat.participants.find(id => id !== currentUser.uid);
       messageData.receiverId = otherUserId;
       messageData.read = false;
     }
 
-    await db.collection('chats').doc(currentChatId).collection('messages').add(messageData);
-    await db.collection('chats').doc(currentChatId).update({
+    // 2. Фоновая отправка в БД без всплывающих окон при ошибках
+    await db.collection('chats').doc(chatId).collection('messages').add(messageData);
+    await db.collection('chats').doc(chatId).update({
       lastMessage: text,
       lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
     });
 
   } catch (error) {
-    console.error('Ошибка отправки:', error);
-    alert('Ошибка при отправке сообщения');
-    input.value = text;
+    // Ошибка логируется только в консоль — браузерный alert больше не блокирует интерфейс
+    console.error('Ошибка фоновой отправки сообщения:', error);
   }
 }
 
