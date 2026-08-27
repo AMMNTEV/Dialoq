@@ -692,7 +692,12 @@
 }
 
 .modal-leave-btn {
-  padding: 10px 20px;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;                  /* Отступ между стрелочкой и текстом */
+  margin: 16px auto 0 auto !important;  /* Выравнивает кнопку строго по центру */
+  padding: 10px 20px !important;
   background: #f1f5f9;
   color: #64748b;
   border: none;
@@ -700,6 +705,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  line-height: 1 !important;           /* Фиксирует вертикальную центровку текста */
 }
 
 .modal-leave-btn:hover {
