@@ -138,29 +138,41 @@
   </a>
 </nav>
 
- <!-- Модальное окно создания беседы -->
-  <div id="createGroupModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 data-i18n="createGroupTitle">Создать новую беседу</h3>
-        <button onclick="hideCreateGroupModal()" class="modal-close">&times;</button>
-      </div>
-      <div class="modal-body">
-        <input type="text" id="groupName" data-i18n-placeholder="groupNamePlaceholder" placeholder="Название беседы" class="modal-input">
-        <div class="group-participants">
-          <h4 data-i18n="selectParticipants">Выберите участников:</h4>
-          <input type="text" id="searchUsersInCreate" data-i18n-placeholder="searchUsersPlaceholder" placeholder="Поиск пользователей..." class="search-input" onkeyup="searchUsersInCreate()">
-          <div id="usersListModal" class="users-checkbox-list">
-            <div class="no-users" data-i18n="startTypingToSearch">Начните вводить имя для поиска</div>
-          </div>
+<div id="createGroupModal" class="modal">
+  <div class="modal-content tg-modal-content">
+    
+    <!-- Шапка со стрелкой назад, скопированная из информации о группе -->
+    <div class="tg-modal-header">
+      <button onclick="hideCreateGroupModal()" class="tg-back-btn" aria-label="Назад">
+        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+        </svg>
+      </button>
+      <h3 data-i18n="createGroupTitle" class="tg-group-name" style="margin: 0; font-size: 18px;">Создать новую беседу</h3>
+    </div>
+
+    <div class="tg-modal-body">
+      <div class="tg-section-box">
+        <!-- Поле названия -->
+        <div style="margin-bottom: 16px;">
+          <input type="text" id="groupName" data-i18n-placeholder="groupNamePlaceholder" placeholder="Название беседы" class="modal-input" style="width: 100%; box-sizing: border-box;">
         </div>
-      </div>
-      <div class="modal-footer">
-        <button onclick="hideCreateGroupModal()" class="modal-cancel-btn" data-i18n="cancelBtn">Отмена</button>
-        <button onclick="createGroupChat()" class="modal-save-btn" data-i18n="createBtn">Создать</button>
+
+        <!-- Поиск и добавление участников -->
+        <div class="tg-add-header" style="margin-bottom: 12px;">
+          <input type="text" id="searchUsersInCreate" data-i18n-placeholder="searchUsersPlaceholder" placeholder="Поиск пользователей..." class="search-input" onkeyup="searchUsersInCreate()" style="width: 100%;">
+        </div>
+        
+        <div id="usersListModal" class="users-checkbox-list">
+          <!-- Заглушка изменена на текст о взаимной подписке -->
+          <div class="no-users" data-i18n="searchMutualOnly">Вы можете добавить только тех людей, с которыми у вас взаимная подписка</div>
+        </div>
+        
+        <button onclick="createGroupChat()" class="modal-save-btn" data-i18n="createBtn" style="margin-top: 12px; width: 100%;">Создать</button>
       </div>
     </div>
   </div>
+</div>
 
 <div id="groupInfoModal" class="modal">
   <div class="modal-content tg-modal-content">
