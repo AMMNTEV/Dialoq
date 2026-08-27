@@ -64,7 +64,7 @@ if (document.readyState === 'loading') {
 }
 
 // ===== ПОДПИСКА НА АВТОРИЗАЦИЮ FIREBASE =====
-onAuthStateChanged(async (user, userData) => {
+auth.onAuthStateChanged(async (user) => {
   if (!user || !user.emailVerified) {
     localStorage.removeItem('lastUid');
     window.location.href = 'index.html';
@@ -73,13 +73,6 @@ onAuthStateChanged(async (user, userData) => {
 
   currentUser = user;
   localStorage.setItem('lastUid', user.uid);
-
-  // Если данные переданы из хелпера auth.js
-  if (userData) {
-    currentUserData = userData;
-    updateSidebarUser(currentUserData);
-    fillEditForm(currentUserData);
-  }
 
   try {
     console.log('📡 Загрузка данных из Firestore...');
@@ -95,6 +88,7 @@ onAuthStateChanged(async (user, userData) => {
     localStorage.setItem(cacheKey, JSON.stringify(currentUserData));
     if (window.userCache) userCache.set(user.uid, currentUserData);
 
+    // Отрисовываем сайдбар и заполняем форму актуальными данными
     updateSidebarUser(currentUserData);
     fillEditForm(currentUserData);
 
@@ -107,7 +101,9 @@ onAuthStateChanged(async (user, userData) => {
 
   } catch (error) {
     console.error('❌ Ошибка загрузки профиля:', error);
-    showMessage(typeof t === 'function' ? t('saveError') : 'Ошибка загрузки данных', 'error');
+    if (typeof showMessage === 'function') {
+      showMessage(typeof t === 'function' ? t('saveError') : 'Ошибка загрузки данных', 'error');
+    }
   }
 });
 
