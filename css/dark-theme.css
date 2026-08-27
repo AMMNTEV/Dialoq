@@ -1059,6 +1059,29 @@ a:focus {
   background: transparent !important;
   box-shadow: none !important;
 }
+
+/* --- Фикс цвета заголовка и описания в зоне удаления --- */
+.dark-theme .settings-item.danger .settings-item-title,
+.dark-theme .settings-item-danger .settings-item-title,
+.dark-theme .danger .settings-item-title,
+.dark-theme .danger-zone .settings-item-title,
+.dark-theme .danger-zone h3,
+.dark-theme .danger-zone h4,
+.dark-theme .modal-danger .modal-title,
+.dark-theme .modal-delete h3,
+.dark-theme .modal-delete h4 {
+  color: #f87171 !important;
+}
+
+.dark-theme .settings-item.danger .settings-item-desc,
+.dark-theme .settings-item-danger .settings-item-desc,
+.dark-theme .danger .settings-item-desc,
+.dark-theme .danger-zone .settings-item-desc,
+.dark-theme .danger-zone p,
+.dark-theme .danger-zone span,
+.dark-theme .modal-delete p {
+  color: #9ca3af !important;
+}
 /* ==========================================
    КОНЕЦ DARK THEME
    ========================================== */
