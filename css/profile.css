@@ -858,15 +858,18 @@ a:focus {
 /* Прозрачный серый слой поверх аватара */
 .avatar-overlay {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   opacity: 0;
-  transition: opacity 0.2s ease;
-  backdrop-filter: blur(2px);
+  transition: opacity 0.2s;
 }
 
 .avatar-wrapper:hover .avatar-overlay {
@@ -1301,17 +1304,22 @@ body.dark-theme .header-user-tag {
   }
 
   .insta-top-row {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    width: 100%;
-  }
+  display: flex;
+  align-items: flex-start !important; /* Прижимает аватарку к верхнему краю */
+  gap: 32px;
+  width: 100%;
+}
 
   .insta-avatar-wrapper {
-    width: 86px !important;
-    height: 86px !important;
-    flex-shrink: 0;
-  }
+  position: relative;
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  padding: 0 !important;
+  background: none !important;
+  box-sizing: border-box;
+}
 
   .insta-right-block {
     flex: 1;
@@ -1412,6 +1420,7 @@ body.dark-theme .header-user-tag {
   justify-content: center;
   font-size: 2.5rem;
   font-weight: bold;
+  border: none !important;
 }
 
 .insta-avatar img {
@@ -1537,6 +1546,7 @@ body.dark-theme .btn-secondary:hover {
 /* Мобильный адаптив */
 @media (max-width: 600px) {
   .insta-top-row {
+    align-items: flex-start !important;
     gap: 16px;
   }
 
