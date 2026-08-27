@@ -3298,3 +3298,25 @@ body.dark-theme .tg-modal-header .tg-group-name {
     padding-top: 76px !important; /* Отступ = высота моб. шапки (64) + зазор (12) */
   }
 }
+
+@media (max-width: 768px) {
+  .search-box {
+    /* Делаем высоту контейнера такой же, как у шапки чата (обычно 60px или 64px) */
+    height: 60px; 
+    display: flex;
+    align-items: center;
+    /* Подгоняем боковые отступы так, чтобы они совпадали с отступами кнопки "Назад" */
+    padding: 0 16px; 
+    box-sizing: border-box;
+    /* Если у шапки чата есть нижняя рамка, можно добавить ее и сюда */
+    border-bottom: 1px solid var(--border-color, #2a2a2a); 
+  }
+  
+  #searchInput {
+    /* Фиксируем высоту самого инпута */
+    height: 40px; 
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
