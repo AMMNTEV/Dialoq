@@ -352,7 +352,7 @@ async function saveChanges() {
   }
 
   isSubmitting = true;
-  showMessage('Сохранение...', 'info');
+  showMessage(typeof t === 'function' ? t('saving') : 'Saving...', 'info');
 
   try {
     const updates = { nickname: newNickname, tag: newTag, bio: newBio };
@@ -370,7 +370,7 @@ async function saveChanges() {
     updateSidebarUser(currentUserData);
     showMessage(typeof t === 'function' ? t('changesSaved') : 'Изменения сохранены!', 'success');
 
-    setTimeout(() => { window.location.href = 'profile.html'; }, 1500);
+    
 
   } catch (error) {
     console.error('Ошибка сохранения:', error);
