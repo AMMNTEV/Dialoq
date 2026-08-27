@@ -1073,14 +1073,11 @@ a:focus {
   color: #f87171 !important;
 }
 
+.dark-theme .settings-item.danger .settings-item-title,
 .dark-theme .settings-item.danger .settings-item-desc,
-.dark-theme .settings-item-danger .settings-item-desc,
-.dark-theme .danger .settings-item-desc,
-.dark-theme .danger-zone .settings-item-desc,
-.dark-theme .danger-zone p,
-.dark-theme .danger-zone span,
-.dark-theme .modal-delete p {
-  color: #9ca3af !important;
+.dark-theme .settings-item.danger .settings-item-icon,
+.dark-theme .settings-item.danger .transition-arrow {
+  color: #ef4444 !important;
 }
 
 /* Фикс красного цвета для заголовков удаления в тёмной теме */
@@ -1100,7 +1097,7 @@ a:focus {
 .dark-theme .text-danger,
 .dark-theme .danger-text,
 .dark-theme .danger-title {
-  color: #f87171 !important;
+  color: #ef4444 !important;
 }
 /* ==========================================
    КОНЕЦ DARK THEME
