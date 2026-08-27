@@ -1034,7 +1034,24 @@ a:focus {
   background: var(--bg-secondary) !important;
   box-shadow: 0 0 0 4px var(--accent-glow) !important;
 }
+/* Исправление фонов полей в форме редактирования */
+.dark-theme .edit-textarea,
+.dark-theme textarea {
+  background: var(--bg-input) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
 
+.dark-theme .edit-tag-wrapper {
+  background: var(--bg-input) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Гарантируем прозрачность самого input внутри обертки тега */
+.dark-theme .edit-tag-wrapper .edit-input-field {
+  background: transparent !important;
+  box-shadow: none !important;
+}
 /* ==========================================
    КОНЕЦ DARK THEME
    ========================================== */
