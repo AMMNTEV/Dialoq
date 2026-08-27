@@ -1363,6 +1363,7 @@ async function openChatInfo(chatId) {
     }
 
     document.getElementById('groupInfoName').textContent = chat.name || t('defaultGroupName');
+    document.getElementById('groupInfoCount').textContent = `${chat.participants.length} ${t('participantsCount')}`;
 
     // 2. ПАРАЛЛЕЛЬНАЯ загрузка всех участников через Promise.all
     const participantPromises = chat.participants.map(async (userId) => {
