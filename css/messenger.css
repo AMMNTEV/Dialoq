@@ -2639,7 +2639,6 @@ body {
    МОДАЛЬНЫЕ ОКНА - БАЗОВЫЕ СТИЛИ (ПК ВЕРСИЯ)
    ========================================== */
 
-/* Базовые стили для модальных окон - работают на ПК */
 .modal {
   display: none;
   position: fixed;
@@ -2656,11 +2655,11 @@ body {
 
 .modal-content,
 .tg-modal-content {
-  max-width: 420px;
-  width: 100%;
-  max-height: 90vh;
-  border-radius: 16px;
-  padding: 0;
+  max-width: 420px !important;
+  width: 100% !important;
+  max-height: 90vh !important;
+  border-radius: 16px !important;
+  padding: 0 !important;
   overflow: hidden;
   background: #ffffff;
   color: #000000;
@@ -2932,7 +2931,6 @@ body {
    ========================================== */
 
 @media (max-width: 768px) {
-  /* Все модальные окна - на весь экран */
   .modal {
     padding: 0 !important;
     align-items: stretch !important;
@@ -2942,11 +2940,11 @@ body {
   
   .modal-content,
   .tg-modal-content {
+    max-width: 100% !important;
     width: 100% !important;
     height: 100vh !important;
     height: -webkit-fill-available !important;
     height: 100dvh !important;
-    max-width: 100% !important;
     max-height: 100% !important;
     border-radius: 0 !important;
     margin: 0 !important;
@@ -2961,7 +2959,6 @@ body {
     box-shadow: none !important;
   }
   
-  /* Шапка модалки - фиксированная сверху */
   .tg-modal-header {
     padding: 12px 16px !important;
     flex-shrink: 0 !important;
@@ -2975,7 +2972,6 @@ body {
     border-bottom-color: rgba(255, 255, 255, 0.06) !important;
   }
   
-  /* Тело модалки - скроллится, занимает всё оставшееся место */
   .modal-body,
   .tg-modal-body {
     flex: 1 1 auto !important;
@@ -2985,24 +2981,20 @@ body {
     -webkit-overflow-scrolling: touch !important;
   }
   
-  /* Убираем лишние отступы у секций */
   .tg-section-box {
     margin-bottom: 16px !important;
   }
   
-  /* Кнопка "Создать" внизу */
   .modal-save-btn {
     margin-top: 16px !important;
     width: 100% !important;
     padding: 14px !important;
   }
   
-  /* Список участников в модалке */
   .users-checkbox-list {
     max-height: 250px !important;
   }
   
-  /* Специфичные стили для groupInfoModal на мобилках */
   #groupInfoModal .tg-profile-section {
     padding-top: 8px !important;
   }
@@ -3026,7 +3018,6 @@ body {
     font-size: 1rem !important;
   }
   
-  /* Специфичные стили для createGroupModal на мобилках */
   #createGroupModal .modal-input {
     font-size: 1rem !important;
     padding: 14px 16px !important;
@@ -3051,10 +3042,45 @@ body {
 }
 
 /* ==========================================
+   УБИРАЕМ КОНФЛИКТ С .modal-fullscreen
+   ========================================== */
+
+/* Сбрасываем влияние .modal-fullscreen на ПК */
+.modal-fullscreen .modal-content,
+.modal-fullscreen .tg-modal-content {
+  max-width: 420px !important;
+  width: 100% !important;
+  max-height: 90vh !important;
+  border-radius: 16px !important;
+  margin: auto !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+}
+
+.dark-theme .modal-fullscreen .modal-content,
+.dark-theme .modal-fullscreen .tg-modal-content {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Только на мобилках .modal-fullscreen делает окно на весь экран */
+@media (max-width: 768px) {
+  .modal-fullscreen .modal-content,
+  .modal-fullscreen .tg-modal-content {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 100vh !important;
+    height: -webkit-fill-available !important;
+    height: 100dvh !important;
+    max-height: 100% !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
+}
+
+/* ==========================================
    ДОПОЛНИТЕЛЬНЫЕ ИСПРАВЛЕНИЯ
    ========================================== */
 
-/* Убираем лишние отступы у полей ввода внутри tg-section-box */
 .tg-section-box .modal-input,
 .tg-section-box .search-input {
   margin-bottom: 0 !important;
@@ -3064,7 +3090,6 @@ body {
   margin-bottom: 12px !important;
 }
 
-/* Список участников */
 .group-participants-list {
   max-height: 300px;
   overflow-y: auto;
@@ -3123,37 +3148,7 @@ body {
   color: #ffffff;
 }
 
-/* Модальные окна на весь экран - класс для JS */
-.modal-fullscreen .modal-content,
-.modal-fullscreen .tg-modal-content {
-  max-width: 100% !important;
-  max-height: 100% !important;
-  border-radius: 0 !important;
-  margin: 0 !important;
-}
-
-@media (max-width: 768px) {
-  .modal-fullscreen {
-    padding: 0 !important;
-    align-items: stretch !important;
-    justify-content: stretch !important;
-  }
-  
-  .modal-fullscreen .modal-content,
-  .modal-fullscreen .tg-modal-content {
-    width: 100% !important;
-    height: 100vh !important;
-    height: -webkit-fill-available !important;
-    height: 100dvh !important;
-    max-width: 100% !important;
-    max-height: 100% !important;
-    border-radius: 0 !important;
-    margin: 0 !important;
-    box-shadow: none !important;
-  }
-}
-
-/* Убираем дырку под нижней панелью навигации */
+/* Мобильная нижняя панель */
 .mobile-bottom-nav {
   z-index: 1005 !important;
   background: rgba(255, 255, 255, 0.92) !important;
@@ -3169,7 +3164,6 @@ body {
   box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.3) !important;
 }
 
-/* Дополнительный фон под панелью для iOS */
 body {
   background-color: #ffffff !important;
 }
