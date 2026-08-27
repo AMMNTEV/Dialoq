@@ -3,10 +3,11 @@
 .edit-container {
   flex: 1;
   overflow-y: auto;
+  scrollbar-gutter: stable; 
+  
   padding: 16px 20px 80px 20px;
-  max-width: 600px;
-  margin: 0 auto;
   width: 100%;
+  box-sizing: border-box;
 }
 
 /* Шапка с кнопкой назад */
@@ -354,4 +355,11 @@ body.dark-theme .edit-bio-counter {
   .edit-save-btn {
     padding: 14px;
   }
+}
+
+.edit-header,
+.edit-content {
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
 }
