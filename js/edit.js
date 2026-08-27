@@ -3,12 +3,43 @@ let currentUser = null;
 let currentUserData = {};
 let isSubmitting = false;
 let tagCheckTimeout = null;
-let isTagAvailable = false;
+let isTagAvailable = true;
 let selectedAvatarFile = null;
 let currentTagValue = '';
 
-// ========== МГНОВЕННАЯ ОТРИСОВКА (ДО ЗАПУСКА FIREBASE) ==========
+// ===== ИНИЦИАЛИЗАЦИЯ СОБЫТИЙ ФОРМЫ =====
+function initFormListeners() {
+  const bioTextarea = document.getElementById('editBio');
+  if (bioTextarea && !bioTextarea.dataset.listenerAttached) {
+    bioTextarea.dataset.listenerAttached = 'true';
+    bioTextarea.addEventListener('input', function() {
+      updateBioCounter(this);
+      autoResize(this);
+    });
+  }
+
+  const tagInput = document.getElementById('editTag');
+  if (tagInput && !tagInput.dataset.listenerAttached) {
+    tagInput.dataset.listenerAttached = 'true';
+    tagInput.addEventListener('input', function() {
+      let value = this.value.replace(/@/g, '').slice(0, 20);
+      value = value.replace(/[^a-zA-Z0-9_]/g, '');
+      this.value = value;
+      validateTag(value);
+    });
+  }
+
+  const avatarInput = document.getElementById('avatarInput');
+  if (avatarInput && !avatarInput.dataset.listenerAttached) {
+    avatarInput.dataset.listenerAttached = 'true';
+    avatarInput.addEventListener('change', handleAvatarSelect);
+  }
+}
+
+// ===== МГНОВЕННАЯ ОТРИСОВКА ИЗ КЭША =====
 function initEditPage() {
+  initFormListeners();
+
   const lastUid = localStorage.getItem('lastUid');
   if (lastUid) {
     const cachedUserStr = localStorage.getItem(`cachedCurrentUser_${lastUid}`);
@@ -25,112 +56,81 @@ function initEditPage() {
   }
 }
 
-// Запускаем сразу, если DOM уже загружен, либо ждем события
+// Запускаем инициализацию сразу или по загрузке DOM
 if (document.readyState === 'loading') {
   document.addEventListener("DOMContentLoaded", initEditPage);
 } else {
   initEditPage();
 }
 
-// Ждем загрузку Firebase и проверяем авторизацию
-document.addEventListener('DOMContentLoaded', function() {
-  // Проверяем, что Firebase загрузился
-  if (typeof firebase === 'undefined' || typeof auth === 'undefined') {
-    console.error('Firebase не загружен');
+// ===== ПОДПИСКА НА АВТОРИЗАЦИЮ FIREBASE =====
+onAuthStateChanged(async (user, userData) => {
+  if (!user || !user.emailVerified) {
+    localStorage.removeItem('lastUid');
+    window.location.href = 'index.html';
     return;
   }
-  
-  // Подписываемся на изменение состояния авторизации
-  auth.onAuthStateChanged(async function(user) {
-    console.log('🔥 onAuthStateChanged вызван, user:', user ? user.uid : 'null');
-    
-    if (!user || !user.emailVerified) {
-      localStorage.removeItem('lastUid');
-      window.location.href = 'index.html';
+
+  currentUser = user;
+  localStorage.setItem('lastUid', user.uid);
+
+  // Если данные переданы из хелпера auth.js
+  if (userData) {
+    currentUserData = userData;
+    updateSidebarUser(currentUserData);
+    fillEditForm(currentUserData);
+  }
+
+  try {
+    console.log('📡 Загрузка данных из Firestore...');
+    const doc = await db.collection('users').doc(user.uid).get();
+
+    if (!doc.exists) {
+      window.location.href = 'profile.html';
       return;
     }
-    
-    currentUser = user;
-    localStorage.setItem('lastUid', user.uid);
 
-    // Пробуем загрузить из кэша
+    currentUserData = doc.data();
     const cacheKey = `cachedCurrentUser_${user.uid}`;
-    const cachedDataStr = localStorage.getItem(cacheKey);
-    
-    if (cachedDataStr) {
-      try {
-        currentUserData = JSON.parse(cachedDataStr);
-        updateSidebarUser(currentUserData);
-        fillEditForm(currentUserData);
-        console.log('✅ Данные загружены из кэша (auth)');
-      } catch (e) {
-        console.error('Ошибка парсинга кэша:', e);
-      }
+    localStorage.setItem(cacheKey, JSON.stringify(currentUserData));
+    if (window.userCache) userCache.set(user.uid, currentUserData);
+
+    updateSidebarUser(currentUserData);
+    fillEditForm(currentUserData);
+
+    const tagInput = document.getElementById('editTag');
+    if (tagInput && tagInput.value) {
+      validateTag(tagInput.value);
     }
 
-    try {
-      console.log('📡 Загрузка данных из Firestore...');
-      const doc = await db.collection('users').doc(user.uid).get();
-      console.log('📡 Документ получен, exists:', doc.exists);
-      
-      if (!doc.exists) {
-        window.location.href = 'profile.html';
-        return;
-      }
-      
-      currentUserData = doc.data();
-      console.log('📡 Данные из Firestore:', currentUserData);
-      
-      localStorage.setItem(cacheKey, JSON.stringify(currentUserData));
-      if (window.userCache) userCache.set(user.uid, currentUserData);
-      
-      updateSidebarUser(currentUserData);
-      fillEditForm(currentUserData);
-      
-      // Проверяем текущий тег после загрузки данных
-      const tagInput = document.getElementById('editTag');
-      if (tagInput && tagInput.value) {
-        validateTag(tagInput.value);
-      }
-      
-      console.log('✅ Профиль успешно загружен');
-      
-    } catch (error) {
-      console.error('❌ Ошибка загрузки профиля:', error);
-      showMessage(t('saveError') || 'Ошибка загрузки данных', 'error');
-    }
-  });
+    console.log('✅ Профиль успешно загружен');
+
+  } catch (error) {
+    console.error('❌ Ошибка загрузки профиля:', error);
+    showMessage(typeof t === 'function' ? t('saveError') : 'Ошибка загрузки данных', 'error');
+  }
 });
 
+// ===== ЗАПОЛНЕНИЕ ФОРМЫ И САЙДБАРА =====
 function fillEditForm(data) {
-  console.log('📝 fillEditForm вызван с данными:', data);
-  
   const nickInput = document.getElementById('editNickname');
   const tagInput = document.getElementById('editTag');
   const bioTextarea = document.getElementById('editBio');
   const avatarDiv = document.getElementById('editAvatar');
 
-  if (nickInput) {
-    nickInput.value = data.nickname || '';
-    console.log('📝 Никнейм установлен:', data.nickname);
-  }
-  if (tagInput) {
-    tagInput.value = (data.tag || '').replace(/^@+/, '');
-    console.log('📝 Тег установлен:', data.tag);
-  }
+  if (nickInput) nickInput.value = data.nickname || '';
+  if (tagInput) tagInput.value = (data.tag || '').replace(/^@+/, '');
+  
   if (bioTextarea) {
     bioTextarea.value = data.bio || '';
     updateBioCounter(bioTextarea);
     autoResize(bioTextarea);
-    console.log('📝 Био установлено:', data.bio);
   }
 
-  // Аватар
   if (avatarDiv) {
     if (data.avatar) {
       avatarDiv.innerHTML = `<img src="${data.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
       avatarDiv.style.background = 'transparent';
-      console.log('📝 Аватар установлен (изображение)');
     } else {
       avatarDiv.innerHTML = data.nickname ? data.nickname.charAt(0).toUpperCase() : '?';
       avatarDiv.style.background = '#3b82f6';
@@ -140,32 +140,41 @@ function fillEditForm(data) {
       avatarDiv.style.justifyContent = 'center';
       avatarDiv.style.fontSize = '2.5rem';
       avatarDiv.style.fontWeight = '600';
-      console.log('📝 Аватар установлен (буква)');
     }
   }
 }
 
-// ===== БИО СЧЕТЧИК =====
-document.addEventListener('DOMContentLoaded', () => {
-  const bioTextarea = document.getElementById('editBio');
-  if (bioTextarea) {
-    bioTextarea.addEventListener('input', function() {
-      updateBioCounter(this);
-      autoResize(this);
-    });
-  }
-});
+function updateSidebarUser(userData) {
+  const nameEl = document.getElementById('sidebarUserName');
+  const tagEl = document.getElementById('sidebarUserTag');
+  const avatarEl = document.getElementById('sidebarUserAvatar');
 
+  if (nameEl) {
+    nameEl.textContent = userData.nickname || 'Пользователь';
+    nameEl.removeAttribute('data-i18n');
+  }
+
+  if (tagEl) tagEl.textContent = userData.tag || '@user';
+
+  if (avatarEl) {
+    if (userData.avatar) {
+      avatarEl.innerHTML = `<img src="${userData.avatar}" alt="Аватар" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block;">`;
+      avatarEl.style.background = 'transparent';
+    } else {
+      avatarEl.innerHTML = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
+      avatarEl.style.background = '#3b82f6';
+      avatarEl.style.color = 'white';
+    }
+  }
+}
+
+// ===== ВАЛИДАЦИЯ ТЕГА И БИО =====
 function updateBioCounter(textarea) {
   const counter = document.getElementById('bioCounter');
   if (counter) {
     const len = textarea.value.length;
     counter.textContent = `${len} / 150`;
-    if (len > 140) {
-      counter.style.color = '#dc2626';
-    } else {
-      counter.style.color = '#999';
-    }
+    counter.style.color = len > 140 ? '#dc2626' : '#999';
   }
 }
 
@@ -174,80 +183,56 @@ function autoResize(textarea) {
   textarea.style.height = textarea.scrollHeight + 'px';
 }
 
-// ===== ВАЛИДАЦИЯ ТЕГА =====
-document.addEventListener('DOMContentLoaded', () => {
-  const tagInput = document.getElementById('editTag');
-  if (tagInput) {
-    tagInput.addEventListener('input', function() {
-      // Очищаем ввод от @ и недопустимых символов
-      let value = this.value.replace(/@/g, '').slice(0, 20);
-      value = value.replace(/[^a-zA-Z0-9_]/g, '');
-      this.value = value;
-      validateTag(value);
-    });
-  }
-});
-
 function validateTag(value) {
   const statusDiv = document.getElementById('tagStatus');
   if (!statusDiv) return;
-  
+
   if (tagCheckTimeout) clearTimeout(tagCheckTimeout);
-  
   const trimmedValue = value.trim();
 
-  // Если поле пустое
   if (!trimmedValue) {
-    statusDiv.textContent = t('tagEmptyError') || 'Тег не может быть пустым';
+    statusDiv.textContent = typeof t === 'function' ? t('tagEmptyError') : 'Тег не может быть пустым';
     statusDiv.className = 'edit-tag-status unavailable';
     isTagAvailable = false;
     return;
   }
 
-  // Проверка минимальной длины (3 символа)
   if (trimmedValue.length < 3) {
-    statusDiv.textContent = t('tagMinLengthError') || 'Тег должен содержать минимум 3 символа';
+    statusDiv.textContent = typeof t === 'function' ? t('tagMinLengthError') : 'Тег должен содержать минимум 3 символа';
     statusDiv.className = 'edit-tag-status unavailable';
     isTagAvailable = false;
     return;
   }
 
-  // Проверка, не является ли это текущим тегом пользователя
   const fullTag = '@' + trimmedValue;
   if (fullTag === currentUserData.tag) {
-    statusDiv.textContent = t('tagCurrentError') || 'Это ваш текущий тег';
+    statusDiv.textContent = typeof t === 'function' ? t('tagCurrentError') : 'Это ваш текущий тег';
     statusDiv.className = 'edit-tag-status available';
     isTagAvailable = true;
     return;
   }
 
-  // Показываем статус проверки
-  statusDiv.textContent = t('tagChecking') || 'Проверка тега...';
+  statusDiv.textContent = typeof t === 'function' ? t('tagChecking') : 'Проверка тега...';
   statusDiv.className = 'edit-tag-status loading';
   currentTagValue = trimmedValue;
 
-  // Дебаунс 500мс перед проверкой
   tagCheckTimeout = setTimeout(async () => {
-    // Проверяем, не изменился ли тег за время ожидания
     if (currentTagValue !== trimmedValue) return;
 
     try {
-      const snapshot = await db.collection('users')
-        .where('tag', '==', fullTag)
-        .get();
-
+      const snapshot = await db.collection('users').where('tag', '==', fullTag).get();
       if (snapshot.empty) {
-        statusDiv.textContent = t('tagAvailable') || '✅ Тег доступен';
+        statusDiv.textContent = typeof t === 'function' ? t('tagAvailable') : '✅ Тег доступен';
         statusDiv.className = 'edit-tag-status available';
         isTagAvailable = true;
       } else {
-        statusDiv.textContent = t('tagTaken') || '❌ Тег уже занят';
+        statusDiv.textContent = typeof t === 'function' ? t('tagTaken') : '❌ Тег уже занят';
         statusDiv.className = 'edit-tag-status unavailable';
         isTagAvailable = false;
       }
     } catch (error) {
       console.error('Ошибка проверки тега:', error);
-      statusDiv.textContent = t('tagError') || '❌ Ошибка проверки';
+      statusDiv.textContent = '❌ Ошибка проверки';
       statusDiv.className = 'edit-tag-status unavailable';
       isTagAvailable = false;
     }
@@ -255,55 +240,38 @@ function validateTag(value) {
 }
 
 // ===== АВАТАРКА =====
-document.addEventListener('DOMContentLoaded', () => {
-  const avatarInput = document.getElementById('avatarInput');
-  if (avatarInput) {
-    avatarInput.addEventListener('change', handleAvatarSelect);
-  }
-});
-
 async function handleAvatarSelect(event) {
   let file = event.target.files[0];
   if (!file) return;
 
   let base64Avatar;
-
   try {
     base64Avatar = await processAvatarFile(file);
   } catch (error) {
-    console.warn('Обычное чтение аватара не удалось, пробуем heic2any...', error);
-    
     try {
-      const convertedBlob = await heic2any({
-        blob: file,
-        toType: "image/jpeg",
-        quality: 0.85
-      });
+      const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.85 });
       const finalBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
       const fallbackFile = new File([finalBlob], "avatar.jpg", { type: "image/jpeg" });
       base64Avatar = await processAvatarFile(fallbackFile);
-      
     } catch (heicErr) {
-      console.error('Ошибка конвертации HEIC для аватара:', heicErr);
-      alert(t('fileError') || 'Не удалось обработать изображение.');
+      alert(typeof t === 'function' ? t('fileError') : 'Не удалось обработать изображение.');
       event.target.value = '';
       return;
     }
   }
 
   if (base64Avatar.length > 1048576) {
-    alert(t('fileTooLarge') || 'Файл слишком большой');
+    alert(typeof t === 'function' ? t('fileTooLarge') : 'Файл слишком большой');
     event.target.value = '';
     return;
   }
 
-  // Обновляем превью аватара
   const avatarDiv = document.getElementById('editAvatar');
   if (avatarDiv) {
     avatarDiv.innerHTML = `<img src="${base64Avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
     avatarDiv.style.background = 'transparent';
   }
-  
+
   selectedAvatarFile = base64Avatar;
 }
 
@@ -314,7 +282,6 @@ function processAvatarFile(file) {
 
     img.onload = function() {
       URL.revokeObjectURL(objectUrl);
-      
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       const targetSize = 800;
@@ -342,7 +309,7 @@ function processAvatarFile(file) {
   });
 }
 
-// ===== СОХРАНЕНИЕ =====
+// ===== СОХРАНЕНИЕ И ОТМЕНА =====
 async function saveChanges() {
   if (isSubmitting) return;
 
@@ -360,28 +327,24 @@ async function saveChanges() {
   const newTag = '@' + rawTag;
   const newBio = bioTextarea.value.trim();
 
-  // Валидация никнейма
   if (!newNickname) {
     showMessage('Введите никнейм', 'error');
     nickInput.focus();
     return;
   }
 
-  // Валидация тега
   if (!isTagAvailable) {
     showMessage('Пожалуйста, выберите доступный тег', 'error');
     tagInput.focus();
     return;
   }
 
-  // Проверка длины тега
   if (rawTag.length < 3 && newTag !== currentUserData.tag) {
     showMessage('Тег должен содержать минимум 3 символа', 'error');
     tagInput.focus();
     return;
   }
 
-  // Валидация био
   if (newBio.length > 150) {
     showMessage('Био не может превышать 150 символов', 'error');
     bioTextarea.focus();
@@ -392,15 +355,8 @@ async function saveChanges() {
   showMessage('Сохранение...', 'info');
 
   try {
-    const updates = {
-      nickname: newNickname,
-      tag: newTag,
-      bio: newBio
-    };
-
-    if (selectedAvatarFile) {
-      updates.avatar = selectedAvatarFile;
-    }
+    const updates = { nickname: newNickname, tag: newTag, bio: newBio };
+    if (selectedAvatarFile) updates.avatar = selectedAvatarFile;
 
     await db.collection('users').doc(currentUser.uid).update(updates);
 
@@ -408,73 +364,34 @@ async function saveChanges() {
     await currentUser.updateProfile({ displayName: newDisplayName });
 
     currentUserData = { ...currentUserData, ...updates };
-    if (selectedAvatarFile) currentUserData.avatar = selectedAvatarFile;
     localStorage.setItem(`cachedCurrentUser_${currentUser.uid}`, JSON.stringify(currentUserData));
     if (window.userCache) userCache.set(currentUser.uid, currentUserData);
 
     updateSidebarUser(currentUserData);
+    showMessage(typeof t === 'function' ? t('changesSaved') : 'Изменения сохранены!', 'success');
 
-    showMessage(t('changesSaved') || 'Изменения успешно сохранены!', 'success');
-
-    setTimeout(() => {
-      window.location.href = 'profile.html';
-    }, 1500);
+    setTimeout(() => { window.location.href = 'profile.html'; }, 1500);
 
   } catch (error) {
     console.error('Ошибка сохранения:', error);
-    showMessage(t('saveError') || 'Ошибка при сохранении', 'error');
+    showMessage(typeof t === 'function' ? t('saveError') : 'Ошибка при сохранении', 'error');
   } finally {
     isSubmitting = false;
   }
 }
 
-// ===== ОТМЕНА =====
 function cancelEditing() {
   window.location.href = 'profile.html';
 }
 
-// ===== СООБЩЕНИЯ =====
 function showMessage(text, type) {
   const msgDiv = document.getElementById('editMessage');
   if (!msgDiv) return;
   msgDiv.textContent = text;
-  msgDiv.className = 'edit-message';
-  if (type) msgDiv.classList.add(type);
+  msgDiv.className = 'edit-message ' + (type || '');
   msgDiv.style.display = 'block';
 
   if (type !== 'info') {
-    setTimeout(() => {
-      msgDiv.style.display = 'none';
-    }, 5000);
-  }
-}
-
-// ===== ОБНОВЛЕНИЕ САЙДБАРА =====
-function updateSidebarUser(userData) {
-  const nameEl = document.getElementById('sidebarUserName');
-  const tagEl = document.getElementById('sidebarUserTag');
-  const avatarEl = document.getElementById('sidebarUserAvatar');
-  
-  if (nameEl) {
-    try {
-      nameEl.textContent = userData.nickname || 'Users';
-      nameEl.removeAttribute('data-i18n');
-    } catch (e) {
-      nameEl.textContent = userData.nickname || 'Users';
-      nameEl.removeAttribute('data-i18n');
-    }
-  }
-  
-  if (tagEl) tagEl.textContent = userData.tag || '@user';
-  
-  if (avatarEl) {
-    if (userData.avatar) {
-      avatarEl.innerHTML = `<img src="${userData.avatar}" alt="Аватар" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block;">`;
-      avatarEl.style.background = 'transparent';
-    } else {
-      avatarEl.innerHTML = userData.nickname ? userData.nickname.charAt(0).toUpperCase() : '?';
-      avatarEl.style.background = '#3b82f6';
-      avatarEl.style.color = 'white';
-    }
+    setTimeout(() => { msgDiv.style.display = 'none'; }, 5000);
   }
 }
