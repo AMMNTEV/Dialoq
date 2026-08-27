@@ -3340,3 +3340,39 @@ body.dark-theme .tg-modal-header .tg-group-name {
     padding-top: 72px !important;
   }
 }
+
+/* ==========================================
+   ИСПРАВЛЕНИЕ: ВЫРАВНИВАНИЕ ПОИСКА И УДАЛЕНИЕ ПОЛОСКИ
+   ========================================== */
+
+/* 1. Глобально убираем рамку у контейнера над чатами, которая торчала в виде "черной полоски" */
+.chats-header {
+  border-bottom: none !important;
+}
+
+@media (max-width: 768px) {
+  /* 2. Синхронизируем позицию и высоту контейнера поиска с шапкой собеседника (64px) */
+  .search-box {
+    position: absolute !important;
+    top: 0 !important; /* Прижимаем к верху, как и .chat-header */
+    left: 0 !important;
+    right: 0 !important;
+    height: 64px !important; /* Точное совпадение с высотой шапки чата */
+    padding: 0 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    background: transparent !important;
+    z-index: 100 !important;
+  }
+
+  /* 3. Ограничиваем высоту самой "капсулы" ввода, чтобы она была аккуратной (44px) */
+  .search-box input {
+    height: 44px !important;
+    margin: 0 !important;
+  }
+
+  /* 4. Сдвигаем список чатов чуть ниже, чтобы он не залезал под увеличенный поиск */
+  .chats-list {
+    padding-top: 76px !important; /* 64px высота поиска + 12px отступ */
+  }
+}
