@@ -700,25 +700,36 @@ function searchUsersToAdd() {
   const addList = document.getElementById('addParticipantsList');
   if (!addList) return;
 
+  // 1. Показываем новое сообщение, когда поисковая строка пуста
   if (!searchText) { 
-  addList.innerHTML = `<div class="no-users">${t('startTypingToSearch')}</div>`; 
-  return; 
-}
+    addList.innerHTML = `<div class="no-users">${t('searchMutualOnly')}</div>`; 
+    return; 
+  }
 
   const nonParticipants = allUsersForModal.filter(user => !selectedChat.participants.includes(user.id));
-  const filtered = nonParticipants.filter(user =>
+  
+  // 2. Фильтруем участников — оставляем только взаимные подписки
+  const mutualUsers = nonParticipants.filter(user => {
+    const userFollowers = user.followers || [];
+    const userFollowing = user.following || [];
+    
+    // Пользователь подписан на вас И вы подписаны на него
+    return userFollowers.includes(currentUser.uid) && userFollowing.includes(currentUser.uid);
+  });
+
+  // 3. Выполняем поиск по имени или тегу среди взаимных друзей
+  const filtered = mutualUsers.filter(user =>
     (user.nickname && user.nickname.toLowerCase().includes(searchText)) ||
     (user.tag && user.tag.toLowerCase().includes(searchText))
   );
 
   if (filtered.length === 0) { 
-  addList.innerHTML = `<div class="no-users">${t('nothingFound')}</div>`; 
-  return; 
-}
+    addList.innerHTML = `<div class="no-users">${t('nothingFound')}</div>`; 
+    return; 
+  }
 
   let html = '';
   filtered.forEach(user => {
-    // Проверяем, есть ли ID в нашем глобальном хранилище
     const isChecked = selectedUsersForAdd.has(user.id) ? 'checked' : '';
     html += `<label class="user-checkbox"><input type="checkbox" value="${user.id}" onchange="toggleUserSelection('${user.id}', this.checked, 'add')" ${isChecked}><span>${user.nickname} ${user.tag}</span></label>`;
   });
@@ -1315,7 +1326,7 @@ async function openChatInfo(chatId) {
     }
 
     document.getElementById('searchUsersToAdd').value = '';
-    document.getElementById('addParticipantsList').innerHTML = `<div class="no-users">${t('startTypingToSearch')}</div>`;
+    document.getElementById('addParticipantsList').innerHTML = `<div class="no-users">${t('searchMutualOnly')}</div>`;
     selectedUsersForAdd.clear(); // Очищаем список добавления
 
     const deleteBtn = document.getElementById('deleteGroupBtn');
