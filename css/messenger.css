@@ -2201,62 +2201,208 @@ a:focus {
   }
 }
 
-.tg-add-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
+/* ==========================================
+   ИСПРАВЛЕНИЕ КНОПКИ ОТМЕНЫ В МОДАЛЬНОМ ОКНЕ
+   ========================================== */
 
-.tg-add-header .search-input {
-  margin-bottom: 0 !important;
-  flex: 1;
-  height: 44px;
-}
-
+/* Фикс для кнопки отмены - делаем ее компактной и правильно выровненной */
 .tg-cancel-btn {
-  height: 44px;
-  padding: 0 16px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #64748b;
-  cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: all 0.2s ease;
+  width: auto !important;
+  min-width: 80px !important;
+  padding: 8px 20px !important;
+  background: #f1f5f9 !important;
+  border: none !important;
+  color: #64748b !important;
+  border-radius: 12px !important;
+  cursor: pointer !important;
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  margin: 0 !important;
+  transition: background 0.2s, color 0.2s !important;
+  flex-shrink: 0 !important;
 }
 
 .tg-cancel-btn:hover {
-  background: #e2e8f0;
-  color: #1a1a1a;
+  background: #e2e8f0 !important;
+  color: #334155 !important;
 }
 
-.tg-modal-header {
-  display: flex;
-  align-items: center;
-  padding: 16px;
-  background: transparent !important;
-  position: relative;
-  z-index: 10;
+/* Располагаем кнопку отмены рядом с поиском */
+.tg-add-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-bottom: 12px !important;
 }
+
+.tg-add-header .search-input {
+  flex: 1 !important;
+  margin-bottom: 0 !important;
+}
+
+/* ==========================================
+   ИСПРАВЛЕНИЕ ШАПКИ МОДАЛЬНОГО ОКНА - ПРОЗРАЧНЫЙ ФОН
+   ========================================== */
+
+/* Шапка модального окна должна быть прозрачной, чтобы не перекрывать контент */
+.tg-modal-header {
+  padding: 12px 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  background: transparent !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+  flex-shrink: 0 !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+.dark-theme .tg-modal-header {
+  border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Тело модального окна - добавляем отступ сверху для компенсации */
+.tg-modal-body {
+  padding: 0 16px 20px 16px !important;
+  flex: 1 !important;
+  overflow-y: auto !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* ==========================================
+   ИСПРАВЛЕНИЕ НИЖНЕЙ ПАНЕЛИ НАВИГАЦИИ
+   ========================================== */
+
+/* Добавляем отступ снизу для контента, чтобы он не перекрывался панелью */
+@media (max-width: 768px) {
+  .chats-list {
+    padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  
+  .messages-container {
+    padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* Фон под нижней панелью - убираем дырку */
+.mobile-bottom-nav {
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 28px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Темная тема для нижней панели */
+.dark-theme .mobile-bottom-nav {
+  background: rgba(22, 25, 32, 0.92) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* ==========================================
+   МОДАЛЬНОЕ ОКНО ПОВЕРХ ВСЕГО (ВКЛЮЧАЯ НИЖНЮЮ ПАНЕЛЬ)
+   ========================================== */
+
+.modal {
+  z-index: 9999 !important;
+}
+
+.modal-overlay {
+  z-index: 9998 !important;
+}
+
+/* Убеждаемся, что модальное окно перекрывает нижнюю панель */
+.mobile-bottom-nav {
+  z-index: 100 !important;
+}
+
+/* ==========================================
+   ИСПРАВЛЕНИЕ ДЛЯ СВЕТЛОЙ ТЕМЫ - КНОПКА ОТМЕНЫ
+   ========================================== */
+
+/* Кнопка отмены в светлой теме */
+.tg-cancel-btn {
+  background: #f1f5f9 !important;
+  color: #64748b !important;
+}
+
+.tg-cancel-btn:hover {
+  background: #e2e8f0 !important;
+  color: #334155 !important;
+}
+
+/* Кнопка отмены в темной теме */
+.dark-theme .tg-cancel-btn {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #cbd5e1 !important;
+}
+
+.dark-theme .tg-cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+
+/* ==========================================
+   ИСПРАВЛЕНИЕ ОТСТУПОВ В МОДАЛЬНОМ ОКНЕ
+   ========================================== */
+
+/* Убираем лишние отступы у полей ввода */
+.tg-section-box .modal-input,
+.tg-section-box .search-input {
+  margin-bottom: 0 !important;
+}
+
+/* Добавляем отступ между полями */
+.tg-section-box > div:not(:last-child) {
+  margin-bottom: 12px !important;
+}
+
+/* ==========================================
+   ИСПРАВЛЕНИЕ ДЛЯ ПОЛНОЭКРАННЫХ МОДАЛОК НА МОБИЛКАХ
+   ========================================== */
 
 @media (max-width: 768px) {
-  body {
-    background-color: #ffffff !important;
+  .modal {
+    padding: 0 !important;
+    align-items: flex-start !important;
+    z-index: 9999 !important;
   }
-
-  .messenger-container {
+  
+  .modal-content, 
+  .tg-modal-content {
+    width: 100% !important;
+    height: 100vh !important;
+    height: -webkit-fill-available !important;
+    height: 100dvh !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
     background: #ffffff !important;
   }
-}
-
-body.dark-theme {
-  background-color: #121212 !important;
-}
-
-body.dark-theme .messenger-container {
-  background: #121212 !important;
+  
+  .dark-theme .modal-content,
+  .dark-theme .tg-modal-content {
+    background: #0a0c10 !important;
+  }
+  
+  .modal-body,
+  .tg-modal-body {
+    flex: 1 1 auto !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 24px)) !important;
+  }
+  
+  /* Убеждаемся, что модалка поверх нижней панели */
+  .mobile-bottom-nav {
+    z-index: 100 !important;
+  }
 }
