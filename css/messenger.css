@@ -1821,3 +1821,74 @@ a:focus {
   fill: currentColor !important;
   stroke: currentColor !important;
 }
+
+/* Стили для кнопки выхода в футере */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.modal-leave-btn {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.modal-leave-btn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: #ef4444;
+}
+
+/* Исправление скруглений и вылезающего скроллбара */
+.modal-content {
+  overflow: hidden; /* Клипирует скроллбар по границам скругления родителя */
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-body {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+/* Кастомный кастомный тонкий скроллбар для ПК (Chrome, Edge, Safari) */
+.modal-body::-webkit-scrollbar,
+.users-checkbox-list::-webkit-scrollbar,
+.messages-container::-webkit-scrollbar,
+.chats-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track,
+.users-checkbox-list::-webkit-scrollbar-track,
+.messages-container::-webkit-scrollbar-track,
+.chats-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-body::-webkit-scrollbar-thumb,
+.users-checkbox-list::-webkit-scrollbar-thumb,
+.messages-container::-webkit-scrollbar-thumb,
+.chats-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover,
+.users-checkbox-list::-webkit-scrollbar-thumb:hover,
+.messages-container::-webkit-scrollbar-thumb:hover,
+.chats-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
