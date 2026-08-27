@@ -379,3 +379,114 @@ body.dark-theme .edit-bio-counter {
   margin: 0 !important;
   padding: 0 !important;
 }
+
+/* ===== КОНТЕЙНЕР РЕДАКТИРОВАНИЯ ===== */
+.edit-container {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-gutter: stable; 
+  position: relative; /* Необходим для абсолютного позиционирования шапки */
+  padding: 80px 16px 80px 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Парящая шапка (точно как на profile.html) */
+.edit-header {
+  position: absolute;
+  top: 14px;
+  left: 0;
+  right: 0;
+  height: 60px;
+  z-index: 100;
+  padding: 0 16px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+  width: 100%;
+  pointer-events: none; /* Пропускает клики сквозь свободное пространство */
+}
+
+/* Заголовок шапки */
+.edit-header h1 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  color: #000000;
+  pointer-events: auto;
+}
+
+body.dark-theme .edit-header h1 {
+  color: #ffffff;
+}
+
+/* Стеклянная круглая кнопка "Назад" */
+.edit-header .back-btn {
+  pointer-events: auto;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #1a1a1a;
+  box-shadow: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.edit-header .back-btn:hover {
+  background: rgba(255, 255, 255, 0.95);
+  color: #3b82f6;
+}
+
+.edit-header .back-btn svg {
+  width: 24px;
+  height: 24px;
+  stroke-width: 1.8;
+}
+
+/* Тёмная тема для кнопки "Назад" */
+body.dark-theme .edit-header .back-btn {
+  background: rgba(30, 30, 30, 0.85);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/* ===== АДАПТИВ ===== */
+@media (max-width: 600px) {
+  .edit-container {
+    padding: 70px 16px calc(80px + env(safe-area-inset-bottom, 0px)) 16px;
+  }
+
+  .edit-avatar-wrapper {
+    width: 80px;
+    height: 80px;
+  }
+
+  .edit-avatar {
+    font-size: 2rem;
+  }
+
+  .edit-actions {
+    flex-direction: column;
+  }
+
+  .edit-cancel-btn,
+  .edit-save-btn {
+    padding: 14px;
+  }
+}
