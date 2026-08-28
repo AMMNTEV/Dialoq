@@ -692,7 +692,12 @@
 }
 
 .modal-leave-btn {
-  padding: 10px 20px;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;                  /* Отступ между стрелочкой и текстом */
+  margin: 16px auto 0 auto !important;  /* Выравнивает кнопку строго по центру */
+  padding: 10px 20px !important;
   background: #f1f5f9;
   color: #64748b;
   border: none;
@@ -700,6 +705,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  line-height: 1 !important;           /* Фиксирует вертикальную центровку текста */
 }
 
 .modal-leave-btn:hover {
@@ -1714,7 +1720,7 @@ a:focus {
 
 /* 4. Сдвигаем сообщения вверх, чтобы они плавно уходили под парящую панель ввода */
 .messages-container {
-  /* Компенсируем высоту панели (48px) + отступ снизу (16px) */
+  /* Компенсируем высоту panel (48px) + отступ снизу (16px) */
   padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
@@ -1815,3 +1821,1481 @@ a:focus {
   fill: currentColor !important;
   stroke: currentColor !important;
 }
+
+/* Стили для кнопки выхода в футере */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.modal-leave-btn {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.modal-leave-btn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: #ef4444;
+}
+
+/* Исправление скруглений и вылезающего скроллбара */
+.modal-content {
+  overflow: hidden; /* Клипирует скроллбар по границам скругления родителя */
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-body {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+/* Кастомный кастомный тонкий скроллбар для ПК (Chrome, Edge, Safari) */
+.modal-body::-webkit-scrollbar,
+.users-checkbox-list::-webkit-scrollbar,
+.messages-container::-webkit-scrollbar,
+.chats-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track,
+.users-checkbox-list::-webkit-scrollbar-track,
+.messages-container::-webkit-scrollbar-track,
+.chats-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-body::-webkit-scrollbar-thumb,
+.users-checkbox-list::-webkit-scrollbar-thumb,
+.messages-container::-webkit-scrollbar-thumb,
+.chats-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover,
+.users-checkbox-list::-webkit-scrollbar-thumb:hover,
+.messages-container::-webkit-scrollbar-thumb:hover,
+.chats-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* ========== СВЕТЛАЯ ТЕМА ========== */
+.tg-modal-content {
+  max-width: 420px;
+  border-radius: 16px;
+  padding: 0;
+  overflow: hidden;
+  background: #ffffff;
+  color: #000000;
+  box-shadow: none !important;
+}
+
+.tg-modal-header {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+}
+
+.tg-back-btn {
+  background: transparent;
+  border: none;
+  color: #707579;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+
+.tg-back-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #000000;
+}
+
+.tg-modal-body {
+  padding: 0 16px 20px 16px;
+  max-height: 80vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+/* Профиль группы */
+.tg-profile-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.tg-avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: #f0f2f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  cursor: pointer;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.tg-group-name {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #000000;
+  text-align: center;
+}
+
+.tg-group-count {
+  font-size: 0.85rem;
+  color: #707579;
+  margin-top: 4px;
+}
+
+/* Блок списков */
+.tg-section-box {
+  background: #f4f4f5;
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin-bottom: 16px;
+}
+
+.tg-add-member-btn {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #3390ec;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 10px 4px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  transition: opacity 0.2s;
+}
+
+.tg-add-member-btn:hover {
+  opacity: 0.8;
+}
+
+.tg-add-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+/* ==========================================
+   ОБНОВЛЕНИЕ: КНОПКА ОТМЕНЫ
+   ========================================== */
+.tg-cancel-btn {
+  width: 100%;
+  background: #f1f5f9;
+  border: none;
+  color: #64748b;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 12px 16px;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  margin: 12px auto 0 auto;
+  transition: background 0.2s, color 0.2s;
+}
+
+.tg-cancel-btn:hover {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+/* Кнопки действий внизу */
+.tg-actions-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tg-action-btn {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tg-action-btn.tg-danger {
+  background: #f4f4f5;
+  color: #e53935;
+}
+
+.tg-action-btn.tg-danger:hover {
+  background: rgba(229, 57, 53, 0.08);
+}
+
+.tg-action-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  gap: 8px;
+}
+
+.modal-content {
+  box-shadow: none !important;
+}
+
+/* ==========================================
+   1. СМЯГЧЕНИЕ КРАСНЫХ КНОПОК ("Покинуть" и "Удалить")
+   ========================================== */
+
+/* Светлая тема (мягкая красноватая плашка как при ховере на Logout) */
+.tg-actions-section .tg-action-btn.tg-danger,
+.modal-leave-btn,
+.tg-action-btn.danger,
+.modal-delete-btn {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+  border: 1px solid #fecaca !important;
+  box-shadow: none !important;
+}
+
+.tg-actions-section .tg-action-btn.tg-danger svg,
+.modal-leave-btn svg,
+.tg-action-btn.danger svg,
+.modal-delete-btn svg {
+  stroke: #dc2626 !important;
+}
+
+.tg-actions-section .tg-action-btn.tg-danger:hover,
+.modal-leave-btn:hover,
+.tg-action-btn.danger:hover,
+.modal-delete-btn:hover {
+  background: #fca5a5 !important;
+  color: #b91c1c !important;
+}
+
+/* Тёмная тема (полупрозрачный красноватый оттенок) */
+.dark-theme .tg-actions-section .tg-action-btn.tg-danger,
+.dark-theme .modal-leave-btn,
+.dark-theme .tg-action-btn.danger,
+.dark-theme .modal-delete-btn {
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #ef4444 !important;
+  border: 1px solid rgba(239, 68, 68, 0.25) !important;
+  box-shadow: none !important;
+}
+
+.dark-theme .tg-actions-section .tg-action-btn.tg-danger svg,
+.dark-theme .modal-leave-btn svg,
+.dark-theme .tg-action-btn.danger svg,
+.dark-theme .modal-delete-btn svg {
+  stroke: #ef4444 !important;
+}
+
+.dark-theme .tg-actions-section .tg-action-btn.tg-danger:hover,
+.dark-theme .modal-leave-btn:hover,
+.dark-theme .tg-action-btn.danger:hover,
+.dark-theme .modal-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.22) !important;
+  color: #fca5a5 !important;
+}
+
+
+/* ==========================================
+   2. УБИРАЕМ ПОДЛОЖКУ СПИСКА УЧАСТНИКОВ В СВЕТЛОЙ ТЕМЕ
+   ========================================== */
+
+/* Убираем серый фон и рамку у подложки */
+.group-participants-list,
+.group-info-section,
+.tg-section-box {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Возвращаем темный цвет текста участникам для светлой темы */
+.group-participants-list,
+.group-participants-list * {
+  color: #1a1a1a !important;
+}
+
+
+.dark-theme .group-participants-list,
+.dark-theme .group-participants-list * {
+  color: #ffffff !important;
+}
+
+/* ==========================================
+   ОБНОВЛЕНИЕ: КНОПКА ОТМЕНЫ (ТЁМНАЯ ТЕМА)
+   ========================================== */
+.dark-theme .tg-cancel-btn {
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+}
+.dark-theme .tg-cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+/* ==========================================
+   ОБНОВЛЕНИЕ: ПОЛНОЭКРАННЫЕ МОДАЛЬНЫЕ ОКНА (МОБИЛКИ)
+   ========================================== */
+@media (max-width: 768px) {
+  .modal {
+    padding: 0 !important;
+    align-items: flex-start !important; /* Окно прижимается к верху */
+  }
+  
+  .modal-content, 
+  .tg-modal-content {
+    width: 100% !important;
+    height: 100vh !important;
+    height: -webkit-fill-available;
+    height: 100dvh !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .modal-body,
+  .tg-modal-body {
+    flex: 1 1 auto !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    /* Увеличиваем отступ снизу, чтобы элементы не прятались за системным баром */
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 24px)) !important;
+  }
+}
+
+/* ==========================================
+   ИСПРАВЛЕНИЕ КНОПКИ ОТМЕНЫ В МОДАЛЬНОМ ОКНЕ
+   ========================================== */
+
+/* Фикс для кнопки отмены - делаем ее компактной и правильно выровненной */
+.tg-cancel-btn {
+  width: auto !important;
+  min-width: 80px !important;
+  padding: 8px 20px !important;
+  background: #f1f5f9 !important;
+  border: none !important;
+  color: #64748b !important;
+  border-radius: 12px !important;
+  cursor: pointer !important;
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  margin: 0 !important;
+  transition: background 0.2s, color 0.2s !important;
+  flex-shrink: 0 !important;
+}
+
+.tg-cancel-btn:hover {
+  background: #e2e8f0 !important;
+  color: #334155 !important;
+}
+
+/* Располагаем кнопку отмены рядом с поиском */
+.tg-add-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-bottom: 12px !important;
+}
+
+.tg-add-header .search-input {
+  flex: 1 !important;
+  margin-bottom: 0 !important;
+}
+
+/* ==========================================
+   ИСПРАВЛЕНИЕ ШАПКИ МОДАЛЬНОГО ОКНА - ПРОЗРАЧНЫЙ ФОН
+   ========================================== */
+
+/* Шапка модального окна должна быть прозрачной, чтобы не перекрывать контент */
+.tg-modal-header {
+  padding: 12px 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  background: transparent !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+  flex-shrink: 0 !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+.dark-theme .tg-modal-header {
+  border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Тело модального окна - добавляем отступ сверху для компенсации */
+.tg-modal-body {
+  padding: 0 16px 20px 16px !important;
+  flex: 1 !important;
+  overflow-y: auto !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* ==========================================
+   ИСПРАВЛЕНИЕ НИЖНЕЙ ПАНЕЛИ НАВИГАЦИИ
+   ========================================== */
+
+/* Добавляем отступ снизу для контента, чтобы он не перекрывался панелью */
+@media (max-width: 768px) {
+  .chats-list {
+    padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  
+  .messages-container {
+    padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* Фон под нижней панелью - убираем дырку */
+.mobile-bottom-nav {
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 28px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Темная тема для нижней панели */
+.dark-theme .mobile-bottom-nav {
+  background: rgba(22, 25, 32, 0.92) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* ==========================================
+   МОДАЛЬНОЕ ОКНО ПОВЕРХ ВСЕГО (ВКЛЮЧАЯ НИЖНЮЮ ПАНЕЛЬ)
+   ========================================== */
+
+.modal {
+  z-index: 9999 !important;
+}
+
+.modal-overlay {
+  z-index: 9998 !important;
+}
+
+/* Убеждаемся, что модальное окно перекрывает нижнюю панель */
+.mobile-bottom-nav {
+  z-index: 100 !important;
+}
+
+/* ==========================================
+   ИСПРАВЛЕНИЕ ДЛЯ СВЕТЛОЙ ТЕМЫ - КНОПКА ОТМЕНЫ
+   ========================================== */
+
+/* Кнопка отмены в светлой теме */
+.tg-cancel-btn {
+  background: #f1f5f9 !important;
+  color: #64748b !important;
+}
+
+.tg-cancel-btn:hover {
+  background: #e2e8f0 !important;
+  color: #334155 !important;
+}
+
+/* Кнопка отмены в темной теме */
+.dark-theme .tg-cancel-btn {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #cbd5e1 !important;
+}
+
+.dark-theme .tg-cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+
+/* ==========================================
+   ИСПРАВЛЕНИЕ ОТСТУПОВ В МОДАЛЬНОМ ОКНЕ
+   ========================================== */
+
+/* Убираем лишние отступы у полей ввода */
+.tg-section-box .modal-input,
+.tg-section-box .search-input {
+  margin-bottom: 0 !important;
+}
+
+/* Добавляем отступ между полями */
+.tg-section-box > div:not(:last-child) {
+  margin-bottom: 12px !important;
+}
+
+/* ==========================================
+   ИСПРАВЛЕНИЕ ДЛЯ ПОЛНОЭКРАННЫХ МОДАЛОК НА МОБИЛКАХ
+   ========================================== */
+
+@media (max-width: 768px) {
+  .modal {
+    padding: 0 !important;
+    align-items: flex-start !important;
+    z-index: 9999 !important;
+  }
+  
+  .modal-content, 
+  .tg-modal-content {
+    width: 100% !important;
+    height: 100vh !important;
+    height: -webkit-fill-available !important;
+    height: 100dvh !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: #ffffff !important;
+  }
+  
+  .dark-theme .modal-content,
+  .dark-theme .tg-modal-content {
+    background: #0a0c10 !important;
+  }
+  
+  .modal-body,
+  .tg-modal-body {
+    flex: 1 1 auto !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 24px)) !important;
+  }
+  
+  /* Убеждаемся, что модалка поверх нижней панели */
+  .mobile-bottom-nav {
+    z-index: 100 !important;
+  }
+}
+
+/* ==========================================
+   ИСПРАВЛЕНИЕ - МОДАЛЬНЫЕ ОКНА НА ВЕСЬ ЭКРАН (МОБИЛКИ)
+   ========================================== */
+
+@media (max-width: 768px) {
+  /* Все модальные окна - на весь экран */
+  .modal {
+    padding: 0 !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+    z-index: 9999 !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+  }
+  
+  .modal-content,
+  .tg-modal-content {
+    width: 100% !important;
+    height: 100vh !important;
+    height: -webkit-fill-available !important;
+    height: 100dvh !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: #ffffff !important;
+    position: relative !important;
+  }
+  
+  .dark-theme .modal-content,
+  .dark-theme .tg-modal-content {
+    background: #0a0c10 !important;
+  }
+  
+  /* Шапка модалки - фиксированная сверху */
+  .tg-modal-header {
+    padding: 12px 16px !important;
+    flex-shrink: 0 !important;
+    background: transparent !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+    z-index: 10 !important;
+    min-height: 56px !important;
+  }
+  
+  .dark-theme .tg-modal-header {
+    border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+  }
+  
+  /* Тело модалки - скроллится, занимает всё оставшееся место */
+  .modal-body,
+  .tg-modal-body {
+    flex: 1 1 auto !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    padding: 16px 16px calc(24px + env(safe-area-inset-bottom, 24px)) !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  /* Убираем лишние отступы у секций */
+  .tg-section-box {
+    margin-bottom: 16px !important;
+  }
+  
+  /* Кнопка "Создать" внизу */
+  .modal-save-btn {
+    margin-top: 16px !important;
+    width: 100% !important;
+    padding: 14px !important;
+  }
+  
+  /* Список участников в модалке */
+  .users-checkbox-list {
+    max-height: 250px !important;
+  }
+  
+  /* Убираем дырку под нижней панелью - контент не должен перекрываться */
+  .chats-list {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  
+  /* Мобильная нижняя панель - фон непрозрачный */
+  .mobile-bottom-nav {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.05) !important;
+  }
+  
+  .dark-theme .mobile-bottom-nav {
+    background: rgba(22, 25, 32, 0.95) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.3) !important;
+  }
+}
+
+/* ==========================================
+   ИСПРАВЛЕНИЕ ДЛЯ #groupInfoModal (информация о беседе)
+   ========================================== */
+
+@media (max-width: 768px) {
+  #groupInfoModal .modal-content,
+  #groupInfoModal .tg-modal-content {
+    height: 100vh !important;
+    height: -webkit-fill-available !important;
+    height: 100dvh !important;
+  }
+  
+  #groupInfoModal .tg-profile-section {
+    padding-top: 8px !important;
+  }
+  
+  #groupInfoModal .tg-avatar {
+    width: 80px !important;
+    height: 80px !important;
+    font-size: 2rem !important;
+  }
+  
+  #groupInfoModal .tg-group-name {
+    font-size: 1.1rem !important;
+  }
+  
+  /* Кнопки действий внизу модалки */
+  #groupInfoModal .tg-actions-section {
+    padding-bottom: env(safe-area-inset-bottom, 20px) !important;
+  }
+  
+  #groupInfoModal .tg-action-btn {
+    padding: 14px 16px !important;
+    font-size: 1rem !important;
+  }
+}
+
+/* ==========================================
+   ИСПРАВЛЕНИЕ ДЛЯ #createGroupModal (создание беседы)
+   ========================================== */
+
+@media (max-width: 768px) {
+  #createGroupModal .modal-content,
+  #createGroupModal .tg-modal-content {
+    height: 100vh !important;
+    height: -webkit-fill-available !important;
+    height: 100dvh !important;
+  }
+  
+  #createGroupModal .modal-input {
+    font-size: 1rem !important;
+    padding: 14px 16px !important;
+  }
+  
+  #createGroupModal .search-input {
+    font-size: 1rem !important;
+    padding: 12px 16px !important;
+  }
+  
+  #createGroupModal .users-checkbox-list {
+    max-height: 200px !important;
+  }
+  
+  #createGroupModal .user-checkbox {
+    padding: 12px !important;
+  }
+  
+  #createGroupModal .user-checkbox span {
+    font-size: 1rem !important;
+  }
+}
+
+/* ==========================================
+   УБИРАЕМ ДЫРКУ ПОД НИЖНЕЙ ПАНЕЛЬЮ НАВИГАЦИИ
+   ========================================== */
+
+/* Убеждаемся, что фон под панелью есть */
+.mobile-bottom-nav {
+  z-index: 1005 !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.04) !important;
+}
+
+.dark-theme .mobile-bottom-nav {
+  background: rgba(22, 25, 32, 0.92) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Дополнительный фон под панелью для iOS */
+body {
+  background-color: #ffffff !important;
+}
+
+.dark-theme body {
+  background-color: #0a0c10 !important;
+}
+
+/* Модальные окна на весь экран */
+.modal-fullscreen .modal-content,
+.modal-fullscreen .tg-modal-content {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+}
+
+@media (max-width: 768px) {
+  .modal-fullscreen {
+    padding: 0 !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+  }
+  
+  .modal-fullscreen .modal-content,
+  .modal-fullscreen .tg-modal-content {
+    width: 100% !important;
+    height: 100vh !important;
+    height: -webkit-fill-available !important;
+    height: 100dvh !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+/* ==========================================
+   МОДАЛЬНЫЕ ОКНА - БАЗОВЫЕ СТИЛИ (ПК ВЕРСИЯ)
+   ========================================== */
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999 !important;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-content,
+.tg-modal-content {
+  max-width: 420px !important;
+  width: 100% !important;
+  max-height: 90vh !important;
+  border-radius: 16px !important;
+  padding: 0 !important;
+  overflow: hidden;
+  background: #ffffff;
+  color: #000000;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+}
+
+.dark-theme .modal-content,
+.dark-theme .tg-modal-content {
+  background: #161920;
+  color: #ffffff;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+/* Шапка модального окна */
+.tg-modal-header {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  background: transparent !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.dark-theme .tg-modal-header {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+.tg-back-btn {
+  background: transparent;
+  border: none;
+  color: #707579;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+  margin-right: 8px;
+}
+
+.tg-back-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #000000;
+}
+
+.dark-theme .tg-back-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+
+.tg-group-name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: inherit;
+}
+
+/* Тело модального окна */
+.tg-modal-body {
+  padding: 0 16px 20px 16px;
+  overflow-y: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.tg-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tg-modal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tg-modal-body::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+}
+
+.tg-modal-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* Секции внутри модалки */
+.tg-section-box {
+  background: #f4f4f5;
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin-bottom: 16px;
+}
+
+.dark-theme .tg-section-box {
+  background: #1e2430;
+}
+
+/* Профиль группы */
+.tg-profile-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-top: 8px;
+}
+
+.tg-avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: #f0f2f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  cursor: pointer;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.dark-theme .tg-avatar {
+  background: #232a38;
+}
+
+.tg-group-count {
+  font-size: 0.85rem;
+  color: #707579;
+  margin-top: 4px;
+}
+
+.dark-theme .tg-group-count {
+  color: #8b93a5;
+}
+
+/* Кнопка добавления участников */
+.tg-add-member-btn {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #3390ec;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 10px 4px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  transition: opacity 0.2s;
+}
+
+.dark-theme .tg-add-member-btn {
+  color: #5285c2;
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+.tg-add-member-btn:hover {
+  opacity: 0.8;
+}
+
+/* Кнопка отмены (ПК версия) */
+.tg-cancel-btn {
+  width: auto !important;
+  min-width: 80px !important;
+  padding: 8px 20px !important;
+  background: #f1f5f9 !important;
+  border: none !important;
+  color: #64748b !important;
+  border-radius: 12px !important;
+  cursor: pointer !important;
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  margin: 0 !important;
+  transition: background 0.2s, color 0.2s !important;
+  flex-shrink: 0 !important;
+}
+
+.tg-cancel-btn:hover {
+  background: #e2e8f0 !important;
+  color: #334155 !important;
+}
+
+.dark-theme .tg-cancel-btn {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #cbd5e1 !important;
+}
+
+.dark-theme .tg-cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+
+/* Заголовок поиска */
+.tg-add-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-bottom: 12px !important;
+}
+
+.tg-add-header .search-input {
+  flex: 1 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Кнопки действий */
+.tg-actions-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tg-action-btn {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  gap: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tg-action-btn.tg-danger {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+  border: 1px solid #fecaca !important;
+}
+
+.tg-action-btn.tg-danger svg {
+  stroke: #dc2626 !important;
+}
+
+.tg-action-btn.tg-danger:hover {
+  background: #fca5a5 !important;
+  color: #b91c1c !important;
+}
+
+.dark-theme .tg-action-btn.tg-danger {
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #ef4444 !important;
+  border: 1px solid rgba(239, 68, 68, 0.25) !important;
+}
+
+.dark-theme .tg-action-btn.tg-danger svg {
+  stroke: #ef4444 !important;
+}
+
+.dark-theme .tg-action-btn.tg-danger:hover {
+  background: rgba(239, 68, 68, 0.22) !important;
+  color: #fca5a5 !important;
+}
+
+/* ==========================================
+   МОДАЛЬНЫЕ ОКНА - МОБИЛЬНАЯ ВЕРСИЯ (ВЕСЬ ЭКРАН)
+   ========================================== */
+
+@media (max-width: 768px) {
+  .modal {
+    padding: 0 !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+  }
+  
+  .modal-content,
+  .tg-modal-content {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 100vh !important;
+    height: -webkit-fill-available !important;
+    height: 100dvh !important;
+    max-height: 100% !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+  }
+  
+  .dark-theme .modal-content,
+  .dark-theme .tg-modal-content {
+    background: #0a0c10 !important;
+    box-shadow: none !important;
+  }
+  
+  .tg-modal-header {
+    padding: 12px 16px !important;
+    flex-shrink: 0 !important;
+    background: transparent !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+    z-index: 10 !important;
+    min-height: 56px !important;
+  }
+  
+  .dark-theme .tg-modal-header {
+    border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+  }
+  
+  .modal-body,
+  .tg-modal-body {
+    flex: 1 1 auto !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    padding: 16px 16px calc(24px + env(safe-area-inset-bottom, 24px)) !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  .tg-section-box {
+    margin-bottom: 16px !important;
+  }
+  
+  .modal-save-btn {
+    margin-top: 16px !important;
+    width: 100% !important;
+    padding: 14px !important;
+  }
+  
+  .users-checkbox-list {
+    max-height: 250px !important;
+  }
+  
+  #groupInfoModal .tg-profile-section {
+    padding-top: 8px !important;
+  }
+  
+  #groupInfoModal .tg-avatar {
+    width: 80px !important;
+    height: 80px !important;
+    font-size: 2rem !important;
+  }
+  
+  #groupInfoModal .tg-group-name {
+    font-size: 1.1rem !important;
+  }
+  
+  #groupInfoModal .tg-actions-section {
+    padding-bottom: env(safe-area-inset-bottom, 20px) !important;
+  }
+  
+  #groupInfoModal .tg-action-btn {
+    padding: 14px 16px !important;
+    font-size: 1rem !important;
+  }
+  
+  #createGroupModal .modal-input {
+    font-size: 1rem !important;
+    padding: 14px 16px !important;
+  }
+  
+  #createGroupModal .search-input {
+    font-size: 1rem !important;
+    padding: 12px 16px !important;
+  }
+  
+  #createGroupModal .users-checkbox-list {
+    max-height: 200px !important;
+  }
+  
+  #createGroupModal .user-checkbox {
+    padding: 12px !important;
+  }
+  
+  #createGroupModal .user-checkbox span {
+    font-size: 1rem !important;
+  }
+}
+
+/* ==========================================
+   УБИРАЕМ КОНФЛИКТ С .modal-fullscreen
+   ========================================== */
+
+/* Сбрасываем влияние .modal-fullscreen на ПК */
+.modal-fullscreen .modal-content,
+.modal-fullscreen .tg-modal-content {
+  max-width: 420px !important;
+  width: 100% !important;
+  max-height: 90vh !important;
+  border-radius: 16px !important;
+  margin: auto !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+}
+
+.dark-theme .modal-fullscreen .modal-content,
+.dark-theme .modal-fullscreen .tg-modal-content {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Только на мобилках .modal-fullscreen делает окно на весь экран */
+@media (max-width: 768px) {
+  .modal-fullscreen .modal-content,
+  .modal-fullscreen .tg-modal-content {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 100vh !important;
+    height: -webkit-fill-available !important;
+    height: 100dvh !important;
+    max-height: 100% !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
+}
+
+/* ==========================================
+   ДОПОЛНИТЕЛЬНЫЕ ИСПРАВЛЕНИЯ
+   ========================================== */
+
+.tg-section-box .modal-input,
+.tg-section-box .search-input {
+  margin-bottom: 0 !important;
+}
+
+.tg-section-box > div:not(:last-child) {
+  margin-bottom: 12px !important;
+}
+
+.group-participants-list {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 10px;
+  background: transparent !important;
+  border-radius: 12px;
+}
+
+.dark-theme .group-participants-list * {
+  color: #ffffff !important;
+}
+
+.users-checkbox-list {
+  max-height: 300px;
+  padding: 8px;
+  border: 1px solid #eef2f6;
+  border-radius: 12px;
+  overflow-y: auto;
+}
+
+.dark-theme .users-checkbox-list {
+  border-color: #212631;
+  background: #1e2430;
+}
+
+.user-checkbox {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.user-checkbox:hover {
+  background: #f1f5f9;
+}
+
+.dark-theme .user-checkbox:hover {
+  background: #232a38;
+}
+
+.user-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-right: 12px;
+  cursor: pointer;
+}
+
+.user-checkbox span {
+  font-size: 0.95rem;
+  color: #1a1a1a;
+}
+
+.dark-theme .user-checkbox span {
+  color: #ffffff;
+}
+
+/* Мобильная нижняя панель */
+.mobile-bottom-nav {
+  z-index: 1005 !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.04) !important;
+}
+
+.dark-theme .mobile-bottom-nav {
+  background: rgba(22, 25, 32, 0.92) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+body {
+  background-color: #ffffff !important;
+}
+
+.dark-theme body {
+  background-color: #0a0c10 !important;
+}
+
+/* ==========================================
+   УНИФИКАЦИЯ МОДАЛЬНЫХ ОКОН (СОЗДАНИЕ И ИНФО О БЕСЕДЕ)
+   ========================================== */
+
+/* 1. Делаем контейнер модалки относительным для фиксации шапки */
+.tg-modal-content {
+  position: relative !important;
+}
+
+/* 2. Шапка модалки: парящая, абсолютно прозрачная, без полоски внизу */
+.tg-modal-header {
+  position: absolute !important;
+  top: 14px !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 70px !important;
+  z-index: 100 !important;
+  background: transparent !important; 
+  border-bottom: none !important; 
+  box-shadow: none !important;
+  padding: 0 16px !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  pointer-events: none !important; /* Пропускаем клики сквозь пустые места */
+}
+
+/* Мобильная адаптивность для шапки (как в основном чате) */
+@media (max-width: 768px) {
+  .tg-modal-header {
+    top: 0 !important;
+    height: 64px !important;
+    padding: 0 16px !important;
+  }
+}
+
+/* 3. Кнопка "Назад": стеклянный эффект, 1 в 1 как в чатах */
+.tg-back-btn {
+  pointer-events: auto !important; /* Возвращаем кликабельность кнопке */
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  border-radius: 50% !important;
+  box-sizing: border-box !important;
+  
+  /* Стеклянный дизайн (Светлая тема) */
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  color: #1a1a1a !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  outline: none !important;
+}
+
+.tg-back-btn:hover {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #3b82f6 !important;
+}
+
+/* Фиксируем размер иконки внутри (перезаписываем инлайн-стили HTML) */
+.tg-back-btn svg {
+  width: 24px !important;
+  height: 24px !important;
+  stroke-width: 1.8 !important;
+}
+
+/* Темная тема для кнопки */
+body.dark-theme .tg-back-btn {
+  background: rgba(22, 25, 32, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}
+
+/* 4. Оформление заголовка "Создать новую беседу" (стеклянная плашка) */
+.tg-modal-header .tg-group-name {
+  pointer-events: auto !important; 
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 28px !important;
+  padding: 0 16px !important;
+  height: 48px !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  color: #1a1a1a !important;
+  box-sizing: border-box !important;
+  box-shadow: none !important;
+}
+
+/* Темная тема для заголовка */
+body.dark-theme .tg-modal-header .tg-group-name {
+  background: rgba(22, 25, 32, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}
+
+/* 5. Отступы в самом окне, чтобы контент плавно уезжал под парящую кнопку */
+.tg-modal-body {
+  padding-top: 90px !important; /* Отступ = высота шапки (70) + зазор (20) */
+  height: 100% !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 768px) {
+  .tg-modal-body {
+    padding-top: 76px !important; /* Отступ = высота моб. шапки (64) + зазор (12) */
+  }
+}
+

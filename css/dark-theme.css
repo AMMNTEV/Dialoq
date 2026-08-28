@@ -1099,6 +1099,384 @@ a:focus {
 .dark-theme .danger-title {
   color: #ef4444 !important;
 }
+
+/* ==========================================
+   ОКНО ИНФОРМАЦИИ О БЕСЕДЕ (CHAT INFO MODAL)
+   ========================================== */
+
+/* Контейнер модального окна и боковой панели */
+.dark-theme .chat-info-modal,
+.dark-theme .chat-info-drawer,
+.dark-theme .chat-info-sidebar,
+.dark-theme .chat-details-popup {
+  background-color: #17212b !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Шапка окна информации (прозрачная, без лишних подложек) */
+.dark-theme .chat-info-header,
+.dark-theme .chat-details-header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+/* Название беседы и заголовки */
+.dark-theme .chat-info-title,
+.dark-theme .chat-info-header h2,
+.dark-theme .chat-info-header h3,
+.dark-theme .chat-member-name {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+/* Подписи (количество участников, статус, медиа) */
+.dark-theme .chat-info-subtitle,
+.dark-theme .chat-member-status,
+.dark-theme .chat-info-section-title,
+.dark-theme .chat-info-label {
+  color: #7f91a4 !important;
+}
+
+/* Список участников и пункты меню */
+.dark-theme .chat-member-item,
+.dark-theme .chat-info-option {
+  background: transparent !important;
+  border-radius: 8px;
+  transition: background-color 0.15s ease;
+}
+
+.dark-theme .chat-member-item:hover,
+.dark-theme .chat-info-option:hover {
+  background-color: #202b36 !important;
+}
+
+/* Поле ввода / настройки внутри окна */
+.dark-theme .chat-info-input,
+.dark-theme .chat-info-field {
+  background-color: #0e1621 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Красные кнопки действий (Выйти из беседы, Очистить историю и т.д.) */
+.dark-theme .chat-info-leave-btn,
+.dark-theme .chat-info-action-danger,
+.dark-theme .chat-info-modal .btn-primary {
+  background: #e53935 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.dark-theme .chat-info-leave-btn:hover,
+.dark-theme .chat-info-action-danger:hover,
+.dark-theme .chat-info-modal .btn-primary:hover {
+  background: #d32f2f !important;
+  box-shadow: 0 4px 12px rgba(229, 57, 53, 0.3) !important;
+}
+
+/* Кнопка закрытия (крестик) */
+.dark-theme .chat-info-close-btn {
+  color: #7f91a4 !important;
+}
+
+.dark-theme .chat-info-close-btn:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ==========================================
+   ИСПРАВЛЕНИЕ МОДАЛЬНОГО ОКНА БЕСЕДЫ (TG-MODAL)
+   ========================================== */
+
+/* Контейнер модального окна и центральный блок */
+.dark-theme .tg-modal-content {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.dark-theme .tg-section-box {
+  background: var(--bg-tertiary) !important;
+  border: none
+
+/* Кнопка "Добавить участников" (текст и иконка) */
+.dark-theme .tg-add-member-btn {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .tg-add-member-btn svg {
+  stroke: var(--text-primary) !important;
+}
+
+.dark-theme .tg-add-member-btn:hover {
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .tg-add-member-btn:hover svg {
+  stroke: var(--text-primary) !important;
+}
+
+/* Список участников и их имена */
+.dark-theme .group-participants-list,
+.dark-theme .group-participants-list *,
+.dark-theme .tg-group-name {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .tg-group-count {
+  color: var(--text-secondary) !important;
+}
+
+/* Белые кнопки действий ("Покинуть беседу", "Удалить беседу") */
+.dark-theme .tg-actions-section .tg-action-btn,
+.dark-theme .tg-action-btn {
+  background: var(--bg-tertiary) !important;
+  border: 1px solid var(--border-color) !important;
+  color: #ef4444 !important;
+}
+
+.dark-theme .tg-actions-section .tg-action-btn svg,
+.dark-theme .tg-action-btn svg {
+  stroke: #ef4444 !important;
+}
+
+.dark-theme .tg-actions-section .tg-action-btn:hover,
+.dark-theme .tg-action-btn:hover {
+  background: rgba(184, 74, 74, 0.18) !important;
+  border-color: rgba(184, 74, 74, 0.3) !important;
+  color: #f87171 !important;
+}
+
+/* Поле поиска участников в режиме добавления */
+.dark-theme .tg-add-header input {
+  background: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Имена участников в списках, модалках и чекбоксах */
+.dark-theme .group-participants-list,
+.dark-theme .group-participants-list *,
+.dark-theme .participants-list li,
+.dark-theme .user-checkbox span,
+.dark-theme .chat-member-name,
+.dark-theme .tg-group-name,
+.dark-theme .tg-add-member-btn {
+  color: #ffffff !important;
+}
+
+/* Иконка плюс / добавить */
+.dark-theme .tg-add-member-btn svg,
+.dark-theme .add-participant-btn svg {
+  stroke: #ffffff !important;
+}
+
+/* Все варианты кнопок выхода, удаления и покидания беседы */
+.dark-theme .modal-leave-btn,
+.dark-theme .tg-action-btn,
+.dark-theme .tg-actions-section .tg-action-btn,
+.dark-theme .chat-info-leave-btn,
+.dark-theme .modal-delete-btn,
+.dark-theme .modal-option-btn.delete,
+.dark-theme .settings-danger-btn,
+.dark-theme .nav-button.logout-btn,
+.dark-theme .popup-item.logout {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #ef4444 !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+}
+
+.dark-theme .modal-leave-btn:hover,
+.dark-theme .tg-action-btn:hover,
+.dark-theme .tg-actions-section .tg-action-btn:hover,
+.dark-theme .chat-info-leave-btn:hover,
+.dark-theme .modal-delete-btn:hover,
+.dark-theme .modal-option-btn.delete:hover,
+.dark-theme .settings-danger-btn:hover,
+.dark-theme .nav-button.logout-btn:hover,
+.dark-theme .popup-item.logout:hover {
+  background: rgba(239, 68, 68, 0.28) !important;
+  color: #fca5a5 !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+}
+
+/* Красный цвет для иконок внутри этих кнопок */
+.dark-theme .tg-action-btn svg,
+.dark-theme .modal-leave-btn svg,
+.dark-theme .logout-btn svg {
+  stroke: #ef4444 !important;
+}
+
+/* Сделать контейнер списка участников чуть светлее основного фона модалки (#161920) */
+.dark-theme .group-participants-list,
+.dark-theme .users-checkbox-list,
+.dark-theme .group-info-section,
+.dark-theme .tg-section-box {
+  background-color: #1e2430 !important;
+  border: none !important; /* Убрали border */
+}
+
+/* ==========================================
+   ИСПРАВЛЕНИЯ: ТЕКСТ, КРАСНЫЕ КНОПКИ И ПОДЛОЖКА
+   ========================================== */
+
+/* 1. Белый цвет для имен участников и кнопки добавления */
+.dark-theme .group-participants-list,
+.dark-theme .group-participants-list *,
+.dark-theme .participants-list,
+.dark-theme .participants-list *,
+.dark-theme .participants-list li,
+.dark-theme .user-checkbox span,
+.dark-theme .chat-member-name,
+.dark-theme .tg-group-name,
+.dark-theme .tg-add-member-btn,
+.dark-theme .tg-add-member-btn *,
+.dark-theme .add-participant-btn,
+.dark-theme .add-participant-btn * {
+  color: #ffffff !important;
+}
+
+.dark-theme .tg-add-member-btn svg,
+.dark-theme .add-participant-btn svg {
+  stroke: #ffffff !important;
+}
+
+/* 2. Принудительный красный цвет для всех кнопок удаления/выхода */
+.dark-theme .modal-leave-btn:hover,
+.dark-theme .tg-action-btn:hover,
+.dark-theme .tg-actions-section .tg-action-btn:hover,
+.dark-theme .chat-info-leave-btn:hover,
+.dark-theme .modal-delete-btn:hover,
+.dark-theme .modal-option-btn.delete:hover,
+.dark-theme .settings-danger-btn:hover,
+.dark-theme .delete-btn:hover {
+  background: rgba(239, 68, 68, 0.28) !important;
+  color: #fca5a5 !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+}
+
+.dark-theme .modal-leave-btn,
+.dark-theme .tg-action-btn,
+.dark-theme .tg-actions-section .tg-action-btn,
+.dark-theme .chat-info-leave-btn,
+.dark-theme .modal-delete-btn,
+.dark-theme .modal-option-btn.delete,
+.dark-theme .settings-danger-btn,
+.dark-theme .delete-btn {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #ef4444 !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+}
+
+.dark-theme .modal-leave-btn svg,
+.dark-theme .tg-action-btn svg,
+.dark-theme .chat-info-leave-btn svg,
+.dark-theme .modal-delete-btn svg,
+.dark-theme .settings-danger-btn svg {
+  stroke: #ef4444 !important;
+}
+
+/* 3. Светлая подложка под списком участников (#232a38 более контрастна к #161920) */
+.dark-theme .group-participants-list,
+.dark-theme .users-checkbox-list,
+.dark-theme .group-info-section,
+.dark-theme .tg-section-box,
+.dark-theme .participants-list {
+  background-color: #232a38 !important;
+  border: none !important; /* Убрали border */
+}
+
+/* ==========================================
+   1. СМЯГЧЕНИЕ КРАСНЫХ КНОПОК ("Покинуть" и "Удалить")
+   ========================================== */
+
+/* Светлая тема (мягкая красноватая плашка как при ховере на Logout) */
+.tg-actions-section .tg-action-btn.tg-danger,
+.modal-leave-btn,
+.tg-action-btn.danger,
+.modal-delete-btn {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+  border: 1px solid #fecaca !important;
+  box-shadow: none !important;
+}
+
+.tg-actions-section .tg-action-btn.tg-danger svg,
+.modal-leave-btn svg,
+.tg-action-btn.danger svg,
+.modal-delete-btn svg {
+  stroke: #dc2626 !important;
+}
+
+.tg-actions-section .tg-action-btn.tg-danger:hover,
+.modal-leave-btn:hover,
+.tg-action-btn.danger:hover,
+.modal-delete-btn:hover {
+  background: #fca5a5 !important;
+  color: #b91c1c !important;
+}
+
+/* Тёмная тема (полупрозрачный красноватый оттенок) */
+.dark-theme .tg-actions-section .tg-action-btn.tg-danger,
+.dark-theme .modal-leave-btn,
+.dark-theme .tg-action-btn.danger,
+.dark-theme .modal-delete-btn {
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #ef4444 !important;
+  border: 1px solid rgba(239, 68, 68, 0.25) !important;
+  box-shadow: none !important;
+}
+
+.dark-theme .tg-actions-section .tg-action-btn.tg-danger svg,
+.dark-theme .modal-leave-btn svg,
+.dark-theme .tg-action-btn.danger svg,
+.dark-theme .modal-delete-btn svg {
+  stroke: #ef4444 !important;
+}
+
+.dark-theme .tg-actions-section .tg-action-btn.tg-danger:hover,
+.dark-theme .modal-leave-btn:hover,
+.dark-theme .tg-action-btn.danger:hover,
+.dark-theme .modal-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.22) !important;
+  color: #fca5a5 !important;
+}
+
+
+/* ==========================================
+   2. УБИРАЕМ ПОДЛОЖКУ СПИСКА УЧАСТНИКОВ В СВЕТЛОЙ ТЕМЕ
+   ========================================== */
+
+/* Убираем серый фон и рамку у подложки */
+.group-participants-list,
+.group-info-section,
+.tg-section-box {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+
+/* Сохраняем темный фон и белый текст ТОЛЬКО в тёмной теме */
+.dark-theme .group-participants-list,
+.dark-theme .group-info-section,
+.dark-theme .tg-section-box {
+  background: #232a38 !important;
+  border: none !important;
+}
+
+.dark-theme .group-participants-list,
+.dark-theme .group-participants-list * {
+  color: #ffffff !important;
+}
+/* --- Белые имена участников --- */
+.group-participants-list,
+.group-participants-list * {
+  color: #ffffff !important; /* Принудительно делаем весь текст внутри списка белым */
+}
+
 /* ==========================================
    КОНЕЦ DARK THEME
    ========================================== */

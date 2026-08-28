@@ -444,7 +444,7 @@ function listenForChats() {
 
           if (chat.isGroup) {
             chatName = chat.name || t('defaultGroupName');
-            chatAvatar = '👥';
+            chatAvatar = '';
             chatImage = chat.avatar || chat.bitmap || chat.photo || chat.profileImage || null;
           } else {
   const otherUserId = chat.participants.find(id => id !== currentUser.uid);
@@ -669,12 +669,21 @@ function searchUsersInCreate() {
   const usersList = document.getElementById('usersListModal');
   if (!usersList) return;
 
+  // 1. Показываем сообщение о взаимной подписке, если строка пуста
   if (!searchText) { 
-    usersList.innerHTML = `<div class="no-users">${t('startTypingToSearch')}</div>`;
+    usersList.innerHTML = `<div class="no-users">${t('searchMutualOnly')}</div>`;
     return; 
   }
 
-  const filtered = allUsersForModal.filter(user =>
+  // 2. Оставляем только пользователей со взаимной подпиской
+  const mutualUsers = allUsersForModal.filter(user => {
+    const userFollowers = user.followers || [];
+    const userFollowing = user.following || [];
+    return userFollowers.includes(currentUser.uid) && userFollowing.includes(currentUser.uid);
+  });
+
+  // 3. Выполняем поиск среди взаимных друзей
+  const filtered = mutualUsers.filter(user =>
     (user.nickname && user.nickname.toLowerCase().includes(searchText)) ||
     (user.tag && user.tag.toLowerCase().includes(searchText))
   );
@@ -686,7 +695,6 @@ function searchUsersInCreate() {
 
   let html = '';
   filtered.forEach(user => {
-    // Проверяем, есть ли ID в нашем глобальном хранилище
     const isChecked = selectedUsersForCreate.has(user.id) ? 'checked' : '';
     html += `<label class="user-checkbox"><input type="checkbox" value="${user.id}" onchange="toggleUserSelection('${user.id}', this.checked, 'create')" ${isChecked}><span>${user.nickname} ${user.tag}</span></label>`;
   });
@@ -700,25 +708,36 @@ function searchUsersToAdd() {
   const addList = document.getElementById('addParticipantsList');
   if (!addList) return;
 
+  // 1. Показываем новое сообщение, когда поисковая строка пуста
   if (!searchText) { 
-  addList.innerHTML = `<div class="no-users">${t('startTypingToSearch')}</div>`; 
-  return; 
-}
+    addList.innerHTML = `<div class="no-users">${t('searchMutualOnly')}</div>`; 
+    return; 
+  }
 
   const nonParticipants = allUsersForModal.filter(user => !selectedChat.participants.includes(user.id));
-  const filtered = nonParticipants.filter(user =>
+  
+  // 2. Фильтруем участников — оставляем только взаимные подписки
+  const mutualUsers = nonParticipants.filter(user => {
+    const userFollowers = user.followers || [];
+    const userFollowing = user.following || [];
+    
+    // Пользователь подписан на вас И вы подписаны на него
+    return userFollowers.includes(currentUser.uid) && userFollowing.includes(currentUser.uid);
+  });
+
+  // 3. Выполняем поиск по имени или тегу среди взаимных друзей
+  const filtered = mutualUsers.filter(user =>
     (user.nickname && user.nickname.toLowerCase().includes(searchText)) ||
     (user.tag && user.tag.toLowerCase().includes(searchText))
   );
 
   if (filtered.length === 0) { 
-  addList.innerHTML = `<div class="no-users">${t('nothingFound')}</div>`; 
-  return; 
-}
+    addList.innerHTML = `<div class="no-users">${t('nothingFound')}</div>`; 
+    return; 
+  }
 
   let html = '';
   filtered.forEach(user => {
-    // Проверяем, есть ли ID в нашем глобальном хранилище
     const isChecked = selectedUsersForAdd.has(user.id) ? 'checked' : '';
     html += `<label class="user-checkbox"><input type="checkbox" value="${user.id}" onchange="toggleUserSelection('${user.id}', this.checked, 'add')" ${isChecked}><span>${user.nickname} ${user.tag}</span></label>`;
   });
@@ -1158,28 +1177,82 @@ function listenForNewMessages() {
     }, error => console.error('Ошибка слушателя новых сообщений:', error));
 }
 
+function updateChatListOptimistically(chatId, text) {
+  const now = new Date();
+
+  // Обновляем данные текущего выбранного чата в памяти
+  if (selectedChat && selectedChat.id === chatId) {
+    selectedChat.lastMessage = text;
+    selectedChat.lastMessageTime = now;
+  }
+
+  // Находим чат в общем массиве и обновляем его превью
+  let chatItem = allChats.find(c => c.id === chatId);
+  if (chatItem) {
+    chatItem.lastMessage = text;
+    chatItem.lastMessageTime = now;
+  } else if (selectedChat) {
+    chatItem = { ...selectedChat, lastMessage: text, lastMessageTime: now };
+    allChats.push(chatItem);
+  }
+
+  // Сортируем чаты: самый свежий поднимается наверх
+  allChats.sort((a, b) => {
+    const timeA = a.lastMessageTime ? new Date(a.lastMessageTime).getTime() : 0;
+    const timeB = b.lastMessageTime ? new Date(b.lastMessageTime).getTime() : 0;
+    return timeB - timeA;
+  });
+
+  // Сохраняем обновленный список в localStorage
+  if (currentUser) {
+    try {
+      localStorage.setItem(`cachedChats_${currentUser.uid}`, JSON.stringify(allChats));
+    } catch (e) {
+      console.warn('Ошибка сохранения кэша чатов:', e);
+    }
+  }
+
+  // Перерисовываем список чатов на экране мгновенно
+  displayChats(allChats);
+}
+
 // ========== ОТПРАВКА СООБЩЕНИЯ ==========
 async function sendMessage() {
   const input = document.getElementById('messageInput');
   const text = input.value.trim();
   if (!text || !selectedChat) return;
+
+  // Очищаем поле ввода сразу
   input.value = '';
   input.style.height = 'auto';
 
+  // Фиксируем ссылки на текущий чат, чтобы выход из него не сбивал логику
+  const targetChat = { ...selectedChat };
+  const chatId = targetChat.id;
+
+  // 1. МГНОВЕННО обновляем UI списка чатов (чат поднимается вверх)
+  updateChatListOptimistically(chatId, text);
+
   try {
-    if (selectedChat.isNew) {
-      const otherUserId = selectedChat.participants.find(id => id !== currentUser.uid);
+    if (targetChat.isNew) {
+      const otherUserId = targetChat.participants.find(id => id !== currentUser.uid);
       const newChatRef = await db.collection('chats').add({
         participants: [currentUser.uid, otherUserId],
         isGroup: false,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        lastMessage: null,
-        lastMessageTime: null
+        lastMessage: text,
+        lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
       });
-      const chatId = newChatRef.id;
-      selectedChat.id = chatId;
-      selectedChat.isNew = false;
-      currentChatId = chatId;
+      const newId = newChatRef.id;
+
+      targetChat.id = newId;
+      targetChat.isNew = false;
+      
+      if (selectedChat && selectedChat.id === chatId) {
+        selectedChat.id = newId;
+        selectedChat.isNew = false;
+        currentChatId = newId;
+      }
       isNewChatPending = false;
 
       const messageData = {
@@ -1189,14 +1262,13 @@ async function sendMessage() {
         receiverId: otherUserId,
         read: false
       };
-      await db.collection('chats').doc(chatId).collection('messages').add(messageData);
-      await db.collection('chats').doc(chatId).update({
-        lastMessage: text,
-        lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
-      });
 
-      await loadMessages(false);
-      updateChatHeader(selectedChat);
+      await db.collection('chats').doc(newId).collection('messages').add(messageData);
+
+      if (selectedChat && selectedChat.id === newId) {
+        await loadMessages(false);
+        updateChatHeader(selectedChat);
+      }
       return;
     }
 
@@ -1205,34 +1277,41 @@ async function sendMessage() {
       senderId: currentUser.uid,
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
-    if (selectedChat.isGroup) {
+
+    if (targetChat.isGroup) {
       messageData.readBy = [currentUser.uid];
     } else {
-      const otherUserId = selectedChat.participants.find(id => id !== currentUser.uid);
+      const otherUserId = targetChat.participants.find(id => id !== currentUser.uid);
       messageData.receiverId = otherUserId;
       messageData.read = false;
     }
 
-    await db.collection('chats').doc(currentChatId).collection('messages').add(messageData);
-    await db.collection('chats').doc(currentChatId).update({
+    // 2. Фоновая отправка в БД без всплывающих окон при ошибках
+    await db.collection('chats').doc(chatId).collection('messages').add(messageData);
+    await db.collection('chats').doc(chatId).update({
       lastMessage: text,
       lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
     });
 
   } catch (error) {
-    console.error('Ошибка отправки:', error);
-    alert('Ошибка при отправке сообщения');
-    input.value = text;
+    // Ошибка логируется только в консоль — браузерный alert больше не блокирует интерфейс
+    console.error('Ошибка фоновой отправки сообщения:', error);
   }
 }
 
 // ========== СОЗДАНИЕ ГРУППЫ ==========
 function showCreateGroupModal() {
-  selectedUsersForCreate.clear(); // Очищаем выбранных людей перед открытием окна
+  selectedUsersForCreate.clear();
   const usersList = document.getElementById('usersListModal');
   if (!usersList) return;
+  
+  // Очищаем поля ввода
   document.getElementById('searchUsersInCreate').value = '';
-  usersList.innerHTML = `<div class="no-users">${t('startTypingToSearch')}</div>`;
+  document.getElementById('groupName').value = ''; 
+  
+  // Устанавливаем стартовую заглушку-предупреждение
+  usersList.innerHTML = `<div class="no-users">${t('searchMutualOnly')}</div>`;
+  
   document.getElementById('createGroupModal').style.display = 'flex';
 }
 function hideCreateGroupModal() {
@@ -1276,67 +1355,102 @@ async function createGroupChat() {
 // ========== ИНФОРМАЦИЯ О ГРУППЕ ==========
 async function openChatInfo(chatId) {
   if (!selectedChat || !selectedChat.isGroup) return;
+
+  const modal = document.getElementById('groupInfoModal');
+  if (modal.style.display === 'flex') return;
+
+  // 1. СРАЗУ показываем модальное окно с индикатором загрузки
+  document.getElementById('groupInfoName').textContent = selectedChat.displayName || t('defaultGroupName');
+  document.getElementById('groupParticipants').innerHTML = `<div class="loading">${t('loading')}</div>`;
+  modal.style.display = 'flex';
+  
+  history.pushState({ modal: 'groupInfo' }, '', window.location.href);
+
   try {
     const chatDoc = await db.collection('chats').doc(chatId).get();
     const chat = chatDoc.data();
     selectedChat = { ...selectedChat, participants: chat.participants, name: chat.name };
 
+    // Установка аватарки
     const avatarDiv = document.getElementById('groupInfoAvatar');
     if (avatarDiv) {
       if (chat.avatar) {
         avatarDiv.innerHTML = `<img src="${chat.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
       } else {
-        avatarDiv.innerHTML = chat.name ? chat.name.charAt(0).toUpperCase() : '👥';
+        avatarDiv.innerHTML = chat.name ? chat.name.charAt(0).toUpperCase() : '';
       }
     }
-
-    let participantsHTML = '<ul class="participants-list">';
-    for (const userId of chat.participants) {
-      const userData = await getUserById(userId);
-      if (userData) {
-        const isCreator = userId === chat.createdBy ? ' (создатель)' : '';
-        const canRemove = userId !== currentUser.uid && userId !== chat.createdBy;
-        participantsHTML += `<li>
-          ${userData.nickname} ${userData.tag}${isCreator}
-          ${canRemove ? `<button class="remove-participant-btn" onclick="removeParticipant('${userId}')">×</button>` : ''}
-        </li>`;
-      }
-    }
-    participantsHTML += '</ul>';
 
     document.getElementById('groupInfoName').textContent = chat.name || t('defaultGroupName');
+    document.getElementById('groupInfoCount').textContent = `${chat.participants.length} ${t('participantsCount')}`;
+
+    // 2. ПАРАЛЛЕЛЬНАЯ загрузка всех участников через Promise.all
+    const participantPromises = chat.participants.map(async (userId) => {
+      const userData = await getUserById(userId);
+      return { userId, userData };
+    });
+
+    const participantsData = await Promise.all(participantPromises);
+    const isCurrentUserAdmin = chat.createdBy === currentUser.uid;
+
+    // 3. Формирование списка участников за один раз
+    let participantsHTML = '<ul class="participants-list">';
+for (const { userId, userData } of participantsData) {
+  if (userData) {
+    const isCreator = userId === chat.createdBy ? ' (создатель)' : '';
+    
+    const canRemove = isCurrentUserAdmin && userId !== chat.createdBy;
+
+    participantsHTML += `<li>
+      ${userData.nickname} ${userData.tag}${isCreator}
+      ${canRemove ? `<button class="remove-participant-btn" onclick="removeParticipant('${userId}')">×</button>` : ''}
+    </li>`;
+  }
+}
+participantsHTML += '</ul>';
+
     document.getElementById('groupParticipants').innerHTML = participantsHTML;
 
+    // Управление кнопками Выйти / Удалить
     const leaveBtn = document.getElementById('leaveGroupBtn');
-    if (chat.createdBy === currentUser.uid) {
-      leaveBtn.style.display = 'none';
-    } else {
-      leaveBtn.style.display = 'block';
+    if (leaveBtn) {
+      leaveBtn.style.display = chat.createdBy === currentUser.uid ? 'none' : 'block';
     }
 
     document.getElementById('searchUsersToAdd').value = '';
-    document.getElementById('addParticipantsList').innerHTML = `<div class="no-users">${t('startTypingToSearch')}</div>`;
-    selectedUsersForAdd.clear(); // Очищаем список добавления
+    document.getElementById('addParticipantsList').innerHTML = `<div class="no-users">${t('searchMutualOnly')}</div>`;
+    selectedUsersForAdd.clear();
 
     const deleteBtn = document.getElementById('deleteGroupBtn');
-    if (chat.createdBy === currentUser.uid) {
-      deleteBtn.style.display = 'inline-block';
-    } else {
-      deleteBtn.style.display = 'none';
+    if (deleteBtn) {
+      deleteBtn.style.display = chat.createdBy === currentUser.uid ? 'inline-block' : 'none';
     }
 
-    document.getElementById('groupInfoModal').style.display = 'flex';
   } catch (error) {
     console.error('Ошибка загрузки информации о беседе:', error);
+    document.getElementById('groupParticipants').innerHTML = '<div class="error">Ошибка загрузки</div>';
   }
 }
+
 function hideGroupInfoModal() {
-  document.getElementById('groupInfoModal').style.display = 'none';
+  const modal = document.getElementById('groupInfoModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+  
+  // Очищаем фантомное состояние из истории браузера
+  if (history.state && history.state.modal === 'groupInfo') {
+    history.back();
+  }
 }
 
 // ========== УПРАВЛЕНИЕ УЧАСТНИКАМИ ГРУППЫ ==========
 async function removeParticipant(userId) {
   if (!selectedChat || !selectedChat.isGroup) return;
+  if (selectedChat.createdBy !== currentUser.uid) {
+    alert('Только администратор беседы может исключать участников');
+    return;
+  }
   if (!confirm(t('confirmRemoveUser'))) return;
   try {
     await db.collection('chats').doc(selectedChat.id).update({
@@ -1590,9 +1704,30 @@ function exitChatMode() {
   document.getElementById('messagesContainer').innerHTML = '';
   document.getElementById('messageInputArea').style.display = 'none';
   isNewChatPending = false;
+
+  if (history.state && history.state.chatMode) {
+    history.back();
+  }
 }
 
 window.addEventListener('popstate', function(event) {
+  // 1. Проверяем, открыто ли окно создания беседы
+  const createModal = document.getElementById('createGroupModal');
+  if (createModal && createModal.style.display === 'flex') {
+    createModal.style.display = 'none';
+    document.body.style.overflow = '';
+    return; // Останавливаем выполнение, так как свайп уже отработал
+  }
+
+  // 2. Проверяем, открыто ли окно информации о беседе
+  const infoModal = document.getElementById('groupInfoModal');
+  if (infoModal && infoModal.style.display === 'flex') {
+    hideAddParticipantsView();
+    infoModal.style.display = 'none';
+    return;
+  }
+
+  // 3. Старая логика (если окна закрыты, выходим из чата)
   if (isChatMode) exitChatMode();
 });
 
@@ -1660,44 +1795,89 @@ function updateSidebarUser(userData) {
   }
 }
 
-// ========== ЗАГРУЗКА АВАТАРКИ ДЛЯ БЕСЕДЫ ==========
-document.getElementById('groupAvatarInput')?.addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (!file || !selectedChat || !selectedChat.isGroup) return;
-
-  const reader = new FileReader();
-  reader.onload = function(event) {
+// Вспомогательная функция для обработки и обрезки аватарки беседы (аналог processAvatarFile)
+function processGroupAvatarFile(file) {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
     const img = new Image();
+    
     img.onload = function() {
-      // Создаем холст для изменения размера (как в профиле)
+      URL.revokeObjectURL(objectUrl);
+      
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      const targetSize = 800;
+      const targetSize = 800; // Целевой размер 800x800
       
       canvas.width = targetSize;
       canvas.height = targetSize;
 
-      // Вычисляем координаты для обрезки (crop) по центру в идеальный квадрат
+      // Белый фон на случай прозрачных изображений
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, targetSize, targetSize);
+
+      // Вычисляем координаты для идеальной обрезки по центру квадратом
       const minDim = Math.min(img.width, img.height);
       const startX = (img.width - minDim) / 2;
       const startY = (img.height - minDim) / 2;
 
-      // Отрисовываем картинку
       ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, targetSize, targetSize);
-
-      // Получаем Base64 строку (JPEG, 70% качества)
-      const base64Avatar = canvas.toDataURL('image/jpeg', 0.7);
-
-      if (base64Avatar.length > 1000000) {
-        alert('Файл слишком большой даже после сжатия. Пожалуйста, выберите другую картинку.');
-        return;
-      }
-
-      saveGroupAvatarToFirebase(base64Avatar);
+      
+      resolve(canvas.toDataURL('image/jpeg', 0.8));
     };
-    img.src = event.target.result;
-  };
-  reader.readAsDataURL(file);
+    
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Формат не поддерживается или файл поврежден'));
+    };
+    
+    img.src = objectUrl;
+  });
+}
+
+// ========== ЗАГРУЗКА АВАТАРКИ ДЛЯ БЕСЕДЫ ==========
+document.getElementById('groupAvatarInput')?.addEventListener('change', async function(e) {
+  let file = e.target.files[0];
+  if (!file || !selectedChat || !selectedChat.isGroup) return;
+
+  let base64Avatar;
+
+  try {
+    // 1. Пробуем прочитать как обычное изображение (JPEG/PNG/и т.д.)
+    base64Avatar = await processGroupAvatarFile(file);
+    
+  } catch (error) {
+    console.warn('Обычное чтение аватара не удалось, пробуем heic2any...', error);
+    
+    try {
+      // 2. Если не вышло, пробуем конвертировать через heic2any
+      const convertedBlob = await heic2any({ 
+        blob: file, 
+        toType: "image/jpeg", 
+        quality: 0.85 
+      });
+      const finalBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+      const fallbackFile = new File([finalBlob], "group_avatar.jpg", { type: "image/jpeg" });
+
+      // Повторно прогоняем через обрезку уже сконвертированный файл
+      base64Avatar = await processGroupAvatarFile(fallbackFile);
+
+    } catch (heicErr) {
+      console.error('Ошибка конвертации фолбэка HEIC для аватара:', heicErr);
+      alert('Не удалось обработать изображение. Файл может быть поврежден или иметь неподдерживаемый формат.');
+      e.target.value = ''; 
+      return;
+    }
+  }
+
+  // 3. Проверка на размер после всех сжатий (лимит 1MB)
+  if (base64Avatar.length > 1048576) {
+    alert('Файл слишком большой после обработки. Пожалуйста, выберите другую картинку.');
+    e.target.value = '';
+    return;
+  }
+  
+  // 4. Отправляем в базу
+  saveGroupAvatarToFirebase(base64Avatar);
 });
 
 async function saveGroupAvatarToFirebase(base64String) {
@@ -1800,3 +1980,80 @@ function formatMessageText(text) {
   // Заменяем переносы строк на теги <br>
   return linkedText.replace(/\n/g, '<br>');
 }
+
+function showAddParticipantsView() {
+  document.getElementById('tgParticipantsView').style.display = 'none';
+  document.getElementById('tgAddView').style.display = 'block';
+  document.getElementById('searchUsersToAdd').focus();
+}
+
+function hideAddParticipantsView() {
+  document.getElementById('tgAddView').style.display = 'none';
+  document.getElementById('tgParticipantsView').style.display = 'block';
+  document.getElementById('searchUsersToAdd').value = '';
+}
+
+// При закрытии модального окна сбрасываем вид
+const originalHideGroupInfoModal = hideGroupInfoModal;
+hideGroupInfoModal = function() {
+  hideAddParticipantsView();
+  const modal = document.getElementById('groupInfoModal');
+  
+  if (modal) {
+    // Если в истории есть запись об окне, просто вызываем "назад". 
+    // Слушатель popstate сам перехватит событие и скроет окно.
+    if (history.state && history.state.modal === 'groupInfo') {
+      history.back(); 
+    } else {
+      // Запасной вариант, если записи в истории по какой-то причине нет
+      modal.style.display = 'none';
+    }
+  }
+};
+
+// Добавляем обработчик для закрытия модалок по клику вне их области
+document.addEventListener('DOMContentLoaded', function() {
+  // Закрытие окна создания беседы
+  const createModal = document.getElementById('createGroupModal');
+  if (createModal) {
+    createModal.addEventListener('click', function(e) {
+      if (e.target === this) {
+        hideCreateGroupModal();
+      }
+    });
+  }
+
+  // Закрытие окна информации/управления беседой
+  const infoModal = document.getElementById('groupInfoModal');
+  if (infoModal) {
+    infoModal.addEventListener('click', function(e) {
+      if (e.target === this) {
+        hideGroupInfoModal();
+      }
+    });
+  }
+});
+
+window.showCreateGroupModal = function() {
+  const modal = document.getElementById('createGroupModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.style.zIndex = '9999';
+    document.body.style.overflow = 'hidden';
+    
+    // Добавляем состояние в историю при открытии
+    history.pushState({ modal: 'createGroup' }, '', window.location.href);
+  }
+};
+
+window.hideCreateGroupModal = function() {
+  const modal = document.getElementById('createGroupModal');
+  if (modal) {
+    if (history.state && history.state.modal === 'createGroup') {
+      history.back();
+    } else {
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+  }
+};
