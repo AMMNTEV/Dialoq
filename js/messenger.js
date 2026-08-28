@@ -1356,10 +1356,14 @@ async function createGroupChat() {
 async function openChatInfo(chatId) {
   if (!selectedChat || !selectedChat.isGroup) return;
 
+  const modal = document.getElementById('groupInfoModal');
+  if (modal.style.display === 'flex') return;
+
   // 1. СРАЗУ показываем модальное окно с индикатором загрузки
   document.getElementById('groupInfoName').textContent = selectedChat.displayName || t('defaultGroupName');
   document.getElementById('groupParticipants').innerHTML = `<div class="loading">${t('loading')}</div>`;
-  document.getElementById('groupInfoModal').style.display = 'flex';
+  modal.style.display = 'flex';
+  
   history.pushState({ modal: 'groupInfo' }, '', window.location.href);
 
   try {
@@ -1429,7 +1433,15 @@ participantsHTML += '</ul>';
 }
 
 function hideGroupInfoModal() {
-  document.getElementById('groupInfoModal').style.display = 'none';
+  const modal = document.getElementById('groupInfoModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+  
+  // Очищаем фантомное состояние из истории браузера
+  if (history.state && history.state.modal === 'groupInfo') {
+    history.back();
+  }
 }
 
 // ========== УПРАВЛЕНИЕ УЧАСТНИКАМИ ГРУППЫ ==========
@@ -1692,6 +1704,10 @@ function exitChatMode() {
   document.getElementById('messagesContainer').innerHTML = '';
   document.getElementById('messageInputArea').style.display = 'none';
   isNewChatPending = false;
+
+  if (history.state && history.state.chatMode) {
+    history.back();
+  }
 }
 
 window.addEventListener('popstate', function(event) {
