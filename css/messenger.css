@@ -3299,3 +3299,32 @@ body.dark-theme .tg-modal-header .tg-group-name {
   }
 }
 
+.message-input-area {
+  display: flex;
+  align-items: flex-end; /* Выравнивание по нижнему краю, если textarea будет растягиваться */
+  gap: 8px;
+  padding: 10px;
+  background-color: #ffffff;
+  /* Ваши остальные стили для контейнера... */
+}
+
+.emoji-btn {
+  background: transparent;
+  border: none;
+  color: #8e8e93; /* Стандартный серый цвет иконки */
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  flex-shrink: 0; /* Запрещаем кнопке сжиматься */
+  margin-bottom: 2px; /* Небольшая корректировка для визуального выравнивания с текстом */
+}
+
+.emoji-btn:hover {
+  color: #3b82f6; /* Акцентный синий цвет при наведении */
+  background-color: #f3f4f6; /* Светло-серый фон при наведении */
+}
+
