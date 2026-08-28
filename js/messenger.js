@@ -1795,44 +1795,89 @@ function updateSidebarUser(userData) {
   }
 }
 
-// ========== ЗАГРУЗКА АВАТАРКИ ДЛЯ БЕСЕДЫ ==========
-document.getElementById('groupAvatarInput')?.addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (!file || !selectedChat || !selectedChat.isGroup) return;
-
-  const reader = new FileReader();
-  reader.onload = function(event) {
+// Вспомогательная функция для обработки и обрезки аватарки беседы (аналог processAvatarFile)
+function processGroupAvatarFile(file) {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
     const img = new Image();
+    
     img.onload = function() {
-      // Создаем холст для изменения размера (как в профиле)
+      URL.revokeObjectURL(objectUrl);
+      
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      const targetSize = 800;
+      const targetSize = 800; // Целевой размер 800x800
       
       canvas.width = targetSize;
       canvas.height = targetSize;
 
-      // Вычисляем координаты для обрезки (crop) по центру в идеальный квадрат
+      // Белый фон на случай прозрачных изображений
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, targetSize, targetSize);
+
+      // Вычисляем координаты для идеальной обрезки по центру квадратом
       const minDim = Math.min(img.width, img.height);
       const startX = (img.width - minDim) / 2;
       const startY = (img.height - minDim) / 2;
 
-      // Отрисовываем картинку
       ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, targetSize, targetSize);
-
-      // Получаем Base64 строку (JPEG, 70% качества)
-      const base64Avatar = canvas.toDataURL('image/jpeg', 0.7);
-
-      if (base64Avatar.length > 1000000) {
-        alert('Файл слишком большой даже после сжатия. Пожалуйста, выберите другую картинку.');
-        return;
-      }
-
-      saveGroupAvatarToFirebase(base64Avatar);
+      
+      resolve(canvas.toDataURL('image/jpeg', 0.8));
     };
-    img.src = event.target.result;
-  };
-  reader.readAsDataURL(file);
+    
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Формат не поддерживается или файл поврежден'));
+    };
+    
+    img.src = objectUrl;
+  });
+}
+
+// ========== ЗАГРУЗКА АВАТАРКИ ДЛЯ БЕСЕДЫ ==========
+document.getElementById('groupAvatarInput')?.addEventListener('change', async function(e) {
+  let file = e.target.files[0];
+  if (!file || !selectedChat || !selectedChat.isGroup) return;
+
+  let base64Avatar;
+
+  try {
+    // 1. Пробуем прочитать как обычное изображение (JPEG/PNG/и т.д.)
+    base64Avatar = await processGroupAvatarFile(file);
+    
+  } catch (error) {
+    console.warn('Обычное чтение аватара не удалось, пробуем heic2any...', error);
+    
+    try {
+      // 2. Если не вышло, пробуем конвертировать через heic2any
+      const convertedBlob = await heic2any({ 
+        blob: file, 
+        toType: "image/jpeg", 
+        quality: 0.85 
+      });
+      const finalBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+      const fallbackFile = new File([finalBlob], "group_avatar.jpg", { type: "image/jpeg" });
+
+      // Повторно прогоняем через обрезку уже сконвертированный файл
+      base64Avatar = await processGroupAvatarFile(fallbackFile);
+
+    } catch (heicErr) {
+      console.error('Ошибка конвертации фолбэка HEIC для аватара:', heicErr);
+      alert('Не удалось обработать изображение. Файл может быть поврежден или иметь неподдерживаемый формат.');
+      e.target.value = ''; 
+      return;
+    }
+  }
+
+  // 3. Проверка на размер после всех сжатий (лимит 1MB)
+  if (base64Avatar.length > 1048576) {
+    alert('Файл слишком большой после обработки. Пожалуйста, выберите другую картинку.');
+    e.target.value = '';
+    return;
+  }
+  
+  // 4. Отправляем в базу
+  saveGroupAvatarToFirebase(base64Avatar);
 });
 
 async function saveGroupAvatarToFirebase(base64String) {
