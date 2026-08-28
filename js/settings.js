@@ -283,34 +283,3 @@ function t(key) {
   }
   return key; // Если не найдено
 }
-
-// ========== ПЕРЕХВАТ КНОПКИ НАЗАД (НАСТРОЙКИ) ==========
-window.addEventListener('load', () => {
-  history.pushState({ page: 'settings' }, '', window.location.href);
-});
-
-window.addEventListener('popstate', (event) => {
-  // Если есть модалки настроек, закрываем их здесь.
-  // Иначе перекидываем в мессенджер:
-  window.location.replace('messenger.html');
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  // 1. Создаем искусственный шаг истории для перехвата кнопки "Назад"
-  history.pushState({ page: 'sub_page' }, '', window.location.href);
-
-  window.addEventListener('popstate', (event) => {
-    // 2. Если на странице открыто модальное окно (например, создание поста)
-    // мы просто закрываем его и не уходим со страницы.
-    const openModal = document.querySelector('.modal[style*="display: block"]');
-    if (openModal) {
-      openModal.style.display = 'none';
-      // Снова пушим состояние, чтобы следующее нажатие "Назад" опять сработало
-      history.pushState({ page: 'sub_page' }, '', window.location.href);
-      return;
-    }
-
-    // 3. Если модалок нет — отправляем в мессенджер ЗАМЕНЯЯ историю
-    window.location.replace('messenger.html');
-  });
-});

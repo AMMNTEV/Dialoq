@@ -1996,17 +1996,3 @@ window.hideCreateGroupModal = function() {
     }
   }
 };
-
-document.addEventListener("DOMContentLoaded", () => {
-  // Находим все ссылки нижнего и бокового меню
-  const navLinks = document.querySelectorAll('.nav-button[href], .nav-item[href]');
-  
-  navLinks.forEach(link => {
-    link.addEventListener('click', function(e) {
-      e.preventDefault(); // Отменяем стандартный переход
-      const targetUrl = this.getAttribute('href');
-      // Используем replace, чтобы история браузера не росла бесконечно
-      window.location.replace(targetUrl);
-    });
-  });
-});
