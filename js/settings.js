@@ -283,3 +283,7 @@ function t(key) {
   }
   return key; // Если не найдено
 }
+
+function goToMessenger() {
+    window.history.back();
+}
