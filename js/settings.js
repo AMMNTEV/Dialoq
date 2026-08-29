@@ -285,9 +285,6 @@ function t(key) {
 }
 
 function goToMessenger() {
-  if (window.history.length > 1) {
-    window.history.back(); // Возвращаемся к единственному изначальному мессенджеру
-  } else {
-    window.location.replace('messenger.html'); // Подстраховка для пустой истории
-  }
+  // Просто заменяем текущую запись в истории
+  window.location.replace('messenger.html'); 
 }
