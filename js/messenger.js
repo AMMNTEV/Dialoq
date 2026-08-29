@@ -2059,5 +2059,5 @@ window.hideCreateGroupModal = function() {
 };
 
 function switchTab(url) {
-  window.location.replace(url);
+  window.location.href = url;
 }
