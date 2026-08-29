@@ -395,3 +395,7 @@ function showMessage(text, type) {
     setTimeout(() => { msgDiv.style.display = 'none'; }, 5000);
   }
 }
+
+function goToMessenger() {
+    window.history.back();
+}

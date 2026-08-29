@@ -310,3 +310,7 @@ function toggleBio(btn, mode) {
     fullDiv.style.display = 'none';
   }
 }
+
+function goToMessenger() {
+    window.history.back();
+}
