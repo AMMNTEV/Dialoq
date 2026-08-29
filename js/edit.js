@@ -397,11 +397,18 @@ function showMessage(text, type) {
 }
 
 function goToMessenger() {
-    if (window.history.length > 1) {
-        // Если есть история - возвращаемся назад
+    const referrer = document.referrer;
+    
+    // Если пришли с messenger.html или других страниц приложения
+    if (referrer && (
+        referrer.includes('messenger.html') || 
+        referrer.includes('settings.html') || 
+        referrer.includes('profile.html') || 
+        referrer.includes('user.html') || 
+        referrer.includes('edit.html')
+    )) {
         window.history.back();
     } else {
-        // Если истории нет - заменяем текущую страницу в истории
         window.location.replace('messenger.html');
     }
 }
