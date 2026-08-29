@@ -2057,7 +2057,3 @@ window.hideCreateGroupModal = function() {
     }
   }
 };
-
-function switchTab(url) {
-  window.location.href = url;
-}

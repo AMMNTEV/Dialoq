@@ -395,7 +395,3 @@ function showMessage(text, type) {
     setTimeout(() => { msgDiv.style.display = 'none'; }, 5000);
   }
 }
-
-function switchTab(url) {
-  window.location.replace(url);
-}

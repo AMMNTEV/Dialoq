@@ -310,7 +310,3 @@ function toggleBio(btn, mode) {
     fullDiv.style.display = 'none';
   }
 }
-
-function switchTab(url) {
-  window.location.replace(url);
-}
