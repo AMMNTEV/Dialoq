@@ -310,3 +310,20 @@ function toggleBio(btn, mode) {
     fullDiv.style.display = 'none';
   }
 }
+
+function goToMessenger() {
+    const referrer = document.referrer;
+    
+    // Если пришли с messenger.html или других страниц приложения
+    if (referrer && (
+        referrer.includes('messenger.html') || 
+        referrer.includes('settings.html') || 
+        referrer.includes('profile.html') || 
+        referrer.includes('user.html') || 
+        referrer.includes('edit.html')
+    )) {
+        window.history.back();
+    } else {
+        window.location.replace('messenger.html');
+    }
+}
