@@ -283,3 +283,19 @@ function t(key) {
   }
   return key; // Если не найдено
 }
+
+function goBackToMessenger() {
+  // Если пользователь пришел с другой страницы нашего же сайта, 
+  // возвращаемся назад по истории (это удалит профиль/настройки из стека)
+  if (document.referrer.includes(window.location.host) || history.length > 1) {
+    history.back(); 
+  } else {
+    // Резервный вариант, если историю стерли или зашли по прямой ссылке
+    window.location.href = 'messenger.html'; 
+  }
+}
+
+function switchTab(url) {
+  window.location.replace(url);
+}
+
