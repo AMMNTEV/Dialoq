@@ -285,5 +285,11 @@ function t(key) {
 }
 
 function goToMessenger() {
-    window.history.back();
+    if (window.history.length > 1) {
+        // Если есть история - возвращаемся назад
+        window.history.back();
+    } else {
+        // Если истории нет - заменяем текущую страницу в истории
+        window.location.replace('messenger.html');
+    }
 }
