@@ -405,7 +405,8 @@ function goToMessenger() {
         referrer.includes('settings.html') || 
         referrer.includes('profile.html') || 
         referrer.includes('user.html') || 
-        referrer.includes('edit.html')
+        referrer.includes('edit.html') &&
+        window.history.length > 1
     )) {
         window.history.back();
     } else {
