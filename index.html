@@ -1,338 +1,260 @@
 <!DOCTYPE html>
-<html lang="ru">
-
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Empty — Вход</title>
-  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-  <style>
-    body {
-      font-family: 'Courier New', Courier, 'Lucida Console', monospace;
-      background: #0a0a0a;
-      color: #d0d0d0;
-      margin: 0;
-      padding: 20px;
-      letter-spacing: 0.3px;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Вход в аккаунт</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='11' width='18' height='11' rx='2' ry='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/auth.css">
+<link rel="stylesheet" href="css/dark-theme.css">
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script>
+  (function () {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      // Моментально красим фон, чтобы не было белой вспышки
+      document.documentElement.style.backgroundColor = '#121212';
+      
+      // Добавляем класс на body, как только он появится в DOM
+      document.addEventListener('DOMContentLoaded', () => {
+        document.body.classList.add('dark-theme');
+      });
     }
+  })();
+</script>
+<!-- Подключаем сам манифест (без первого слеша) -->
+<link rel="manifest" href="manifest.json">
 
-    .card {
-      background: #0a0a0a;
-      border: 1px solid #2a2a2a;
-      padding: 20px;
-      max-width: 400px;
-      width: 100%;
-      margin: 0 auto;
-    }
+<!-- Цвет статус-бара для Android -->
+<meta name="theme-color" content="#121212">
 
-    h1 {
-      color: #6f6;
-      font-size: 16px;
-      margin: 0 0 15px;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-    }
+<!-- Указываем Safari, что это PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes">
 
-    h1::before {
-      content: '[ ';
-      color: #444;
-    }
+<!-- Настраиваем внешний вид статус-бара на iOS (black-translucent делает его прозрачным поверх приложения) -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    h1::after {
-      content: ' ]';
-      color: #444;
-    }
+<!-- Название приложения на экране "Домой" для iOS (замени TSA на свое короткое название, если нужно) -->
+<meta name="apple-mobile-web-app-title" content="TSA">
 
-    .subtitle {
-      color: #666;
-      font-size: 11px;
-      margin-bottom: 15px;
-    }
-
-    label {
-      display: block;
-      color: #888;
-      font-size: 11px;
-      margin: 10px 0 4px;
-      font-weight: bold;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    input,
-    textarea {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #2a2a2a;
-      background: #050505;
-      color: #d0d0d0;
-      border-radius: 0;
-      font-size: 13px;
-      font-family: inherit;
-      box-sizing: border-box;
-      outline: none;
-      letter-spacing: 0.3px;
-    }
-
-    input:focus,
-    textarea:focus {
-      border-color: #6f6;
-    }
-
-    input::placeholder,
-    textarea::placeholder {
-      color: #333;
-    }
-
-    textarea {
-      min-height: 100px;
-      font-size: 11px;
-      resize: vertical;
-    }
-
-    button {
-      margin-top: 10px;
-      padding: 8px 16px;
-      background: transparent;
-      border: 1px solid #2a4a2a;
-      color: #6f6;
-      font-size: 12px;
-      font-weight: bold;
-      cursor: pointer;
-      font-family: inherit;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      transition: all 0.15s;
-      border-radius: 0;
-    }
-
-    button:hover {
-      background: #0a1a0a;
-      border-color: #6f6;
-    }
-
-    button:disabled {
-      color: #333;
-      border-color: #1a1a1a;
-      cursor: not-allowed;
-    }
-
-    button.secondary {
-      background: transparent;
-      color: #888;
-      border-color: #2a2a2a;
-      font-weight: normal;
-      text-transform: none;
-      letter-spacing: 0.3px;
-    }
-
-    button.secondary:hover {
-      background: #111;
-      color: #fff;
-      border-color: #555;
-    }
-
-    .error {
-      color: #f66;
-      font-size: 11px;
-      margin-top: 8px;
-      min-height: 16px;
-    }
-
-    .hint {
-      color: #444;
-      font-size: 10px;
-    }
-
-    .warning {
-      background: #1a0a0a;
-      border: 1px solid #4a2a2a;
-      padding: 8px;
-      font-size: 11px;
-      color: #c88;
-      margin: 10px 0;
-    }
-
-    .screen {
-      display: none;
-    }
-
-    .screen.active {
-      display: block;
-    }
-
-    .account-list {
-      margin: 10px 0;
-    }
-
-    .account-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px;
-      border: 1px solid #2a2a2a;
-      margin-bottom: 6px;
-      cursor: pointer;
-      background: #0a0a0a;
-      transition: all 0.1s;
-    }
-
-    .account-item:hover {
-      background: #111;
-      border-color: #555;
-    }
-
-    .account-item.current {
-      border-color: #2a4a2a;
-      background: #0a1a0a;
-    }
-
-    .account-avatar {
-      width: 34px;
-      height: 34px;
-      background: transparent;
-      border: 1px solid #2a2a2a;
-      color: #6f6;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      flex-shrink: 0;
-    }
-
-    .account-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .account-name {
-      font-weight: bold;
-      font-size: 13px;
-      color: #d0d0d0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .account-fp {
-      font-size: 10px;
-      color: #555;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .account-delete {
-      background: transparent;
-      border: none;
-      color: #555;
-      cursor: pointer;
-      font-size: 14px;
-      padding: 4px 8px;
-      margin: 0;
-      font-family: inherit;
-    }
-
-    .account-delete:hover {
-      color: #f66;
-      background: transparent;
-      border: none;
-    }
-
-    #importScannerSuccess {
-      transition: opacity 0.15s ease;
-    }
-  </style>
+<!-- Иконка приложения для iOS (указали правильный путь к твоей картинке) -->
+<link rel="apple-touch-icon" href="img/logo.png">
 </head>
-
-<body>
-
-  <!-- Мои аккаунты -->
-  <div class="card screen" id="screen-accounts">
-    <h1>Мои аккаунты</h1>
-    <p class="subtitle">Выберите аккаунт или добавьте новый.</p>
-    <div class="account-list" id="accountList"></div>
-    <button id="btnAddAccount">+ Добавить аккаунт</button>
-    <button class="secondary" id="btnImportAccount">Импорт с другого устройства</button>
+<body class="auth-page">
+  <!-- Добавляем переключатель языков -->
+  <div class="lang-switcher">
+    <button onclick="setLanguage('en')">EN</button>
+    <button onclick="setLanguage('ru')">RU</button>
   </div>
 
-  <!-- Создание -->
-  <div class="card screen" id="screen-create">
-    <h1>Новый аккаунт</h1>
-    <p class="subtitle">Создайте локальную личность. Регистрация не нужна.</p>
-
-    <label>Никнейм</label>
-    <input type="text" id="nickname" placeholder="Алиса" maxlength="24" autocomplete="off">
-    <div class="hint">Только буквы, цифры, пробел и символы _ - .</div>
-
-    <label>Пароль (для шифрования ключей)</label>
-    <input type="password" id="password" placeholder="Минимум 6 символов">
-
-    <label>Повторите пароль</label>
-    <input type="password" id="password2" placeholder="Ещё раз">
-
-    <button id="createBtn">Создать</button>
-    <button class="secondary" id="linkBackFromCreate">← Назад</button>
-    <div class="error" id="createError"></div>
-  </div>
-
-  <!-- Вход -->
-  <div class="card screen" id="screen-unlock">
-    <h1>Вход в аккаунт</h1>
-    <p class="subtitle" id="unlockSubtitle">Введите пароль</p>
-
-    <label>Пароль</label>
-    <input type="password" id="unlockPassword" placeholder="Ваш пароль">
-
-    <button id="unlockBtn">Войти</button>
-    <button class="secondary" id="linkBackFromUnlock">← К списку аккаунтов</button>
-    <div class="error" id="unlockError"></div>
-  </div>
-
-  <!-- Импорт -->
-  <div class="card screen" id="screen-import">
-    <h1>Импорт аккаунта</h1>
-    <p class="subtitle">Отсканируйте QR со старого устройства.</p>
-
-    <div class="warning">
-      ⚠️ Эти данные содержат ваши приватные ключи. Никому их не показывайте.
-    </div>
-
-    <div id="importScannerWrap" style="margin-top:10px;">
-      <div id="importScannerBox"
-        style="position:relative; width:100%; aspect-ratio:1/1; background:#000; overflow:hidden; border:1px solid #2a2a2a;">
-        <video id="importScannerVideo" playsinline
-          style="width:100%; height:100%; object-fit:cover; display:block;"></video>
-        <div id="importScannerSuccess" style="display:none; position:absolute; inset:0; background:#0a1a0a;
-                    align-items:center; justify-content:center; border:1px solid #6f6;">
-          <svg viewBox="0 0 24 24" width="96" height="96" fill="none" stroke="#6f6" stroke-width="3"
-            stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
-        </div>
+  <div class="auth-card">
+    <!-- Добавляем атрибуты data-i18n и английский текст по умолчанию -->
+    <h1 data-i18n="title">Sign In</h1>
+    <form id="loginForm">
+      <div class="auth-input-group">
+        <label data-i18n="emailLabel">Email</label>
+        <input type="email" id="email" placeholder="your@email.com" required>
       </div>
-      <div class="error" id="importScanError"></div>
+      <div class="auth-input-group">
+        <label data-i18n="passwordLabel">Password</label>
+        <input type="password" id="password" placeholder="••••••••" required>
+      </div>
+      <div class="auth-links">
+        <a href="forgot-password.html" class="forgot-password-link" data-i18n="forgotPassword">Forgot password?</a>
+      </div>
+      <button type="submit" class="auth-button" id="loginBtn" data-i18n="loginBtn">Sign In</button>
+      <div class="auth-divider" data-i18n="or">or</div>
+      
+      <button type="button" class="oauth-btn" id="googleLoginBtn">
+        <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <!-- SVG пути Google остаются без изменений -->
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        </svg>
+        <span data-i18n="googleBtn">Continue with Google</span>
+      </button>
+    </form>
+    <div class="auth-footer">
+      <span data-i18n="noAccount">Don't have an account?</span> <a href="register.html" data-i18n="register">Sign up</a>
     </div>
-
-    <label>Пароль экспорта</label>
-    <input type="password" id="importPassword" placeholder="Временный пароль">
-
-    <label>Новый пароль для этого устройства</label>
-    <input type="password" id="importNewPassword" placeholder="Минимум 6 символов">
-
-    <label>Повторите новый пароль</label>
-    <input type="password" id="importNewPassword2" placeholder="Ещё раз">
-
-    <button id="importBtn" disabled>Импортировать</button>
-    <button class="secondary" id="linkBackFromImport">← Назад</button>
-    <div class="error" id="importError"></div>
+    <div id="message" class="message"></div>
   </div>
 
-  <script type="module" src="index.js"></script>
-</body>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    // Обработка входа через Google
+    document.getElementById('googleLoginBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('googleLoginBtn');
+      const messageDiv = document.getElementById('message');
+      btn.disabled = true;
+      try {
+        await continueWithGoogle();
+        window.location.href = 'messenger.html'; // Успех -> идем в мессенджер
+      } catch (error) {
+        console.error('Ошибка Google:', error);
+        let errorMsg = error.code === 'auth/popup-closed-by-user' ? 'Вход отменен' : 'Ошибка авторизации';
+        messageDiv.innerHTML = `<div class="error">❌ ${errorMsg}</div>`;
+        btn.disabled = false;
+      }
+    });
+  
+    // Проверяем, не залогинен ли уже пользователь
+    onAuthStateChanged((user) => {
+      if (user && user.emailVerified) {
+        window.location.href = 'messenger.html';
+      }
+    });
 
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const loginBtn = document.getElementById('loginBtn');
+      const messageDiv = document.getElementById('message');
+
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Вход...';
+
+      try {
+        const userCredential = await login(email, password);
+        const user = userCredential.user;
+        if (user.emailVerified) {
+          window.location.href = 'messenger.html';
+        } else {
+          messageDiv.innerHTML = `
+            <div class="warning">
+              <strong>ⓘ Аккаунт не активирован</strong>
+              <p>На почту ${email} отправлено письмо с подтверждением.</p>
+              <div style="margin: 10px 0;">
+                <input type="password" id="resendPassword" placeholder="Введите пароль" style="width: 100%; padding: 8px; border: 1px solid #ffeeba; border-radius: 4px;">
+              </div>
+              <button onclick="resendVerification('${email}')" class="resend-btn">Отправить снова</button>
+            </div>
+          `;
+          await auth.signOut();
+        }
+      } catch (error) {
+        console.error('Ошибка входа:', error);
+        let errorMessage = '';
+        if (error.code === 'auth/network-request-failed') {
+          errorMessage = '🌐 Проблема с интернетом. Проверьте подключение и попробуйте снова.';
+        } else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+          errorMessage = '❌ Неверный email или пароль';
+        } else if (error.code === 'auth/invalid-email') {
+          errorMessage = '📧 Некорректный формат email';
+        } else if (error.code === 'auth/too-many-requests') {
+          errorMessage = '⏳ Слишком много попыток. Подождите несколько минут и попробуйте снова.';
+        } else if (error.code === 'auth/user-disabled') {
+          errorMessage = '🚫 Аккаунт заблокирован';
+        } else {
+          errorMessage = '❌ Ошибка при входе. Попробуйте позже.';
+        }
+        messageDiv.innerHTML = `<div class="error">${errorMessage}</div>`;
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Войти';
+      }
+    });
+
+    window.resendVerification = async (email) => {
+      const password = document.getElementById('resendPassword')?.value;
+      if (!password) { alert('Введите пароль'); return; }
+      const messageDiv = document.getElementById('message');
+      messageDiv.innerHTML = '<div class="loading">Отправка...</div>';
+      try {
+        await login(email, password);
+        const user = auth.currentUser;
+        if (user) {
+          await sendVerificationEmail();
+          await auth.signOut();
+          messageDiv.innerHTML = `
+            <div class="success">
+              ✅ Письмо отправлено повторно на ${email}!<br>
+              <small>Проверьте папку "Спам"</small>
+            </div>
+          `;
+        } else {
+          throw new Error('User not found');
+        }
+      } catch (error) {
+        console.error('Ошибка отправки:', error);
+        let errorMessage = '';
+        if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+          errorMessage = '❌ Неверный email или пароль';
+        } else if (error.code === 'auth/too-many-requests') {
+          errorMessage = '⏳ Слишком много попыток. Подождите несколько минут и попробуйте снова.';
+        } else if (error.code === 'auth/network-request-failed') {
+          errorMessage = '🌐 Проблема с интернетом';
+        } else {
+          errorMessage = '❌ Ошибка при отправке. Попробуйте позже.';
+        }
+        messageDiv.innerHTML = `<div class="error">${errorMessage}</div>`;
+      }
+    };
+  </script>
+
+<!-- ... предыдущие скрипты ... -->
+  <script>
+    // Словарь переводов
+    const translations = {
+      en: {
+        title: "Sign In",
+        emailLabel: "Email",
+        passwordLabel: "Password",
+        forgotPassword: "Forgot password?",
+        loginBtn: "Sign In",
+        or: "or",
+        googleBtn: "Continue with Google",
+        noAccount: "Don't have an account?",
+        register: "Sign up"
+      },
+      ru: {
+        title: "Вход в аккаунт",
+        emailLabel: "Email",
+        passwordLabel: "Пароль",
+        forgotPassword: "Забыли пароль?",
+        loginBtn: "Войти",
+        or: "или",
+        googleBtn: "Продолжить с Google",
+        noAccount: "Нет аккаунта?",
+        register: "Зарегистрироваться"
+      }
+    };
+
+    // Функция переключения и сохранения языка
+    function setLanguage(lang) {
+      // Сохраняем выбор пользователя
+      localStorage.setItem('app_lang', lang);
+      document.documentElement.lang = lang; // Меняем атрибут lang у <html>
+
+      // Находим все элементы с атрибутом data-i18n и меняем текст
+      document.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        if (translations[lang] && translations[lang][key]) {
+          element.textContent = translations[lang][key];
+        }
+      });
+
+      // Отдельно меняем плейсхолдеры, если нужно
+      const emailInput = document.getElementById('email');
+      if (emailInput) {
+        emailInput.placeholder = lang === 'en' ? 'your@email.com' : 'ваш@email.com';
+      }
+    }
+
+    // Запускаем при загрузке страницы
+    document.addEventListener('DOMContentLoaded', () => {
+      // Берем язык из localStorage, если его нет — ставим 'en' по умолчанию
+      const savedLang = localStorage.getItem('app_lang') || 'en';
+      setLanguage(savedLang);
+    });
+  </script>
+</body>
 </html>
+

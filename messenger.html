@@ -1,825 +1,415 @@
 <!DOCTYPE html>
-<html lang="ru">
-
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
-  <title>Empty — Мессенджер</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      height: 100%;
-      height: 100dvh;
-      margin: 0;
-      overflow: hidden;
-      background: #000;
-    }
-
-    body {
-      font-family: 'Courier New', Courier, 'Lucida Console', monospace;
-      background: #0a0a0a;
-      color: #d0d0d0;
-      font-size: 13px;
-      display: flex;
-      flex-direction: column;
-      letter-spacing: 0.3px;
-    }
-
-    /* ============ ШАПКА ============ */
-    .topbar {
-      background: #000;
-      color: #d0d0d0;
-      padding: 8px 12px;
-      padding-top: calc(8px + env(safe-area-inset-top));
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-shrink: 0;
-      border-bottom: 1px solid #2a2a2a;
-    }
-
-    .me-name {
-      font-weight: bold;
-      font-size: 14px;
-      color: #fff;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .me-name::before {
-      content: '> ';
-      color: #6f6;
-    }
-
-    .topbar-actions {
-      display: flex;
-      gap: 4px;
-      flex-shrink: 0;
-    }
-
-    .topbar-actions button {
-      background: transparent;
-      border: 1px solid #2a2a2a;
-      color: #aaa;
-      padding: 4px 10px;
-      cursor: pointer;
-      font-size: 11px;
-      font-family: inherit;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      transition: all 0.15s;
-    }
-
-    .topbar-actions button:hover {
-      background: #111;
-      color: #fff;
-      border-color: #6f6;
-    }
-
-    .topbar-actions button.primary {
-      color: #6f6;
-      border-color: #2a4a2a;
-    }
-
-    .topbar-actions button.primary:hover {
-      background: #0a1a0a;
-      border-color: #6f6;
-    }
-
-    /* ============ ОСНОВНОЙ БЛОК ============ */
-    .main {
-      flex: 1;
-      display: flex;
-      min-height: 0;
-      overflow: hidden;
-      position: relative;
-    }
-
-    /* ============ SIDEBAR ============ */
-    .sidebar {
-      width: 280px;
-      background: #0a0a0a;
-      border-right: 1px solid #2a2a2a;
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-      min-height: 0;
-      overflow: hidden;
-    }
-
-    .sidebar-header {
-      padding: 8px 12px;
-      background: #0a0a0a;
-      border-bottom: 1px solid #2a2a2a;
-      font-weight: bold;
-      color: #6f6;
-      flex-shrink: 0;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-size: 11px;
-    }
-
-    .sidebar-header::before {
-      content: '[ ';
-    }
-
-    .sidebar-header::after {
-      content: ' ]';
-    }
-
-    .contacts-list {
-      flex: 1;
-      overflow-y: auto;
-      overflow-x: hidden;
-    }
-
-    .contact {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 12px;
-      border-bottom: 1px solid #1a1a1a;
-      cursor: pointer;
-      transition: background 0.1s;
-    }
-
-    .contact:hover {
-      background: #111;
-    }
-
-    .contact.active {
-      background: #0a1a0a;
-      border-left: 2px solid #6f6;
-      padding-left: 10px;
-    }
-
-    .avatar {
-      width: 32px;
-      height: 32px;
-      background: transparent;
-      border: 1px solid #2a2a2a;
-      color: #6f6;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      flex-shrink: 0;
-      font-size: 14px;
-    }
-
-    .contact.active .avatar {
-      border-color: #6f6;
-      color: #6f6;
-    }
-
-    .contact-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .contact-name {
-      font-weight: bold;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      color: #d0d0d0;
-    }
-
-    .contact-fp {
-      font-size: 10px;
-      color: #555;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .empty-sidebar {
-      padding: 20px 12px;
-      color: #444;
-      text-align: center;
-      font-size: 11px;
-    }
-
-    /* ============ ОБЛАСТЬ ЧАТА ============ */
-    .chat-area {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      min-height: 0;
-      overflow: hidden;
-    }
-
-    .chat-empty {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #444;
-      padding: 20px;
-      text-align: center;
-      font-size: 12px;
-    }
-
-    .chat-header {
-      background: #0a0a0a;
-      border-bottom: 1px solid #2a2a2a;
-      padding: 8px 12px;
-      display: none;
-      align-items: center;
-      gap: 10px;
-      flex-shrink: 0;
-    }
-
-    .chat-header.active {
-      display: flex;
-    }
-
-    .chat-header-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .chat-title {
-      font-weight: bold;
-      font-size: 14px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      color: #fff;
-    }
-
-    .chat-timer {
-      font-size: 10px;
-      color: #555;
-    }
-
-    .btn-end-chat {
-      background: transparent;
-      color: #f66;
-      border: 1px solid #4a2a2a;
-      padding: 4px 10px;
-      cursor: pointer;
-      white-space: nowrap;
-      flex-shrink: 0;
-      font-family: inherit;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      transition: all 0.15s;
-    }
-
-    .btn-end-chat:hover {
-      background: #1a0a0a;
-      border-color: #f66;
-    }
-
-    .mobile-back {
-      display: none;
-      background: none;
-      border: none;
-      color: #6f6;
-      font-size: 18px;
-      cursor: pointer;
-      padding: 0 4px;
-      flex-shrink: 0;
-    }
-
-    /* ============ СООБЩЕНИЯ ============ */
-    .messages {
-      flex: 1;
-      overflow-y: auto;
-      overflow-x: hidden;
-      padding: 12px;
-      background: #050505;
-      display: none;
-      min-height: 0;
-    }
-
-    .messages.active {
-      display: block;
-    }
-
-    .msg {
-      display: block;
-      width: fit-content;
-      max-width: 70%;
-      padding: 6px 10px;
-      margin-bottom: 6px;
-      border: 1px solid #2a2a2a;
-      background: #0a0a0a;
-      color: #d0d0d0;
-      word-wrap: break-word;
-      overflow-wrap: anywhere;
-      white-space: pre-wrap;
-      font-size: 13px;
-    }
-
-    .msg.me {
-      margin-left: auto;
-      margin-right: 0;
-      background: #0a1a0a;
-      border-color: #2a4a2a;
-      color: #b0d0b0;
-    }
-
-    .msg.me::before {
-      content: '> ';
-      color: #6f6;
-    }
-
-    .msg.other {
-      margin-left: 0;
-      margin-right: auto;
-    }
-
-    .msg.other::before {
-      content: '< ';
-      color: #666;
-    }
-
-    /* ============ ПОЛЕ ВВОДА ============ */
-    .input-area {
-      background: #0a0a0a;
-      border-top: 1px solid #2a2a2a;
-      padding: 8px;
-      padding-bottom: calc(8px + env(safe-area-inset-bottom));
-      display: none;
-      gap: 6px;
-      align-items: flex-end;
-      flex-shrink: 0;
-    }
-
-    .input-area.active {
-      display: flex;
-    }
-
-    .input-area textarea {
-      flex: 1;
-      padding: 6px 8px;
-      border: 1px solid #2a2a2a;
-      background: #050505;
-      color: #d0d0d0;
-      resize: none;
-      font-family: inherit;
-      font-size: 13px;
-      line-height: 1.3;
-      min-height: 32px;
-      max-height: 100px;
-      outline: none;
-      letter-spacing: 0.3px;
-    }
-
-    .input-area textarea:focus {
-      border-color: #6f6;
-    }
-
-    .input-area textarea::placeholder {
-      color: #333;
-    }
-
-    .btn-send {
-      background: transparent;
-      color: #6f6;
-      border: 1px solid #2a4a2a;
-      padding: 6px 14px;
-      cursor: pointer;
-      height: 32px;
-      flex-shrink: 0;
-      align-self: flex-end;
-      white-space: nowrap;
-      font-family: inherit;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      transition: all 0.15s;
-    }
-
-    .btn-send:hover {
-      background: #0a1a0a;
-      border-color: #6f6;
-    }
-
-    /* ============ МОДАЛКИ ============ */
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.85);
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      padding-top: calc(16px + env(safe-area-inset-top));
-      padding-bottom: calc(16px + env(safe-area-inset-bottom));
-      z-index: 1000;
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .modal-card {
-      background: #0a0a0a;
-      border: 1px solid #2a2a2a;
-      padding: 16px;
-      max-width: 420px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    .modal-card h2 {
-      color: #6f6;
-      margin: 0 0 10px;
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .modal-card h2::before {
-      content: '[ ';
-    }
-
-    .modal-card h2::after {
-      content: ' ]';
-    }
-
-    .modal-card .hint {
-      color: #555;
-      font-size: 11px;
-      margin-bottom: 10px;
-      line-height: 1.4;
-    }
-
-    .modal-card label {
-      display: block;
-      font-size: 11px;
-      font-weight: bold;
-      margin: 8px 0 4px;
-      color: #888;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .modal-card input,
-    .modal-card textarea {
-      width: 100%;
-      padding: 6px 8px;
-      border: 1px solid #2a2a2a;
-      background: #050505;
-      color: #d0d0d0;
-      font-size: 13px;
-      font-family: inherit;
-      outline: none;
-      box-sizing: border-box;
-      letter-spacing: 0.3px;
-    }
-
-    .modal-card input:focus,
-    .modal-card textarea:focus {
-      border-color: #6f6;
-    }
-
-    .modal-card textarea {
-      min-height: 100px;
-      font-size: 11px;
-      resize: vertical;
-    }
-
-    .modal-card button {
-      width: 100%;
-      padding: 8px;
-      background: transparent;
-      color: #6f6;
-      border: 1px solid #2a4a2a;
-      cursor: pointer;
-      margin-top: 8px;
-      font-size: 12px;
-      font-family: inherit;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      transition: all 0.15s;
-    }
-
-    .modal-card button:hover {
-      background: #0a1a0a;
-      border-color: #6f6;
-    }
-
-    .modal-card button.secondary {
-      background: transparent;
-      color: #888;
-      border-color: #2a2a2a;
-    }
-
-    .modal-card button.secondary:hover {
-      background: #111;
-      color: #fff;
-      border-color: #555;
-    }
-
-    .warning {
-      background: #1a0a0a;
-      border: 1px solid #4a2a2a;
-      padding: 8px;
-      font-size: 11px;
-      color: #c88;
-      margin-bottom: 10px;
-      line-height: 1.4;
-    }
-
-    .qr-box {
-      background: #fff;
-      padding: 10px;
-      border: 1px solid #2a2a2a;
-      text-align: center;
-      margin: 10px 0;
-    }
-
-    .qr-box svg,
-    .qr-box canvas,
-    .qr-box img {
-      display: block;
-      max-width: 100%;
-      height: auto;
-      margin: 0 auto;
-    }
-
-    #scannerVideo {
-      width: 100%;
-      background: #000;
-      margin-bottom: 10px;
-      aspect-ratio: 1 / 1;
-      object-fit: cover;
-    }
-
-    .error-text {
-      color: #f66;
-      font-size: 11px;
-      margin-top: 6px;
-      min-height: 16px;
-    }
-
-    .acct-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px;
-      border: 1px solid #2a2a2a;
-      margin-bottom: 6px;
-      background: #0a0a0a;
-      width: 100%;
-      box-sizing: border-box;
-      overflow: hidden;
-    }
-
-    .acct-item.current {
-      border-color: #2a4a2a;
-      background: #0a1a0a;
-    }
-
-    .acct-avatar {
-      width: 34px;
-      height: 34px;
-      background: transparent;
-      border: 1px solid #2a2a2a;
-      color: #6f6;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      flex-shrink: 0;
-    }
-
-    .acct-info {
-      flex: 1;
-      min-width: 0;
-      overflow: hidden;
-    }
-
-    .acct-name,
-    .acct-fp {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .acct-name {
-      color: #d0d0d0;
-    }
-
-    .acct-fp {
-      font-size: 10px;
-      color: #555;
-    }
-
-    .acct-switch {
-      background: transparent !important;
-      color: #6f6 !important;
-      border: 1px solid #2a4a2a !important;
-      padding: 4px 10px !important;
-      cursor: pointer !important;
-      font-size: 11px !important;
-      font-family: inherit !important;
-      text-transform: uppercase !important;
-      letter-spacing: 1px !important;
-      flex-shrink: 0 !important;
-      white-space: nowrap !important;
-      width: auto !important;
-      max-width: 100px !important;
-      margin: 0 0 0 auto !important;
-      display: inline-block !important;
-    }
-
-    /* ============ МОБИЛЬНЫЙ АДАПТИВ ============ */
-    @media (max-width: 768px) {
-      .sidebar {
-        width: 100%;
-        border-right: none;
-      }
-
-      .chat-area {
-        position: absolute;
-        inset: 0;
-        background: #050505;
-        transform: translateX(100%);
-        transition: transform 0.2s ease;
-        z-index: 10;
-      }
-
-      .chat-area.active {
-        transform: translateX(0);
-      }
-
-      .mobile-back {
-        display: block;
-      }
-
-      .msg {
-        max-width: 85%;
-      }
-
-      .topbar {
-        padding: 6px 8px;
-        padding-top: calc(6px + env(safe-area-inset-top));
-      }
-
-      .topbar-actions {
-        gap: 3px;
-      }
-
-      .topbar-actions button {
-        padding: 4px 8px;
-        font-size: 10px;
-      }
-    }
-
-    @media (max-width: 380px) {
-      .topbar-actions button {
-        padding: 3px 6px;
-        font-size: 9px;
-      }
-
-      .avatar {
-        width: 28px;
-        height: 28px;
-        font-size: 12px;
-      }
-
-      .contact {
-        padding: 6px 8px;
-      }
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title data-i18n="pageTitle">Мессенджер</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'/></svg>">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/messenger.css">
+<link rel="stylesheet" href="css/dark-theme.css">
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+
+<script>
+  (function () {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      // Моментально красим фон, чтобы не было белой вспышки
+      document.documentElement.style.backgroundColor = '#121212';
+      
+      // Добавляем класс на body, как только он появится в DOM
+      document.addEventListener('DOMContentLoaded', () => {
+        document.body.classList.add('dark-theme');
+      });
+    }
+  })();
+</script>
+<!-- Подключаем сам манифест (без первого слеша) -->
+<link rel="manifest" href="manifest.json">
+
+<!-- Цвет статус-бара для Android -->
+<meta name="theme-color" content="#121212">
+
+<!-- Указываем Safari, что это PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<!-- Настраиваем внешний вид статус-бара на iOS (black-translucent делает его прозрачным поверх приложения) -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- Название приложения на экране "Домой" для iOS (замени TSA на свое короткое название, если нужно) -->
+<meta name="apple-mobile-web-app-title" content="TSA">
+
+<!-- Иконка приложения для iOS (указали правильный путь к твоей картинке) -->
+<link rel="apple-touch-icon" href="img/user.png">
 </head>
-
 <body>
+  <div class="messenger-container">
+    <div class="nav-sidebar">
+      <!-- Блок с информацией о пользователе -->
+      <div class="nav-user-box">
+        <div class="nav-user-info">
+          <div class="nav-user-name" id="sidebarUserName">&nbsp;</div>
+          <div class="nav-user-tag" id="sidebarUserTag">&nbsp;</div>
+        </div>
+        <div class="nav-user-avatar" id="sidebarUserAvatar" style="background: transparent;"></div>
+      </div>
 
-  <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
-  <div class="topbar">
-    <div>
-      <div class="me-name" id="meName">...</div>
-    </div>
-    <div class="topbar-actions">
-      <button id="btnMyCard">card</button>
-      <button id="btnDevices">dev</button>
-      <button id="btnAccounts">acc</button>
-      <button id="btnAddContact" class="primary">+ add</button>
-    </div>
-  </div>
+      <!-- Основное меню -->
+      <div class="nav-buttons">
+        <a href="#" onclick="window.location.href='profile.html'; return false;" class="nav-button">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span data-i18n="navProfile">Профиль</span>
+        </a>
+        <a href="#" onclick="window.location.replace='messenger.html'; return false;" class="nav-button">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span data-i18n="navMessenger">Мессенджер</span>
+        </a>
+        <a href="#" onclick="window.location.href='settings.html'; return false;" class="nav-button">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span data-i18n="navSettings">Настройки</span>
+        </a>
+      </div>
 
-  <!-- ОСНОВНОЙ БЛОК -->
-  <div class="main">
-    <div class="sidebar">
-      <div class="sidebar-header">contacts</div>
-      <div class="contacts-list" id="contactsList"></div>
+      <div class="nav-divider"></div>
+
+      <button onclick="showCreateGroupModal()" class="nav-button">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span data-i18n="navCreateGroup">Создать беседу</span>
+      </button>
+
+      <div class="nav-divider"></div>
+
+      <button onclick="logout()" class="nav-button logout-btn">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span data-i18n="navLogout">Выход</span>
+      </button>
+    </div>
+
+    <div class="chats-sidebar" id="chatsSidebar">
+      <div class="search-box">
+        <input type="text" id="searchInput" data-i18n-placeholder="searchPlaceholder" placeholder="Поиск" onkeyup="searchAll()">
+      </div>
+      <div class="chats-list" id="chatsList">
+        <div class="loading" data-i18n="loadingChats">Загрузка чатов...</div>
+      </div>
     </div>
 
     <div class="chat-area" id="chatArea">
-      <div class="chat-empty" id="chatEmpty">Выберите контакт слева</div>
-
       <div class="chat-header" id="chatHeader">
-        <button class="mobile-back" id="btnMobileBack" aria-label="Назад">←</button>
-        <div class="chat-header-info">
-          <div class="chat-title" id="chatTitle">—</div>
-          <div class="chat-timer" id="chatTimer"></div>
+        <div class="no-chat-selected" id="noChatMessage" data-i18n="noChatSelected">Выберите чат для начала общения</div>
+      </div>
+      <div class="messages-container" id="messagesContainer"></div>
+      
+      <!-- Поле ввода с иконкой самолетика для отправки -->
+      <div class="message-input-area" data-i18n-placeholder="typeMessage" id="messageInputArea">
+  <textarea id="messageInput" placeholder="Введите сообщение..." rows="1" oninput="autoResize(this)" onkeydown="handleEnter(event)"></textarea>
+  <button onclick="sendMessage()" id="sendButton" title="Отправить">
+    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 2L11 13"/>
+      <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
+    </svg>
+  </button>
+</div>
+    </div>
+  </div>
+
+  <!-- Новая мобильная нижняя панель (Tab Bar) -->
+<nav class="mobile-bottom-nav" id="mobileBottomNav">
+  <!-- 1. Мессенджер -->
+  <a href="#" onclick="window.location.replace='messenger.html'; return false;" class="nav-item active">
+    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  </a>
+  
+  <!-- 2. Создать беседу -->
+  <button onclick="showCreateGroupModal()" class="nav-item">
+    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+
+  <!-- 3. Настройки -->
+  <a href="#" onclick="window.location.href='settings.html'; return false;" class="nav-item">
+    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  </a>
+
+  <!-- 4. Профиль -->
+  <a href="#" onclick="window.location.href='profile.html'; return false;" class="nav-item">
+    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+  </a>
+</nav>
+
+<div id="createGroupModal" class="modal modal-fullscreen" style="z-index: 9999;">
+  <div class="modal-content tg-modal-content">
+    
+    <!-- Шапка со стрелкой назад, прозрачный фон -->
+    <div class="tg-modal-header" style="background: transparent !important;">
+      <button onclick="hideCreateGroupModal()" class="tg-back-btn" aria-label="Назад">
+        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+        </svg>
+      </button>
+      <h3 data-i18n="createGroupTitle" class="tg-group-name" style="margin: 0; font-size: 18px;">Создать новую беседу</h3>
+    </div>
+
+    <div class="tg-modal-body">
+      <div class="tg-section-box">
+        <!-- Поле названия -->
+        <div style="margin-bottom: 16px;">
+          <input type="text" id="groupName" data-i18n-placeholder="groupNamePlaceholder" placeholder="Название беседы" class="modal-input" style="width: 100%; box-sizing: border-box;">
         </div>
-        <button class="btn-end-chat" id="btnEndChat">end</button>
-      </div>
 
-      <div class="messages" id="messages"></div>
-
-      <div class="input-area" id="inputArea">
-        <textarea id="msgInput" rows="1" placeholder="Сообщение..."></textarea>
-        <button class="btn-send" id="btnSend">send</button>
+        <!-- Поиск и добавление участников -->
+        <div class="tg-add-header" style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <input type="text" id="searchUsersInCreate" data-i18n-placeholder="searchUsersPlaceholder" placeholder="Поиск пользователей..." class="search-input" onkeyup="searchUsersInCreate()" style="flex: 1; margin-bottom: 0;">
+        </div>
+        
+        <div id="usersListModal" class="users-checkbox-list" style="max-height: 200px; overflow-y: auto;">
+          <!-- Заглушка изменена на текст о взаимной подписке -->
+          <div class="no-users" data-i18n="searchMutualOnly">Вы можете добавить только тех людей, с которыми у вас взаимная подписка</div>
+        </div>
+        
+        <button onclick="createGroupChat()" class="modal-save-btn" data-i18n="createBtn" style="margin-top: 12px; width: 100%;">Создать</button>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- МОДАЛКА: МОЯ КАРТОЧКА -->
-  <div class="modal" id="modalMyCard">
-    <div class="modal-card">
-      <h2>Моя карточка</h2>
-      <p class="hint">Покажите этот QR тому, с кем хотите связаться.</p>
-      <div class="qr-box" id="qrBox"></div>
-      <button id="btnCloseMyCard" class="secondary">Закрыть</button>
+<div id="groupInfoModal" class="modal modal-fullscreen">
+  <div class="modal-content tg-modal-content">
+    
+    <!-- Шапка со стрелкой назад -->
+    <div class="tg-modal-header">
+      <button onclick="hideGroupInfoModal()" class="tg-back-btn" aria-label="Назад">
+        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+        </svg>
+      </button>
     </div>
-  </div>
 
-  <!-- МОДАЛКА: ДОБАВИТЬ КОНТАКТ -->
-  <div class="modal" id="modalAddContact">
-    <div class="modal-card">
-      <h2>Добавить контакт</h2>
-      <p class="hint">Наведите камеру на QR-код собеседника.</p>
+    <div class="tg-modal-body">
+      <!-- Профиль группы -->
+      <div class="tg-profile-section">
+        <div class="avatar-large tg-avatar" id="groupInfoAvatar" onclick="document.getElementById('groupAvatarInput').click()">
+          
+        </div>
+        <input type="file" id="groupAvatarInput" accept="image/*" style="display: none;">
+        <h3 id="groupInfoName" class="tg-group-name">Название беседы</h3>
+        <span id="groupInfoCount" class="tg-group-count">0 участников</span>
+      </div>
 
-      <div id="scannerBox"
-        style="position:relative; width:100%; aspect-ratio:1/1; background:#000; overflow:hidden; margin-bottom:10px; border:1px solid #2a2a2a;">
-        <video id="scannerVideo" playsinline style="width:100%; height:100%; object-fit:cover; display:block;"></video>
-        <div id="scannerSuccess" style="display:none; position:absolute; inset:0; background:#0a1a0a;
-                    align-items:center; justify-content:center; border:1px solid #6f6;">
-          <svg viewBox="0 0 24 24" width="96" height="96" fill="none" stroke="#6f6" stroke-width="3"
-            stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12"></polyline>
+      <!-- Основная секция участников / Поиска -->
+      <div class="tg-section-box">
+        
+        <!-- Режим 1: Список участников + Кнопка добавить -->
+        <div id="tgParticipantsView">
+          <button onclick="showAddParticipantsView()" class="tg-add-member-btn">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/>
+            </svg>
+            <span data-i18n="addParticipantsTitle">Добавить участников</span>
+          </button>
+          <div id="groupParticipants" class="group-participants-list"></div>
+        </div>
+
+        <!-- Режим 2: Поиск и добавление новых участников -->
+        <div id="tgAddView" style="display: none;">
+          <div class="tg-add-header">
+            <input type="text" id="searchUsersToAdd" data-i18n-placeholder="searchUsersPlaceholder" placeholder="Поиск пользователей..." class="search-input" onkeyup="searchUsersToAdd()">
+            <button onclick="hideAddParticipantsView()" class="tg-cancel-btn" data-i18n="cancelBtn">Отмена</button>
+          </div>
+          <div id="addParticipantsList" class="users-checkbox-list">
+            <div class="no-users" data-i18n="startTypingToSearch">Начните вводить имя для поиска</div>
+          </div>
+          <button onclick="addSelectedParticipants()" class="modal-save-btn" data-i18n="addSelectedBtn" style="margin-top: 12px; width: 100%;">Добавить выбранных</button>
+        </div>
+
+      </div>
+
+      <!-- Кнопки действий (Выйти / Удалить) -->
+      <div class="tg-actions-section">
+        <button onclick="leaveCurrentGroup()" id="leaveGroupBtn" class="tg-action-btn tg-danger">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
           </svg>
-        </div>
+          <span data-i18n="leaveGroupBtn">Покинуть беседу</span>
+        </button>
+
+        <button onclick="deleteCurrentGroup()" id="deleteGroupBtn" class="tg-action-btn tg-danger">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+          <span data-i18n="deleteGroupBtn">Удалить беседу</span>
+        </button>
       </div>
 
-      <div class="error-text" id="scanError"></div>
+    </div>
+  </div>
+</div>
 
-      <button id="btnCloseAddContact" class="secondary">Закрыть</button>
+  <!-- Модальное окно для управления сообщением -->
+  <div id="messageOptionsModal" class="modal modal-fullscreen">
+    <div class="modal-content small">
+      <div class="modal-header">
+        <h3 data-i18n="messageActionsTitle">Действия с сообщением</h3>
+        <button onclick="hideMessageOptions()" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <button onclick="deleteMessageForMe()" class="modal-option-btn" data-i18n="deleteForMeBtn">Удалить у себя</button>
+        <button onclick="deleteMessageForEveryone()" id="deleteForEveryoneBtn" class="modal-option-btn delete" data-i18n="deleteForEveryoneBtn">Удалить у всех</button>
+      </div>
+      <div class="modal-footer">
+        <button onclick="hideMessageOptions()" class="modal-cancel-btn" data-i18n="cancelBtn">Отмена</button>
+      </div>
     </div>
   </div>
 
-  <!-- МОДАЛКА: АККАУНТЫ -->
-  <div class="modal" id="modalAccounts">
-    <div class="modal-card">
-      <h2>Аккаунты</h2>
-      <p class="hint">Переключение между вашими локальными аккаунтами.</p>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/messenger.js"></script>
 
-      <div id="accountsList" style="margin-bottom: 10px;"></div>
+<!-- ЛОКАЛИЗАЦИЯ МЕССЕНДЖЕРА -->
+<script>
+const messengerTranslations = {
+    en: {
+      pageTitle: "Messenger",
+      navProfile: "Profile",
+      navMessenger: "Messenger",
+      loadingChats: "Loading chats...", 
+      noChatSelected: "Select a chat to start messaging",
+      navSettings: "Settings",
+      navLogout: "Log out",
+      loading: "Loading...",
+      searchPlaceholder: "Search...",
+      noChatsText: "No chats yet. Find someone via search.",
+      emptyChatList: "Chat list is empty",
+      noMessages: "No messages. Write something!",
+      loadingMessages: "Loading messages...",
+      typeMessage: "Type a message...",
+      deletedUserStub: "This user deleted their account",
+      nothingFound: "Nothing found",
+      users: "Users:",
+      groups: "Groups:",
+      navCreateGroup: "Create group",
+      // --- НОВЫЕ КЛЮЧИ ---
+      createGroupTitle: "Create new group",
+      groupNamePlaceholder: "Group name",
+      selectParticipants: "Select participants:",
+      searchUsersPlaceholder: "Search users...",
+      cancelBtn: "Cancel",
+      createBtn: "Create",
+      groupInfoTitle: "Group info",
+      clickToChange: "Click to change",
+      participantsTitle: "Participants:",
+      leaveGroupBtn: "Leave group",
+      addParticipantsTitle: "Add participants:",
+      addSelectedBtn: "Add selected",
+      closeBtn: "Close",
+      deleteGroupBtn: "Delete group",
+      messageActionsTitle: "Message actions",
+      deleteForMeBtn: "Delete for me",
+      deleteForEveryoneBtn: "Delete for everyone",
+      startTypingToSearch: "Start typing to search",
+      // --- КЛЮЧИ ДЛЯ JS (Алерты и Системные сообщения) ---
+      sysRemoved: "removed from group",
+      sysAdded: "Added:",
+      sysLeft: "left the group",
+      sysAvatarUpdated: "updated the group avatar",
+      alertEnterGroupName: "Enter a group name",
+      alertSelectParticipant: "Select at least one participant",
+      confirmRemoveUser: "Remove this participant from the group?",
+      confirmLeaveGroup: "Are you sure you want to leave the group?",
+      confirmDeleteGroup: "Are you sure you want to delete this group? This action cannot be undone.",
+      defaultGroupName: "Group chat",
+      searchMutualOnly: 'You can only add people with whom you have a mutual subscription',
+      participantsCount: "participants"
+    },
+    ru: {
+      navCreateGroup: "Создать беседу",
+      pageTitle: "Мессенджер",
+      navProfile: "Профиль",
+      navMessenger: "Мессенджер",
+      navSettings: "Настройки",
+      navLogout: "Выход",
+      loading: "Загрузка...",
+      searchPlaceholder: "Поиск...",
+      noChatsText: "У вас пока нет чатов. Найдите пользователя через поиск.",
+      loadingChats: "Загрузка чатов...",
+      noChatSelected: "Выберите чат для начала общения",
+      emptyChatList: "Список чатов пуст",
+      noMessages: "Нет сообщений. Напишите что-нибудь!",
+      loadingMessages: "Загрузка сообщений...",
+      typeMessage: "Введите сообщение...",
+      deletedUserStub: "Этот пользователь удалил страницу",
+      nothingFound: "Ничего не найдено",
+      users: "Пользователи:",
+      groups: "Беседы:",
+      // --- НОВЫЕ КЛЮЧИ ---
+      createGroupTitle: "Создать новую беседу",
+      groupNamePlaceholder: "Название беседы",
+      selectParticipants: "Выберите участников:",
+      searchUsersPlaceholder: "Поиск пользователей...",
+      cancelBtn: "Отмена",
+      createBtn: "Создать",
+      groupInfoTitle: "Информация о беседе",
+      clickToChange: "Нажмите, чтобы изменить",
+      participantsTitle: "Участники:",
+      leaveGroupBtn: "Покинуть беседу",
+      addParticipantsTitle: "Добавить участников:",
+      addSelectedBtn: "Добавить выбранных",
+      closeBtn: "Закрыть",
+      deleteGroupBtn: "Удалить беседу",
+      messageActionsTitle: "Действия с сообщением",
+      deleteForMeBtn: "Удалить у себя",
+      deleteForEveryoneBtn: "Удалить у всех",
+      startTypingToSearch: "Начните вводить имя для поиска",
+      // --- КЛЮЧИ ДЛЯ JS (Алерты и Системные сообщения) ---
+      sysRemoved: "удален из беседы",
+      sysAdded: "Добавлены:",
+      sysLeft: "покинул беседу",
+      sysAvatarUpdated: "обновил(а) аватарку беседы",
+      alertEnterGroupName: "Введите название беседы",
+      alertSelectParticipant: "Выберите хотя бы одного участника",
+      confirmRemoveUser: "Удалить этого участника из беседы?",
+      confirmLeaveGroup: "Вы уверены, что хотите покинуть беседу?",
+      confirmDeleteGroup: "Вы уверены, что хотите удалить эту беседу? Это действие нельзя отменить.",
+      defaultGroupName: "Беседа",
+      searchMutualOnly: 'Вы можете добавить только тех людей, с которыми у вас взаимная подписка',
+      participantsCount: "участников"
+    }
+  };
 
-      <button id="btnAddAnotherAccount" class="secondary">+ Добавить аккаунт</button>
-      <button id="btnLogout" class="secondary" style="color:#f66; border-color:#4a2a2a;">Выйти из текущего
-        аккаунта</button>
-      <button id="btnCloseAccounts" class="secondary">Закрыть</button>
-    </div>
-  </div>
+  // Делаем функцию глобальной для JS файлов
+  window.t = function(key) {
+    const lang = localStorage.getItem('app_lang') || 'en';
+    if (messengerTranslations[lang] && messengerTranslations[lang][key]) {
+      return messengerTranslations[lang][key];
+    }
+    return key;
+  };
 
-  <!-- МОДАЛКА: УСТРОЙСТВА -->
-  <div class="modal" id="modalDevices">
-    <div class="modal-card">
-      <h2>Устройства</h2>
-      <p class="hint">Откройте этот аккаунт на другом устройстве.</p>
+  function applyLanguage(lang) {
+    document.documentElement.lang = lang;
+    const tObj = messengerTranslations[lang];
+    if (!tObj) return;
 
-      <div class="warning">
-        ⚠️ QR/код содержит ваши приватные ключи. Показывайте только доверенным устройствам.
-      </div>
+    // Перевод текста
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (tObj[key]) el.innerHTML = tObj[key];
+    });
 
-      <label>Временный пароль для передачи</label>
-      <input type="password" id="exportPassword" placeholder="Придумайте (мин. 6 символов)">
+    // Перевод плейсхолдеров (если добавите инпутам атрибут data-i18n-placeholder)
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const key = el.getAttribute('data-i18n-placeholder');
+      if (tObj[key]) el.placeholder = tObj[key];
+    });
+  }
 
-      <button id="btnGenerateExport">Сгенерировать код</button>
-
-      <div id="exportResult" style="display:none; margin-top: 10px;">
-        <div class="qr-box" id="exportQrBox"></div>
-        <textarea id="exportJson" readonly></textarea>
-        <button id="btnCopyExport" class="secondary">Скопировать код</button>
-      </div>
-
-      <button id="btnCloseDevices" class="secondary">Закрыть</button>
-    </div>
-  </div>
-
-  <script type="module" src="messenger.js"></script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const savedLang = localStorage.getItem('app_lang') || 'en';
+    applyLanguage(savedLang);
+  });
+</script>
 </body>
-
 </html>
